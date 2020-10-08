@@ -23,7 +23,7 @@ namespace se4
             "}                                              \n"};
 
         GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, vertex_shader_source, NULL);
+        glShaderSource(vertexShader, 1, vertex_shader_source, nullptr);
         glCompileShader(vertexShader);
 
         // todo : 로깅 분리
@@ -38,13 +38,13 @@ namespace se4
         }
 
         GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, fragment_shader_source, NULL);
+        glShaderSource(fragmentShader, 1, fragment_shader_source, nullptr);
         glCompileShader(fragmentShader);
 
         glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
         if (!success)
         {
-            glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+            glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
             std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
                       << infoLog << std::endl;
         }
@@ -57,7 +57,7 @@ namespace se4
         glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
         if (!success)
         {
-            glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+            glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
             std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
                       << infoLog << std::endl;
         }

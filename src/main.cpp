@@ -10,39 +10,45 @@ float vertices[] = {
     0.5f, -0.5f, 0.0f,
     0.0f, 0.5f, 0.0f};
 
-GLuint shaderProgram;
-
-void framebuffer_size_callback(GLFWwindow *window, int width, int height)
+auto framebuffer_size_callback(GLFWwindow *window, int width, int height) -> void
 {
     glViewport(0, 0, width, height);
 }
 
-void error_callback(int code, const char *description)
+auto error_callback(int code, const char *description) -> void
 {
     std::cerr << description << std::endl;
 }
 
-float tmp_x = 0;
-void processInput_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
-    // if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-    //     glfwSetWindowShouldClose(window, true);
-    if (key == GLFW_KEY_A && action == GLFW_PRESS)
-    {
-        tmp_x -= 0.1;
-        glUniform3f(glGetUniformLocation(shaderProgram, "vPos"), tmp_x, 0.0, 0.0);
-    }
-    if (key == GLFW_KEY_D && action == GLFW_PRESS)
-        glTranslatef(0.1, 0, 0);
-}
-
-void processInput(GLFWwindow *window)
+// 콜백 스타일
+//void processInput_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+//{
+//    if (key == GLFW_KEY_A && action == GLFW_PRESS)
+//    {
+//        tmp_x -= 0.1f;
+//        glUniform3f(glGetUniformLocation(shaderProgram, "vPos"), tmp_x, 0.0, 0.0);
+//    }
+//}
+// 이건 매프레임 직접 호출
+auto processInput(GLFWwindow *window, GLuint shader_program, float tmp) -> void
 {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
+
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+    {
+        tmp -= 0.01f;
+        glUniform3f(glGetUniformLocation(shader_program, "vPos"), tmp, 0.0, 0.0);
+    }
+
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+    {
+        tmp += 0.01f;
+        glUniform3f(glGetUniformLocation(shader_program, "vPos"), tmp, 0.0, 0.0);
+    }
 }
 
-void render(GLuint shaderProgram, int VAO)
+auto render(GLuint VAO) -> void
 {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -50,7 +56,7 @@ void render(GLuint shaderProgram, int VAO)
     glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-int main(int argc, char *argv[])
+auto main(int argc, char *argv[]) -> int
 {
     glfwSetErrorCallback(error_callback);
     GLFWwindow *window;
@@ -83,35 +89,36 @@ int main(int argc, char *argv[])
 
     glViewport(0, 0, 800, 600);
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetKeyCallback(window, processInput_callback);
+    // glfwSetKeyCallback(window, processInput_callback);
+    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
 
-    shaderProgram = se4::compile_shaders();
+    GLuint shader_program = se4::compile_shaders();
 
-    unsigned int VBO, VAO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glBindVertexArray(VAO);
+    GLuint vbo, vao;
+    glGenVertexArrays(1, &vao);
+    glGenBuffers(1, &vbo);
+    glBindVertexArray(vao);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STREAM_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)nullptr);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     glBindVertexArray(0);
 
-    glUseProgram(shaderProgram);
+    glUseProgram(shader_program);
 
-    glfwSetInputMode(window, GLFW_STICKY_KEYS, GLFW_TRUE);
+    float tmp_x = 0;
     while (!glfwWindowShouldClose(window))
     {
-        render(shaderProgram, VAO);
+        render(vao);
 
         glfwSwapBuffers(window);
 
-        processInput(window);
+        processInput(window, shader_program, tmp_x);
         glfwPollEvents();
     }
 
