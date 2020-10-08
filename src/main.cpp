@@ -27,13 +27,6 @@ float vertices[] = {
 
 GLuint shaderProgram;
 
-void move_triangle(float triangle[], float x, float y)
-{
-    triangle[0] += x;    triangle[1] += y;
-    triangle[3] += x;    triangle[4] += y;
-    triangle[6] += x;    triangle[7] += y;
-}
-
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
     glViewport(0, 0, width, height);
