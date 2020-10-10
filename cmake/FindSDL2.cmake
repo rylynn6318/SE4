@@ -140,14 +140,15 @@ if(WIN32)
     set(SDL2_DIR "" CACHE PATH "${_SDL2_VC_PATH}/SDL2-2.0.12")
     endif()
 
-    find_path(SDL2_INCLUDE_DIR SDL.h
-    HINTS
-        ENV SDL2DIR
-        ${SDL2_DIR}
-    PATH_SUFFIXES SDL2
-                    # path suffixes to search inside ENV{SDL2DIR}
-                    include/SDL2 include
-    )
+    # find_path(SDL2_INCLUDE_DIR SDL.h
+    # HINTS
+    #     ENV SDL2DIR
+    #     ${SDL2_DIR}
+    # PATH_SUFFIXES SDL2
+    #                 # path suffixes to search inside ENV{SDL2DIR}
+    #                 include/SDL2 include
+    # )
+    set(SDL2_INCLUDE_DIRS "${SDL2_ROOT}/include")
 
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(VC_LIB_PATH_SUFFIX lib/x64)
