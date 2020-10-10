@@ -2,7 +2,7 @@ namespace se4
 {
     enum class Key
     {
-        A,
+        A = 65,
         B,
         C,
         D,
