@@ -21,3 +21,11 @@ find_package(SDL2 REQUIRED COMPONENTS main)
 include_directories(${SDL2_INCLUDE_DIRS} ${SDL2main_INCLUDE_DIRS} ${CMAKE_BINARY_DIR})
 add_executable(${PROJECT_NAME} ${SRC_DIR}/main.cpp)
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBS})
+
+# Copy SDL2 DLLs to output folder on Windows
+if(WIN32)
+    foreach(DLL ${SDL2_DLLS})
+        add_custom_command(TARGET CMakeDemo POST_BUILD COMMAND
+            ${CMAKE_COMMAND} -E copy_if_different ${DLL} $<TARGET_FILE_DIR:CMakeDemo>)
+    endforeach()
+endif()
