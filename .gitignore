@@ -4,6 +4,8 @@ se4_test
 build/
 cmake-build-debug/
 lib/
+# ignore cmake
+cmake/
 CMakeLists.txt
 
 ## Ignore Visual Studio temporary files, build results, and
