@@ -67,12 +67,13 @@ target_link_libraries(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
         PUBLIC
         SDL2_image
-        ${SDL2_IMAGE_LIBS}
+        ${SDL2_IMAGE_LIB}
         )
 
 
 # Copy SDL2 DLLs to output folder on Windows
 # TODO : fix it!
+# TODO : Copy SDL2 libs and dlls to SE4\out\build\x64-Debug(기본값)  if Windows
 if(WIN32)
     foreach(DLL ${SDL2_DLLS})
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
@@ -89,4 +90,4 @@ message(STATUS "SDL2_INCLUDE_DIRS : ${SDL2_INCLUDE_DIRS}")
 message(STATUS "SDL2main_INCLUDE_DIRS : ${SDL2main_INCLUDE_DIRS}")
 message(STATUS "CMAKE_BINARY_DIR : ${CMAKE_BINARY_DIR}")
 message(STATUS "SDL2_LIBS : ${SDL2_LIBS}")
-message(STATUS "PROJECT_SOURCE_DIR : ${PROJECT_SOURCE_DIR}")
+message(STATUS "TARGET_FILE_DIR :${TARGET_FILE_DIR}")

@@ -1,5 +1,6 @@
 cmake-build-debug
 .idea
+out
 
 # Created by .ignore support plugin (hsz.mobi)
 ### C++ template
@@ -19,7 +20,7 @@ cmake-build-debug
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+# *.dll
 
 # Fortran module files
 *.mod
@@ -29,7 +30,7 @@ cmake-build-debug
 *.lai
 *.la
 *.a
-*.lib
+# *.lib
 
 # Executables
 *.exe
@@ -74,8 +75,8 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
-x86/
+# x64/
+# x86/
 [Aa][Rr][Mm]/
 [Aa][Rr][Mm]64/
 bld/
@@ -424,7 +425,7 @@ MigrationBackup/
 # Compiled Dynamic libraries
 *.so
 *.dylib
-*.dll
+# *.dll
 
 # Fortran module files
 *.mod
@@ -434,7 +435,7 @@ MigrationBackup/
 *.lai
 *.la
 *.a
-*.lib
+# *.lib
 
 # Executables
 *.exe
@@ -454,16 +455,3 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
-.idea/SE4.iml 제거할 예정
-.idea/misc.xml 제거할 예정
-.idea/modules.xml 제거할 예정
-.idea/vcs.xml 제거할 예정
-cmake-build-debug/SE4.cbp 제거할 예정
-cmake-build-debug/SE4_test 제거할 예정
-cmake-build-debug/lib/glfw/GLFW.cbp 제거할 예정
-cmake-build-debug/lib/glfw/src/glfw3.pc 제거할 예정
-cmake-build-debug/lib/glfw/src/glfw3Config.cmake 제거할 예정
-cmake-build-debug/lib/glfw/src/glfw3ConfigVersion.cmake 제거할 예정
-cmake-build-debug/lib/glfw/src/glfw_config.h 제거할 예정
-cmake-build-debug/yeji.png 제거할 예정
-cmake/FindSDL2_image.cmake 제거할 예정

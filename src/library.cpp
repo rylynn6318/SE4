@@ -32,6 +32,7 @@
 
 #include <SDL.h>
 #include <SDL_image.h>
+#include <iostream>
 
 // Define MAX and MIN macros
 #define MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
