@@ -1,8 +1,8 @@
 #pragma once
 #include <array>
 #include <map>
-#include "Entity.hpp"
-#include "EntityMap.hpp"
+#include "entity/Entity.hpp"
+#include "entity/EntityMap.hpp"
 
 namespace se4 {
     template <typename ComponentType>

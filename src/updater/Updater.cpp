@@ -1,4 +1,4 @@
-#include "Updater.hpp"
+#include <updater/Updater.hpp>
 
 namespace se4 {
     void Updater::registerWorld(World* world) { parentWorld = world; }

@@ -1,7 +1,7 @@
 #pragma once
-#include "ComponentHandle.hpp"
+#include "component/ComponentHandle.hpp"
 #include "Entity.hpp"
-#include "World.hpp"
+#include "world/World.hpp"
 
 namespace se4 {
     struct EntityHandle {

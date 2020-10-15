@@ -1,7 +1,7 @@
 #pragma once
 #include <type_traits>
 #include "ComponentManager.hpp"
-#include "Entity.hpp"
+#include "entity/Entity.hpp"
 
 namespace se4 {
     struct ComponentCounter {

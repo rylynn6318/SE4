@@ -2,8 +2,8 @@
 
 #include <bitset>
 #include <vector>
-#include "ComponentMask.hpp"
-#include "Entity.hpp"
+#include "component/ComponentMask.hpp"
+#include "entity/Entity.hpp"
 
 namespace se4 {
 	class World;

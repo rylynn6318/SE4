@@ -1,6 +1,6 @@
-#include "world.hpp"
+#include <world/World.hpp>
 #include <iostream>
-#include "entityHandle.hpp"
+#include <entity/EntityHandle.hpp>
 
 namespace se4 {
     World::World(std::unique_ptr<EntityManager> entityManager) : entityManager(std::move(entityManager)) {}

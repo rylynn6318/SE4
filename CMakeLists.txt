@@ -20,7 +20,10 @@ file(GLOB SOURCES "src/*.cpp")
 # se4 compile to lib
 add_library(${PROJECT_NAME} ${SOURCES})
 # Add all headers files under the include directory
-target_include_directories(${PROJECT_NAME} PRIVATE include)
+target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/include")
+include_directories("${PROJECT_SOURCE_DIR}/include")
+
+message("${PROJECT_SOURCE_DIR}/include")
 
 # Add compiler errors/warnings flags
 #target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
@@ -66,7 +69,7 @@ include_directories(${CMAKE_BINARY_DIR})
 
 # link SDL2
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC
+        PRIVATE
         SDL2
         ${SDL2_LIBS}
         )
@@ -74,7 +77,7 @@ target_link_libraries(${PROJECT_NAME}
 
 # link SDL2_image
 target_link_libraries(${PROJECT_NAME}
-        PUBLIC
+        PRIVATE
         SDL2_image
         ${SDL2_IMAGE_LIBS}
         )

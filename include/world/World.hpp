@@ -1,12 +1,12 @@
 #pragma once
 #include <memory>
-#include "Component.hpp"
-#include "ComponentHandle.hpp"
-#include "ComponentManager.hpp"
-#include "ComponentMask.hpp"
-#include "Entity.hpp"
-#include "EntityManager.hpp"
-#include "Updater.hpp"
+#include "component/Component.hpp"
+#include "component/ComponentHandle.hpp"
+#include "component/ComponentManager.hpp"
+#include "component/ComponentMask.hpp"
+#include "entity/Entity.hpp"
+#include "entity/EntityManager.hpp"
+#include "updater/Updater.hpp"
 
 namespace se4 {
     struct EntityHandle;

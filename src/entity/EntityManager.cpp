@@ -1,4 +1,5 @@
-#include "EntityManager.hpp"
+#include <entity/EntityManager.hpp>
+
 
 namespace se4 {
 	Entity EntityManager::createEntity() {

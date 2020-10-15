@@ -28,8 +28,7 @@
  *
  */
 
-#include "../include/library.h"
-
+#include "library.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <iostream>
