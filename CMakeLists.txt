@@ -9,8 +9,22 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/")
 
 set(EXTERN_DIR ${PROJECT_SOURCE_DIR}/extern)
 
+# Only for Windows
 set(SDL2_VERSION "2.0.12")
 set(SDL2_IMAGE_VERSION "2.0.5")
+
+#------------------- ADD_LIBRARY --------------
+
+# Add all cpp source files under the src directory
+file(GLOB SOURCES "src/*.cpp")
+# se4 compile to lib
+add_library(${PROJECT_NAME} ${SOURCES})
+# Add all headers files under the include directory
+target_include_directories(${PROJECT_NAME} PRIVATE include)
+
+# Add compiler errors/warnings flags
+target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
+target_compile_options(${PROJECT_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror>)
 
 #------------------- FIND LIBS ----------------
 
@@ -28,30 +42,17 @@ set(SDL2_IMAGE_VERSION "2.0.5")
 #add_library("glad" "${GLAD_DIR}/src/glad.c")
 #target_include_directories("glad" PRIVATE "${GLAD_DIR}/include")
 
-## find SDL2
-#find_package(SDL2 REQUIRED COMPONENTS main)
-#include_directories(${SDL2_INCLUDE_DIRS} ${SDL2main_INCLUDE_DIRS})
-#
-## find SDL2_image
-## TODO : SDL2_IMAGE_INCLUDE_DIR? SDL2_IMAGE_INCLUDE_DIRS?
-#find_package(SDL2_image REQUIRED)
-#include_directories(${SDL2_IMAGE_INCLUDE_DIR})
+# find SDL2
+find_package(SDL2 REQUIRED COMPONENTS main)
+include_directories(${SDL2_INCLUDE_DIRS} ${SDL2main_INCLUDE_DIRS})
+
+# find SDL2_image
+# TODO : SDL2_IMAGE_INCLUDE_DIR? SDL2_IMAGE_INCLUDE_DIRS?
+find_package(SDL2_image REQUIRED)
+include_directories(${SDL2_IMAGE_INCLUDE_DIR})
 #
 ## etc
 #include_directories(${CMAKE_BINARY_DIR})
-
-#------------------- ADD_LIBRARY -----------
-
-# Add all c source files under the src directory
-file(GLOB SOURCES "src/*.cpp")
-# se4 compile to lib
-add_library(${PROJECT_NAME} ${SOURCES})
-# Add all headers files under the include directory
-target_include_directories(${PROJECT_NAME} PRIVATE include)
-
-# Add compiler errors/warnings flags
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror>)
 
 #------------------- LINK ------------------
 
@@ -63,21 +64,28 @@ target_compile_options(${PROJECT_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-W
 #target_include_directories(${PROJECT_NAME} PRIVATE "${GLAD_DIR}/include")
 #target_link_libraries(${PROJECT_NAME} "glad" "${CMAKE_DL_LIBS}")
 
-## link SDL2 and others
-#target_link_libraries(${PROJECT_NAME}
-#        PUBLIC
-#        SDL2::Main
-#        SDL2::Image
-##        ${SDL2_LIBS}
-#        )
+# link SDL2
+target_link_libraries(${PROJECT_NAME}
+        PUBLIC
+        SDL2
+        ${SDL2_LIBS}
+        )
+
+
+# link SDL2_image
+target_link_libraries(${PROJECT_NAME}
+        PUBLIC
+        SDL2_image
+        ${SDL2_IMAGE_LIBS}
+        )
 
 # Add SDL2 library
-find_package(SDL2 REQUIRED)
-target_link_libraries(${PROJECT_NAME} SDL2::Core)
-
-# Add SDL2_image library
-find_package(SDL2_image REQUIRED)
-target_link_libraries(${PROJECT_NAME} SDL2::Image)
+#find_package(SDL2 REQUIRED)
+#target_link_libraries(${PROJECT_NAME} SDL2::Core)
+#
+## Add SDL2_image library
+#find_package(SDL2_image REQUIRED)
+#target_link_libraries(${PROJECT_NAME} SDL2::Image)
 
 # Copy SDL2 DLLs to output folder on Windows
 # TODO : fix it!
