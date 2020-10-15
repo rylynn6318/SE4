@@ -95,6 +95,7 @@ if(WIN32)
 #        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
 #                ${CMAKE_COMMAND} -E copy_if_different ${DLL} $<TARGET_FILE_DIR:${PROJECT_NAME}>)
         file(COPY ${DLL} DESTINATION ${CMAKE_BINARY_DIR})
+        message("COPY ${DLL} DESTINATION ${CMAKE_BINARY_DIR}")
     endforeach()
 endif()
 # Copy assets
