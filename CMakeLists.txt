@@ -92,8 +92,9 @@ target_link_libraries(${PROJECT_NAME}
 # TODO : Copy SDL2 libs and dlls to SE4\out\build\x64-Debug(기본값)  if Windows
 if(WIN32)
     foreach(DLL ${SDL2_DLLS})
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-                ${CMAKE_COMMAND} -E copy_if_different ${DLL} $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+#        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
+#                ${CMAKE_COMMAND} -E copy_if_different ${DLL} $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+        file(COPY ${DLL} DESTINATION ${CMAKE_BINARY_DIR})
     endforeach()
 endif()
 # Copy assets
