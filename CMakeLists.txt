@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(SE42)
+project(SE4)
 
 set(CMAKE_CXX_STANDARD 14)
 
@@ -17,40 +17,17 @@ find_package(SDL2_image REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(${SDL2_IMAGE_INCLUDE_DIRS})
 
+file(GLOB_RECURSE SOURCE_FILE src/*.c*)
+file(GLOB_RECURSE HEADER_FILE include/*.h*)
 
-add_executable(SE42
-        include/component/Component.hpp
-        include/component/ComponentHandle.hpp
-        include/component/ComponentManager.hpp
-        include/component/ComponentMask.hpp
-        include/component/iComponent.h
-        include/entity/Entity.hpp
-        include/entity/EntityHandle.hpp
-        include/entity/EntityManager.hpp
-        include/entity/EntityMap.hpp
-        include/input/InputEventType.h
-        include/input/InputManager.h
-        include/input/InputState.h
-        include/input/Key.h
-        include/input/KeyAction.h
-        include/updater/Updater.hpp
-        include/world/World.hpp
-        include/library.h
-        include/se4.hpp
-        src/component/Component.cpp
-        src/component/ComponentMask.cpp
-        src/component/InputComponent.cpp
-        src/entity/EntityManager.cpp
-        src/input/BaseInput.cpp
-        src/input/InputManager.cpp
-        src/updater/BadeUpdater.cpp
-        src/updater/Updater.cpp
-        src/world/World.cpp
-        src/library.cpp
-        test/main.cpp)
+message("${SOURCE_FILE}")
+message("${HEADER_FILE}")
 
-
+add_library(${PROJECT_NAME} ${HEADER_FILE} ${SOURCE_FILE})
 target_link_libraries(${PROJECT_NAME} ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
+
+add_executable(${PROJECT_NAME}_test test/main.cpp ${HEADER_FILE} ${SOURCE_FILE})
+target_link_libraries(${PROJECT_NAME}_test ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES})
 
 if(WIN32)
     # SDL2

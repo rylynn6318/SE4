@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <map>
+#include <stdlib.h>
 #include "entity/Entity.hpp"
 #include "entity/EntityMap.hpp"
 
