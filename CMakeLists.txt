@@ -23,7 +23,7 @@ add_library(${PROJECT_NAME} ${SOURCES})
 target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 # Add compiler errors/warnings flags
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
+#target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
 target_compile_options(${PROJECT_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror>)
 
 #------------------- FIND LIBS ----------------
@@ -52,7 +52,7 @@ find_package(SDL2_image REQUIRED)
 include_directories(${SDL2_IMAGE_INCLUDE_DIR})
 #
 ## etc
-#include_directories(${CMAKE_BINARY_DIR})
+include_directories(${CMAKE_BINARY_DIR})
 
 #------------------- LINK ------------------
 
