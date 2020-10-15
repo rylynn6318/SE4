@@ -16,7 +16,7 @@ include_directories(include/updater)
 include_directories(include/world)
 
 # 외부 라이브러리 추가
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/")
 
 find_package(SDL2 REQUIRED)
 find_package(SDL2_image REQUIRED)
