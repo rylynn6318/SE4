@@ -8,6 +8,8 @@ using namespace se4;
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
 
+constexpr char* TEST_IMG = "resource/yeji.png";
+
 struct Position3f : public Component<Position3f>
 {
     Position3f(float x, float y, float z) :posX(x), posY(y), posZ(z) {}
@@ -114,12 +116,12 @@ int main(int argc, char** args)
     auto entity = world->createEntity();
     entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
     entity.addComponent(Volume4f(100.0f, 100.0f));
-    entity.addComponent(Texture("fuck.png"));
+    entity.addComponent(Texture(TEST_IMG));
 
     auto entity2 = world->createEntity();
     entity2.addComponent(Position3f(500.0f, 200.0f, 0.0f));
     entity2.addComponent(Volume4f(100.0f, 100.0f));
-    entity2.addComponent(Texture("fuck.png"));
+    entity2.addComponent(Texture(TEST_IMG));
 
 
     while (!quit)
