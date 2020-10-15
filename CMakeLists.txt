@@ -16,17 +16,21 @@ set(SDL2_IMAGE_VERSION "2.0.5")
 #------------------- ADD_LIBRARY --------------
 
 # Add all cpp source files under the src directory
-file(GLOB SOURCES "src/*.cpp")
+file(GLOB_RECURSE SOURCES "src/*.cpp")
+file(GLOB_RECURSE HEADERS "include/*.h*")
+message("SOURCES ::::::::: ${SOURCES}")
+message("HEADERS ::::::::: ${HEADERS}")
+
 # se4 compile to lib
 add_library(${PROJECT_NAME} ${SOURCES})
 # Add all headers files under the include directory
-target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/include")
+#target_include_directories(${PROJECT_NAME} PUBLIC "${PROJECT_SOURCE_DIR}/include")
 include_directories("${PROJECT_SOURCE_DIR}/include")
 
 
 # Add compiler errors/warnings flags
 #target_compile_options(${PROJECT_NAME} PRIVATE $<$<C_COMPILER_ID:MSVC>:/W4 /WX>)
-target_compile_options(${PROJECT_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror>)
+# target_compile_options(${PROJECT_NAME} PRIVATE $<$<NOT:$<C_COMPILER_ID:MSVC>>:-Wall -Wextra -pedantic -Werror>)
 
 #------------------- FIND LIBS ----------------
 
