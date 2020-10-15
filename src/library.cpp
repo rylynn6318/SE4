@@ -43,7 +43,7 @@
 #define SCREEN_HEIGHT   600
 
 // Define Tunisia flag image path
-#define TN_FLAG_IMAGE_PATH "yeji.png"
+#define TN_FLAG_IMAGE_PATH "fuck.png"
 
 auto makeWindow() -> int {
     // Initialize SDL2

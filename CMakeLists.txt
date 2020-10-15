@@ -95,8 +95,11 @@ if(WIN32)
 #        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
 #                ${CMAKE_COMMAND} -E copy_if_different ${DLL} $<TARGET_FILE_DIR:${PROJECT_NAME}>)
         file(COPY ${DLL} DESTINATION ${CMAKE_BINARY_DIR})
-        message("COPY ${DLL} DESTINATION ${CMAKE_BINARY_DIR}")
     endforeach()
+
+    file(COPY ${SDL2_LIBS} DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${SDL2_IMAGE_LIB} DESTINATION ${CMAKE_BINARY_DIR})
+    file(COPY ${SDL2_IMAGE_DLLS} DESTINATION ${CMAKE_BINARY_DIR})
 endif()
 # Copy assets
 # file(COPY assets DESTINATION ${CMAKE_BINARY_DIR})
