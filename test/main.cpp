@@ -1,7 +1,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <iostream>
-#include <se4.hpp>
+#include "se4.hpp"
 
 using namespace se4;
 
@@ -28,18 +28,9 @@ struct Render : public Component<Render>
 
 struct Texture : public Component<Texture>
 {
-    Texture(std::string path) : surface(IMG_Load(path.c_str())), texture(nullptr)
-    {
-        if (surface)
-            std::clog << "image load failed : " << IMG_GetError() << std::endl;
-    }
-    virtual ~Texture()
-    {
-        //SDL_FreeSurface(surface);
-    }
+    Texture(std::string path) : path(path), texture(nullptr) {}
 
-
-    SDL_Surface* surface;
+    std::string path;
     SDL_Texture* texture;
 };
 
@@ -63,20 +54,22 @@ public:
 
         for (auto& entity : registeredEntities)
         {
-            ComponentHandle<Position3f> pos3f;
-            ComponentHandle<Volume4f> vol4f;
-            ComponentHandle<Texture> texture;
-            parentWorld->unpack(entity, pos3f, vol4f, texture);
+            ComponentHandle<Position3f> pos3fHandler;
+            ComponentHandle<Volume4f> vol4fHandler;
+            ComponentHandle<Texture> textureHandler;
+            parentWorld->unpack(entity, pos3fHandler, vol4fHandler, textureHandler);
+
+            //여기서 상태에 따른 텍스쳐 정하는거 해줘여함
 
             SDL_Rect rect;
-            rect.x = pos3f->posX;
-            rect.y = pos3f->posY;
-            rect.w = vol4f->leftTop;
-            rect.h = vol4f->rightTop;
+            rect.x = pos3fHandler->posX;
+            rect.y = pos3fHandler->posY;
+            rect.w = vol4fHandler->leftTop;
+            rect.h = vol4fHandler->rightTop;
 
-            texture->texture = SDL_CreateTextureFromSurface(renderer, texture->surface);
-            //Copying the texture on to the window using renderer and rectangle
-            SDL_RenderCopy(renderer, texture->texture, NULL, &rect);
+            //textureHandler->texture = SDL_CreateTextureFromSurface(renderer, textureHandler->surface);
+
+            SDL_RenderCopy(renderer, textureHandler->texture, NULL, &rect);
         }
         SDL_RenderPresent(renderer);
     }
@@ -86,17 +79,18 @@ public:
 
 int main(int argc, char** args)
 {
+
     SDL_Init(SDL_INIT_EVERYTHING);
     //For loading PNG images
     IMG_Init(IMG_INIT_PNG);
 
     SDL_Window* window = SDL_CreateWindow(
-        "SE4 engine",
-        SDL_WINDOWPOS_UNDEFINED,
-        SDL_WINDOWPOS_UNDEFINED,
-        SCREEN_WIDTH,
-        SCREEN_HEIGHT,
-        SDL_WINDOW_SHOWN
+            "SE4 engine",
+            SDL_WINDOWPOS_UNDEFINED,
+            SDL_WINDOWPOS_UNDEFINED,
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            SDL_WINDOW_SHOWN
     );
 
     SDL_Event input;
@@ -110,15 +104,19 @@ int main(int argc, char** args)
     world->addUpdater(std::move(renderUpdater));
 
     world->init();
+
+
+
     auto entity = world->createEntity();
     entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
-    entity.addComponent(Volume4f(100.0f, 100.0f));
+    entity.addComponent(Volume4f(300.0f, 300.0f));
     entity.addComponent(Texture("fuck.png"));
 
     auto entity2 = world->createEntity();
     entity2.addComponent(Position3f(500.0f, 200.0f, 0.0f));
     entity2.addComponent(Volume4f(100.0f, 100.0f));
     entity2.addComponent(Texture("fuck.png"));
+
 
     while (!quit)
     {
@@ -138,3 +136,4 @@ int main(int argc, char** args)
 
     return 0;
 }
+
