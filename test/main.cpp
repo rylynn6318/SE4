@@ -28,9 +28,13 @@ struct Render : public Component<Render>
 
 struct Texture : public Component<Texture>
 {
-    Texture(std::string path) : path(path), texture(nullptr) {}
+    Texture(std::string path) : texture(nullptr) 
+    {
+        surface = IMG_Load(path.c_str());
+    }
 
-    std::string path;
+    SDL_Surface* surface;
+    //std::string path;
     SDL_Texture* texture;
 };
 
@@ -67,7 +71,7 @@ public:
             rect.w = vol4fHandler->leftTop;
             rect.h = vol4fHandler->rightTop;
 
-            //textureHandler->texture = SDL_CreateTextureFromSurface(renderer, textureHandler->surface);
+            textureHandler->texture = SDL_CreateTextureFromSurface(renderer, textureHandler->surface);
 
             SDL_RenderCopy(renderer, textureHandler->texture, NULL, &rect);
         }
@@ -109,7 +113,7 @@ int main(int argc, char** args)
 
     auto entity = world->createEntity();
     entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
-    entity.addComponent(Volume4f(300.0f, 300.0f));
+    entity.addComponent(Volume4f(100.0f, 100.0f));
     entity.addComponent(Texture("fuck.png"));
 
     auto entity2 = world->createEntity();
