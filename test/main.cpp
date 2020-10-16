@@ -8,7 +8,6 @@ using namespace se4;
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
 
-constexpr char* TEST_IMG = "resource/yeji.png";
 
 struct Position3f : public Component<Position3f>
 {
@@ -23,20 +22,14 @@ struct Volume4f :public Component<Volume4f>
     float leftTop, rightTop, rightBot, leftBot;
 };
 
-struct Render : public Component<Render>
-{
 
-};
 
 struct Texture : public Component<Texture>
 {
-    Texture(std::string path) : texture(nullptr) 
-    {
-        surface = IMG_Load(path.c_str());
-    }
+    Texture(const char *path) : texture(nullptr), path(path) {}
 
     SDL_Surface* surface;
-    //std::string path;
+    const char* path;
     SDL_Texture* texture;
 };
 
@@ -72,9 +65,10 @@ public:
             rect.y = pos3fHandler->posY;
             rect.w = vol4fHandler->leftTop;
             rect.h = vol4fHandler->rightTop;
-
-            textureHandler->texture = SDL_CreateTextureFromSurface(renderer, textureHandler->surface);
-
+          
+            //textureHandler->texture = SDL_CreateTextureFromSurface(renderer, textureHandler->surface);            
+            textureHandler->texture = IMG_LoadTexture(renderer, textureHandler->path);
+            
             SDL_RenderCopy(renderer, textureHandler->texture, NULL, &rect);
         }
         SDL_RenderPresent(renderer);
@@ -116,12 +110,12 @@ int main(int argc, char** args)
     auto entity = world->createEntity();
     entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
     entity.addComponent(Volume4f(100.0f, 100.0f));
-    entity.addComponent(Texture(TEST_IMG));
+    entity.addComponent(Texture("resource/fuck.png"));
 
     auto entity2 = world->createEntity();
     entity2.addComponent(Position3f(500.0f, 200.0f, 0.0f));
     entity2.addComponent(Volume4f(100.0f, 100.0f));
-    entity2.addComponent(Texture(TEST_IMG));
+    entity2.addComponent(Texture("resource/yeji.png"));
 
 
     while (!quit)
