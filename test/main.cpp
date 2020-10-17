@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
     LOG(INFO) << "test app start";
     b2Vec2 gravity = b2Vec2(0.0f, -9.8f);
     b2World test_world(gravity);
-    LOG(ERROR) << "error test";
+    LOG(ERROR) << "error log test";
 
     SDL_Init(SDL_INIT_EVERYTHING);
     //For loading PNG images
