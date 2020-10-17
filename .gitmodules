@@ -1,0 +1,6 @@
+[submodule "extern/glog"]
+	path = extern/glog
+	url = https://github.com/google/glog.git
+[submodule "extern/box2d"]
+	path = extern/box2d
+	url = https://github.com/erincatto/box2d.git

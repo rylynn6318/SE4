@@ -1,6 +1,10 @@
-#include <SDL.h>
-#include <SDL_image.h>
 #include <iostream>
+
+#include "SDL.h"
+#include "SDL_image.h"
+#include "glog/logging.h"
+#include "box2d/box2d.h"
+
 #include "se4.hpp"
 
 using namespace se4;
@@ -77,8 +81,13 @@ public:
     SDL_Renderer* renderer;
 };
 
-int main(int argc, char** args)
+int main(int argc, char* argv[])
 {
+    google::InitGoogleLogging(argv[0]);
+    LOG(INFO) << "test app start";
+    b2Vec2 gravity = b2Vec2(0.0f, -9.8f);
+    b2World test_world(gravity);
+    LOG(ERROR) << "error test";
 
     SDL_Init(SDL_INIT_EVERYTHING);
     //For loading PNG images
@@ -114,7 +123,7 @@ int main(int argc, char** args)
 
     auto entity2 = world->createEntity();
     entity2.addComponent(Position3f(500.0f, 200.0f, 0.0f));
-    entity2.addComponent(Volume4f(100.0f, 100.0f));
+    entity2.addComponent(Volume4f(800.0f, 521.0f));
     entity2.addComponent(Texture("resource/yeji.png"));
 
 
