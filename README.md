@@ -10,7 +10,10 @@ git submodule update --init --recursive
 ```
 test/main.cpp 이용해서 디버깅   
 
-# Licnese
+Q. 왜 SDL2는 소스 빌드해서 안쓰나?  
+A. SDL2는 소스에 CMakeLists.txt 있어서 쉽게 빌드 하는데 SDL2_image 빌드할려니까 작성해야할게 넘모 많다.
+
+# License
 MIT  
 todo : 외부 라이센스 명시  
 SDL2, SDL2_image, glog, box2d
