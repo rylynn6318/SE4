@@ -28,9 +28,9 @@ struct Volume4f :public Component<Volume4f>
 
 
 
-struct Texture : public Component<Texture>
+struct Render : public Component<Render>
 {
-    Texture(const char *path) : texture(nullptr), path(path) {}
+    Render(const char *path) : texture(nullptr), path(path) {}
 
     SDL_Surface* surface;
     const char* path;
@@ -47,7 +47,7 @@ public:
     {
         signature.addComponent<Position3f>();
         signature.addComponent<Volume4f>();
-        signature.addComponent<Texture>();
+        signature.addComponent<Render>();
     }
 
     void render()
@@ -59,18 +59,18 @@ public:
         {
             ComponentHandle<Position3f> pos3fHandler;
             ComponentHandle<Volume4f> vol4fHandler;
-            ComponentHandle<Texture> textureHandler;
+            ComponentHandle<Render> textureHandler;
             parentWorld->unpack(entity, pos3fHandler, vol4fHandler, textureHandler);
-
+           
             //여기서 상태에 따른 텍스쳐 정하는거 해줘여함
+            //애니메이션 구현할 코드 위치
 
             SDL_Rect rect;
             rect.x = pos3fHandler->posX;
             rect.y = pos3fHandler->posY;
             rect.w = vol4fHandler->leftTop;
             rect.h = vol4fHandler->rightTop;
-          
-            //textureHandler->texture = SDL_CreateTextureFromSurface(renderer, textureHandler->surface);            
+                     
             textureHandler->texture = IMG_LoadTexture(renderer, textureHandler->path);
             
             SDL_RenderCopy(renderer, textureHandler->texture, NULL, &rect);
@@ -119,12 +119,12 @@ int main(int argc, char* argv[])
     auto entity = world->createEntity();
     entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
     entity.addComponent(Volume4f(100.0f, 100.0f));
-    entity.addComponent(Texture("resource/fuck.png"));
+    entity.addComponent(Render("resource/fuck.png"));
 
     auto entity2 = world->createEntity();
     entity2.addComponent(Position3f(500.0f, 200.0f, 0.0f));
     entity2.addComponent(Volume4f(800.0f, 521.0f));
-    entity2.addComponent(Texture("resource/yeji.png"));
+    entity2.addComponent(Render("resource/yeji.png"));
 
 
     while (!quit)
