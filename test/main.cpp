@@ -98,7 +98,7 @@ public:
             ComponentHandle<Position3f> pos3fHandler;
             parentWorld->unpack(entity, pos3fHandler);
 
-            if(entity.id == yeji_id){
+            if (entity.id == yeji_id) {
                 pos3fHandler->posX += *delta;
             }
         }
@@ -155,27 +155,26 @@ int main(int argc, char *argv[]) {
     entity2.addComponent(Texture("resource/yeji.png"));
 
     while (!quit) {
-        while (SDL_PollEvent(&input) > 0) {
-            *yeji_x = 0;
-            switch (input.type) {
-                case SDL_KEYDOWN:
-                    switch (input.key.keysym.sym) {
-                        case SDLK_a:
-                            *yeji_x = -1;
-                            break;
-                        case SDLK_d:
-                            *yeji_x = 1;
-                            break;
-                    }
-                    break;
-                case SDL_QUIT:
-                    quit = true;
-                    break;
-            }
-
-            world->update(20);
-            world->render();
+        SDL_PollEvent(&input);
+        *yeji_x = 0;
+        switch (input.type) {
+            case SDL_KEYDOWN:
+                switch (input.key.keysym.sym) {
+                    case SDLK_a:
+                        *yeji_x = -1;
+                        break;
+                    case SDLK_d:
+                        *yeji_x = 1;
+                        break;
+                }
+                break;
+            case SDL_QUIT:
+                quit = true;
+                break;
         }
+
+        world->update(20);
+        world->render();
     }
 
 
