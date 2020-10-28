@@ -48,6 +48,7 @@ public:
     }
 
     void render() override {
+        LOG(ERROR) << "render start";
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
@@ -97,7 +98,6 @@ public:
             ComponentHandle<Position3f> pos3fHandler;
             parentWorld->unpack(entity, pos3fHandler);
 
-            LOG(ERROR) << "entity : " << entity.id;
             if(entity.id == yeji_id){
                 pos3fHandler->posX += *delta;
             }
@@ -134,25 +134,29 @@ int main(int argc, char *argv[]) {
 
     world->init();
 
+    // 엔티티 선언
     auto entity = world->createEntity();
+    auto entity2 = world->createEntity();
+
+    // Add Updater
+    auto yeji_x = std::make_shared<int>();
+    std::unique_ptr<Updater> yejiUpdater = std::make_unique<YejiUpdater>(yeji_x, entity2.entity.id);
+    world->addUpdater(std::move(yejiUpdater));
+    std::unique_ptr<Updater> renderUpdater = std::make_unique<RenderUpdater>(window);
+    world->addUpdater(std::move(renderUpdater));
+
+    // 엔티티에 필요한 컴포넌트 선언
     entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
     entity.addComponent(Volume4f(100.0f, 100.0f));
     entity.addComponent(Texture("resource/fuck.png"));
 
-    auto entity2 = world->createEntity();
     entity2.addComponent(Position3f(500.0f, 200.0f, 0.0f));
     entity2.addComponent(Volume4f(800.0f, 521.0f));
     entity2.addComponent(Texture("resource/yeji.png"));
 
-    // Add Updater
-    auto yeji_x = std::make_shared<int>();
-    std::unique_ptr<Updater> renderUpdater = std::make_unique<RenderUpdater>(window);
-    std::unique_ptr<Updater> yejiUpdater = std::make_unique<YejiUpdater>(yeji_x, entity2.entity.id);
-    world->addUpdater(std::move(renderUpdater));
-    world->addUpdater(std::move(yejiUpdater));
-
     while (!quit) {
         while (SDL_PollEvent(&input) > 0) {
+            *yeji_x = 0;
             switch (input.type) {
                 case SDL_KEYDOWN:
                     switch (input.key.keysym.sym) {
@@ -163,7 +167,6 @@ int main(int argc, char *argv[]) {
                             *yeji_x = 1;
                             break;
                     }
-                    LOG(ERROR) << "yeji_x : " << *yeji_x;
                     break;
                 case SDL_QUIT:
                     quit = true;
