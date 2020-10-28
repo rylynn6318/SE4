@@ -21,18 +21,21 @@ struct Position3f : public Component<Position3f>
 
 struct Volume4f :public Component<Volume4f>
 {
-    //Volume4f(float lt, float rt, float rb, float lb) :leftTop(lt), rightTop(rt), rightBot(rb), leftBot(lb) {}
-    Volume4f(float a, float b) :leftTop(a), rightTop(b) {}
+    Volume4f(float lt, float rt, float rb, float lb) :leftTop(lt), rightTop(rt), rightBot(rb), leftBot(lb) {}   
     float leftTop, rightTop, rightBot, leftBot;
 };
 
+struct Volume2f : public Component<Volume2f>
+{
+    Volume2f(float width, float height) :width(width), height(height) {}
+    float width, height;
+};
 
 
 struct Render : public Component<Render>
 {
     Render(const char *path) : texture(nullptr), path(path) {}
-
-    SDL_Surface* surface;
+    
     const char* path;
     SDL_Texture* texture;
 };
@@ -46,21 +49,21 @@ public:
     RenderUpdater(SDL_Window* window) : renderer(SDL_CreateRenderer(window, -1, 0))
     {
         signature.addComponent<Position3f>();
-        signature.addComponent<Volume4f>();
+        signature.addComponent<Volume2f>();
         signature.addComponent<Render>();
     }
-
+    
     void render()
     {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
-
+        
         for (auto& entity : registeredEntities)
         {
             ComponentHandle<Position3f> pos3fHandler;
-            ComponentHandle<Volume4f> vol4fHandler;
+            ComponentHandle<Volume2f> vol2fHandler;
             ComponentHandle<Render> textureHandler;
-            parentWorld->unpack(entity, pos3fHandler, vol4fHandler, textureHandler);
+            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);
            
             //여기서 상태에 따른 텍스쳐 정하는거 해줘여함
             //애니메이션 구현할 코드 위치
@@ -68,12 +71,19 @@ public:
             SDL_Rect rect;
             rect.x = pos3fHandler->posX;
             rect.y = pos3fHandler->posY;
-            rect.w = vol4fHandler->leftTop;
-            rect.h = vol4fHandler->rightTop;
+            rect.w = vol2fHandler->width;
+            rect.h = vol2fHandler->height;
+            
+            SDL_Rect imgPartRect;
+            imgPartRect.x = (i++%4)*73;
+            imgPartRect.y = 0;
+            imgPartRect.w = 73;
+            imgPartRect.h = rect.h;
                      
             textureHandler->texture = IMG_LoadTexture(renderer, textureHandler->path);
             
-            SDL_RenderCopy(renderer, textureHandler->texture, NULL, &rect);
+            
+            SDL_RenderCopy(renderer, textureHandler->texture, &imgPartRect, &rect);
         }
         SDL_RenderPresent(renderer);
     }
@@ -118,13 +128,13 @@ int main(int argc, char* argv[])
 
     auto entity = world->createEntity();
     entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
-    entity.addComponent(Volume4f(100.0f, 100.0f));
-    entity.addComponent(Render("resource/fuck.png"));
+    entity.addComponent(Volume2f(100.0f, 200.0f));
+    entity.addComponent(Render("resource/walk.png"));
 
     auto entity2 = world->createEntity();
-    entity2.addComponent(Position3f(500.0f, 200.0f, 0.0f));
-    entity2.addComponent(Volume4f(800.0f, 521.0f));
-    entity2.addComponent(Render("resource/yeji.png"));
+    entity2.addComponent(Position3f(200.0f, 100.0f, 0.0f));
+    entity2.addComponent(Volume2f(100.0f, 200.0f));
+    entity2.addComponent(Render("resource/walk.png"));
 
 
     while (!quit)
