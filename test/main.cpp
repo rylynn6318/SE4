@@ -35,6 +35,8 @@ struct Texture : public se4::Component<Texture> {
 };
 
 class RenderUpdater : public se4::Updater {
+private:
+    SDL_Renderer *renderer;
 public:
     RenderUpdater() = delete;
 
@@ -71,52 +73,48 @@ public:
         }
         SDL_RenderPresent(renderer);
     }
-
-    SDL_Renderer *renderer;
 };
 
-
-class YejiUpdater : public se4::Updater {
+template<typename ComponentType, typename... Args>
+class UpdaterTemplate : public se4::Updater {
 private:
-    std::shared_ptr<int> delta;
-    int yeji_id;
+    std::function<bool(int)> compare_id;
+    std::function<void(se4::ComponentHandle<ComponentType>, Args ...)> callback;
 
-public:
-    YejiUpdater() = delete;
-
-    ~YejiUpdater() override = default;
-
-    YejiUpdater(std::shared_ptr<int> delta, int yeji) : delta(std::move(delta)), yeji_id(yeji) {
-        signature.addComponent<Position3f>();
+    template<typename ComponentTypeToSignature>
+    void addComponentToSignature() {
+        signature.addComponent<ComponentTypeToSignature>();
     }
 
-//    void update(int dt) override {
-//        for (auto &entity : registeredEntities) {
-//            se4::ComponentHandle<Position3f> pos3fHandler;
-//            parentWorld->unpack(entity, pos3fHandler);
-//
-//            if (entity.id == yeji_id) {
-//                pos3fHandler->posX += *delta;
-//            }
-//        }
-//    }
+    template<typename ComponentTypeToSignature, typename... ComponentTypeToSignatures>
+    void addComponentToSignature() {
+        signature.addComponent<ComponentTypeToSignature>();
+        addComponentToSignature<ComponentTypeToSignatures ...>();
+    }
+public:
+    ~UpdaterTemplate() override = default;
+
+    UpdaterTemplate(std::function<void(se4::ComponentHandle<ComponentType>, Args ...)> callback,
+                    std::function<bool(int)> compare_id)
+            : compare_id(std::move(compare_id)),
+              callback(std::move(callback)) {
+        signature.addComponent<Position3f>();
+        // addComponentToSignature<Position3f>();
+        // addComponentToSignature<ComponentType, Args...>();
+    }
 
     void update(int dt) override {
-        se4::ComponentHandle<Position3f> pos3fHandler;
-        update( dt,
-                [this](int id) -> bool { return id == yeji_id; },
-                [this](se4::ComponentHandle<Position3f> pos3fHandler) -> void { pos3fHandler->posX += *delta; },
-                pos3fHandler);
+        se4::ComponentHandle<ComponentType> pos3fHandler;
+        update(dt, pos3fHandler);
     }
 
-    // args : ComponentHandles
-    template<typename Function, typename ComponentType, typename... Args>
-    void update(int dt, const std::function<bool(int)> &compare_id, Function &&callback, se4::ComponentHandle<ComponentType> &handle, Args &... args) {
+    // handle and args : Parameter for callback (and its type is ComponentHandles<ComponentType>)
+    void update(int dt, se4::ComponentHandle<ComponentType> &handle, se4::ComponentHandle<Args> &... args) {
         for (auto &entity : registeredEntities) {
             parentWorld->unpack(entity, handle, args...);
 
             if (compare_id(entity.id)) {
-                std::forward<Function>(callback)(handle, args...);
+                callback(handle, args...);
             }
         }
     }
@@ -166,7 +164,9 @@ int main(int argc, char *argv[]) {
 
     // Add Updater
     auto yeji_x = std::make_shared<int>();
-    auto yejiUpdater = std::make_unique<YejiUpdater>(yeji_x, entity2.entity.id);
+    auto callback = [&yeji_x](se4::ComponentHandle<Position3f> pos3fHandler) -> void { pos3fHandler->posX += *yeji_x; };
+    auto compare_id = [entity2](int id) -> bool { return id == entity2.entity.id; };
+    auto yejiUpdater = std::make_unique<UpdaterTemplate<Position3f>>(callback, compare_id);
     world->addUpdater(std::move(yejiUpdater));
     auto renderUpdater = std::make_unique<RenderUpdater>(window);
     world->addUpdater(std::move(renderUpdater));
