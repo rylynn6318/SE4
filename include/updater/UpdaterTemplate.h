@@ -31,7 +31,7 @@ namespace se4 {
         };
     }
 
-// user invokes this
+    // user invokes this
     template<typename F, typename Tuple>
     void call(F f, Tuple &&t) {
         typedef typename std::decay<Tuple>::type ttype;
@@ -40,27 +40,23 @@ namespace se4 {
         >::call(f, std::forward<Tuple>(t));
     }
 
+    // --------------------------------------------- UpdaterTemplate --------------------------------------------- //
+
+    // 업데이터를 새로 상속해서 만들 필요 없이 쓸 수 있는 업데이터 템플릿 클래스
+    // callback : 각각의 컴포넌트에 대해 실제로 할 동작 함수
+    // compare_id : 특정 id를 가진 엔티티만 callback 을 수행하게 하기 위한 비교문 함수
+    // 템플릿 파라메터 : 사용할 컴포넌트의 핸들러
     template<typename... ComponentHandlers>
     class UpdaterTemplate : public se4::Updater {
     private:
         std::function<bool(int)> compare_id;
         std::function<void(ComponentHandlers ...)> callback;
 
-//    template<typename Handler>
-//    static void addComponentToSignature(se4::ComponentMask sig) {
-//        using ComponentType = typename Handler::ExposedComponentType;
-//        sig.addComponent<ComponentType>();
-//    }
         template<typename... Handlers>
-        typename std::enable_if<sizeof...(Handlers) == 0>::type addComponentToSignature() {
-        }
+        typename std::enable_if<sizeof...(Handlers) == 0>::type addComponentToSignature() {}
 
         template<typename Handler, typename... Handlers>
-        void addComponentToSignature() {
-            using ComponentType = typename Handler::ExposedComponentType;
-            signature.addComponent<ComponentType>();
-            addComponentToSignature<Handlers ...>();
-        }
+        void addComponentToSignature();
 
         std::tuple<ComponentHandlers...> tuple;
 
@@ -72,54 +68,42 @@ namespace se4 {
 
         void update(int dt) override;
 
-        // handle and args : Parameter for callback (and its type is ComponentHandles<ComponentType>)
-//    void update(int dt, ComponentHandlers &... args) {
-//        for (auto &entity : registeredEntities) {
-//            parentWorld->unpack(entity, args...);
-//
-//            if (compare_id(entity.id)) {
-//                callback(args...);
-//            }
-//        }
-//    }
-        // handle and args : Parameter for callback (and its type is ComponentHandles<ComponentType>)
         void update(int dt, std::tuple<ComponentHandlers...> &t);
     };
+
+    // --------------------------------------------- Implementation --------------------------------------------- //
 
     template<typename... ComponentHandlers>
     UpdaterTemplate<ComponentHandlers...>::UpdaterTemplate(std::function<void(ComponentHandlers...)> callback,
                                                            std::function<bool(int)> compare_id)
             : compare_id(std::move(compare_id)),
               callback(std::move(callback)) {
-//        signature.addComponent<Position3f>();
-//        signature.addComponent<Volume4f>();
-        // signature.addComponent<ComponentTypes ...>();
-        // addComponentToSignature<Position3f>(signature);
         addComponentToSignature<ComponentHandlers...>();
     }
 
     template<typename... ComponentHandlers>
     void UpdaterTemplate<ComponentHandlers...>::update(int dt) {
-//        se4::ComponentHandle<Position3f> pos3fHandler;
-//        se4::ComponentHandle<Volume4f> volume4fHandler;
         update(dt, tuple);
-//        update(dt, pos3fHandler, volume4fHandler);
     }
 
     template<typename... ComponentHandlers>
     void UpdaterTemplate<ComponentHandlers...>::update(int dt, std::tuple<ComponentHandlers...> &t) {
         for (auto &entity : registeredEntities) {
             std::apply([this, &entity](auto &&... args) { ( parentWorld->unpack(entity, args), ...); }, t);
-            // call([this, &entity](auto t) -> auto { parentWorld->unpack(entity, t);}, tuple); // (entity, args...);
 
             if (compare_id(entity.id)) {
                 call(callback, t);
-                // callback(args...);
             }
         }
     }
 
-// -------------------- -------------------- -------------------- --------------------
+    template<typename... ComponentHandlers>
+    template<typename Handler, typename... Handlers>
+    void UpdaterTemplate<ComponentHandlers...>::addComponentToSignature() {
+        using ComponentType = typename Handler::ExposedComponentType;
+        signature.addComponent<ComponentType>();
+        addComponentToSignature<Handlers ...>();
+    }
 }
 
 #endif //SE4_UPDATERTEMPLATE_H
