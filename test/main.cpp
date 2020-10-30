@@ -13,6 +13,7 @@ const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
 double dt = 1 / 60.0f; //60fps
 double currentTime, lastTime, frameTime, accumulator = 0.0;
+float deltaTime = 0;
 
 struct Position3f : public Component<Position3f>
 {
@@ -151,10 +152,11 @@ int main(int argc, char* argv[])
 
         while (frameTime > 0.0)
         {            
-            float deltaTime = std::min(frameTime, dt);
-            world->update(dt);
+            deltaTime = std::min(frameTime, dt);
+            world->update(deltaTime);
             accumulator += dt;
             frameTime -= dt;
+            LOG(ERROR) << deltaTime;
         }
         
         world->render();
