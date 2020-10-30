@@ -141,6 +141,8 @@ int main(int argc, char* argv[])
     double t = 0.0;
     while (!quit)
     {
+        SDL_PollEvent(&input);
+
         lastTime = SDL_GetTicks();
         frameTime = lastTime - currentTime;
         if (frameTime > 0.25) frameTime = 0.25;
