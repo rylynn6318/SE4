@@ -11,7 +11,7 @@ namespace se4 {
         }
     }
 
-    void World::update(int dt) {
+    void World::update(double dt) {
         // TODO(taurheim) check to make sure that the world has called init
         for (auto& updater : updaters) {
             updater->update(dt);

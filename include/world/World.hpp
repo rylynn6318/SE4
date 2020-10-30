@@ -23,7 +23,7 @@ namespace se4 {
          * Update game logic. This is unrelated to a frame
          * https://gafferongames.com/post/fix_your_timestep/
          */
-        void update(int dt);
+        void update(double dt);
         /*
          * Render a frame.
          */
