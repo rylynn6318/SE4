@@ -11,7 +11,8 @@ using namespace se4;
 
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
-
+double dt = 1 / 60.0f; //60fps
+double currentTime, lastTime, frameTime, accumulator = 0.0;
 
 struct Position3f : public Component<Position3f>
 {
@@ -75,9 +76,9 @@ public:
             rect.h = vol2fHandler->height;
             
             SDL_Rect imgPartRect;
-            imgPartRect.x = (i++%4)*73;
-            imgPartRect.y = 0;
-            imgPartRect.w = 73;
+            imgPartRect.x = 0; //시작 x좌표 한상태에서는 여기서만
+            imgPartRect.y = 0; //시작 y좌표 다른상태로 가야할 때
+            imgPartRect.w = rect.w;
             imgPartRect.h = rect.h;
                      
             textureHandler->texture = IMG_LoadTexture(renderer, textureHandler->path);
@@ -136,15 +137,26 @@ int main(int argc, char* argv[])
     entity2.addComponent(Volume2f(100.0f, 200.0f));
     entity2.addComponent(Render("resource/walk.png"));
 
-
+    currentTime = SDL_GetTicks();
+    double t = 0.0;
     while (!quit)
     {
-        while (SDL_PollEvent(&input) > 0)
-        {
-            if (input.type == SDL_QUIT) quit = true;
-            world->update(20);
-            world->render();
+        lastTime = SDL_GetTicks();
+        frameTime = lastTime - currentTime;
+        if (frameTime > 0.25) frameTime = 0.25;
+        currentTime = lastTime;
+        accumulator += frameTime;
+
+        while (frameTime > 0.0)
+        {            
+            float deltaTime = std::min(frameTime, dt);
+            world->update(dt);
+            accumulator += dt;
+            frameTime -= dt;
         }
+        
+        world->render();
+        if (input.type == SDL_QUIT) quit = true;
     }
 
 
