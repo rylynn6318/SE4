@@ -16,7 +16,7 @@ namespace se4 {
     namespace darkmagic {
         template<typename F, typename Tuple, bool Done, int Total, int... N>
         struct call_impl {
-            static void call(F f, Tuple &&t) {
+            static auto call(F f, Tuple &&t) -> void {
                 call_impl<
                         F, Tuple, Total == 1 + sizeof...(N), Total, N..., sizeof...(N)
                 >::call(f, std::forward<Tuple>(t));
@@ -25,7 +25,7 @@ namespace se4 {
 
         template<typename F, typename Tuple, int Total, int... N>
         struct call_impl<F, Tuple, true, Total, N...> {
-            static void call(F f, Tuple &&t) {
+            static auto call(F f, Tuple &&t) -> void {
                 f(std::get<N>(std::forward<Tuple>(t))...);
             }
         };
@@ -33,7 +33,7 @@ namespace se4 {
 
     // user invokes this
     template<typename F, typename Tuple>
-    void call(F f, Tuple &&t) {
+    auto call(F f, Tuple &&t) -> void {
         typedef typename std::decay<Tuple>::type ttype;
         darkmagic::call_impl<
                 F, Tuple, 0 == std::tuple_size<ttype>::value, std::tuple_size<ttype>::value
@@ -51,14 +51,17 @@ namespace se4 {
     private:
         std::function<bool(int)> compare_id;
         std::function<void(ComponentHandlers ...)> callback;
+        // 컴포넌트 값 수정을 위해 존재하는 temp handlers
+        // 매 프레임 만드는거 보다(기존 Updater 코드) 멤버변수로 들고 있는게 낫다고 판단함
+        std::tuple<ComponentHandlers...> tuple;
 
+        // ComponentHandlers 에서 Component 추출해 signature 추가하는 재귀 템플릿
         template<typename... Handlers>
-        typename std::enable_if<sizeof...(Handlers) == 0>::type addComponentToSignature() {}
+        auto addComponentToSignature() -> typename std::enable_if<sizeof...(Handlers) == 0>::type {}
 
         template<typename Handler, typename... Handlers>
-        void addComponentToSignature();
+        auto addComponentToSignature() -> void;
 
-        std::tuple<ComponentHandlers...> tuple;
 
     public:
         ~UpdaterTemplate() override = default;
@@ -66,32 +69,34 @@ namespace se4 {
         UpdaterTemplate(std::function<void(ComponentHandlers ...)> callback,
                         std::function<bool(int)> compare_id);
 
-        void update(int dt) override;
+        auto update(int dt) -> void override;
 
-        void update(int dt, std::tuple<ComponentHandlers...> &t);
+        auto update(int dt, std::tuple<ComponentHandlers...> &t) -> void;
     };
 
     // --------------------------------------------- Implementation --------------------------------------------- //
 
     template<typename... ComponentHandlers>
-    UpdaterTemplate<ComponentHandlers...>::UpdaterTemplate(std::function<void(ComponentHandlers...)> callback,
-                                                           std::function<bool(int)> compare_id)
+    UpdaterTemplate<ComponentHandlers...>::UpdaterTemplate
+            (std::function<void(ComponentHandlers...)> callback, std::function<bool(int)> compare_id)
             : compare_id(std::move(compare_id)),
               callback(std::move(callback)) {
         addComponentToSignature<ComponentHandlers...>();
     }
 
     template<typename... ComponentHandlers>
-    void UpdaterTemplate<ComponentHandlers...>::update(int dt) {
+    auto UpdaterTemplate<ComponentHandlers...>::update(int dt) -> void {
         update(dt, tuple);
     }
 
     template<typename... ComponentHandlers>
-    void UpdaterTemplate<ComponentHandlers...>::update(int dt, std::tuple<ComponentHandlers...> &t) {
+    auto UpdaterTemplate<ComponentHandlers...>::update(int dt, std::tuple<ComponentHandlers...> &t) -> void {
         for (auto &entity : registeredEntities) {
+            // 튜플에 있는 컴포넌트들을 가져와서 unpack
             std::apply([this, &entity](auto &&... args) { ( parentWorld->unpack(entity, args), ...); }, t);
 
             if (compare_id(entity.id)) {
+                // 위에서 정의한 흑마법. 튜플들에 있는 컴포넌트들을 전부 파라메터로 넘김
                 call(callback, t);
             }
         }
@@ -99,7 +104,8 @@ namespace se4 {
 
     template<typename... ComponentHandlers>
     template<typename Handler, typename... Handlers>
-    void UpdaterTemplate<ComponentHandlers...>::addComponentToSignature() {
+    auto UpdaterTemplate<ComponentHandlers...>::addComponentToSignature() -> void {
+        // 핸들러의 컴포넌트 추출 해서 시그니처에 추가하는 것을 재귀
         using ComponentType = typename Handler::ExposedComponentType;
         signature.addComponent<ComponentType>();
         addComponentToSignature<Handlers ...>();
