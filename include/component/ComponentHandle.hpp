@@ -8,12 +8,12 @@ namespace se4 {
     struct ComponentHandle {
         using ExposedComponentType = typename ComponentManager<ComponentType>::LookupType;
 
-        Entity owner;
+        Entity owner{};
         ExposedComponentType* component;
         ComponentManager<ComponentType>* manager;
 
         // Empty constructor used for World::unpack()
-        ComponentHandle() {};
+        ComponentHandle() = default;
         ComponentHandle(Entity owner, ExposedComponentType* component, ComponentManager<ComponentType>* manager) {
             this->owner = owner;
             this->component = component;

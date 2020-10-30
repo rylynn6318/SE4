@@ -8,6 +8,7 @@
 #include "box2d/box2d.h"
 
 #include "se4.hpp"
+#include "updater/UpdaterTemplate.h"
 
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
@@ -75,51 +76,6 @@ public:
     }
 };
 
-template<typename ComponentType, typename... Args>
-class UpdaterTemplate : public se4::Updater {
-private:
-    std::function<bool(int)> compare_id;
-    std::function<void(se4::ComponentHandle<ComponentType>, Args ...)> callback;
-
-    template<typename ComponentTypeToSignature>
-    void addComponentToSignature() {
-        signature.addComponent<ComponentTypeToSignature>();
-    }
-
-    template<typename ComponentTypeToSignature, typename... ComponentTypeToSignatures>
-    void addComponentToSignature() {
-        signature.addComponent<ComponentTypeToSignature>();
-        addComponentToSignature<ComponentTypeToSignatures ...>();
-    }
-public:
-    ~UpdaterTemplate() override = default;
-
-    UpdaterTemplate(std::function<void(se4::ComponentHandle<ComponentType>, Args ...)> callback,
-                    std::function<bool(int)> compare_id)
-            : compare_id(std::move(compare_id)),
-              callback(std::move(callback)) {
-        signature.addComponent<Position3f>();
-        // addComponentToSignature<Position3f>();
-        // addComponentToSignature<ComponentType, Args...>();
-    }
-
-    void update(int dt) override {
-        se4::ComponentHandle<ComponentType> pos3fHandler;
-        update(dt, pos3fHandler);
-    }
-
-    // handle and args : Parameter for callback (and its type is ComponentHandles<ComponentType>)
-    void update(int dt, se4::ComponentHandle<ComponentType> &handle, se4::ComponentHandle<Args> &... args) {
-        for (auto &entity : registeredEntities) {
-            parentWorld->unpack(entity, handle, args...);
-
-            if (compare_id(entity.id)) {
-                callback(handle, args...);
-            }
-        }
-    }
-};
-
 int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
 
@@ -164,9 +120,11 @@ int main(int argc, char *argv[]) {
 
     // Add Updater
     auto yeji_x = std::make_shared<int>();
-    auto callback = [&yeji_x](se4::ComponentHandle<Position3f> pos3fHandler) -> void { pos3fHandler->posX += *yeji_x; };
+    auto callback = [&yeji_x](se4::ComponentHandle<Position3f> pos3fHandler,
+                              se4::ComponentHandle<Volume4f> tmp) -> void { pos3fHandler->posX += *yeji_x; };
     auto compare_id = [entity2](int id) -> bool { return id == entity2.entity.id; };
-    auto yejiUpdater = std::make_unique<UpdaterTemplate<Position3f>>(callback, compare_id);
+    auto yejiUpdater = std::make_unique<se4::UpdaterTemplate<se4::ComponentHandle<Position3f>, se4::ComponentHandle<Volume4f>>>(
+            callback, compare_id);
     world->addUpdater(std::move(yejiUpdater));
     auto renderUpdater = std::make_unique<RenderUpdater>(window);
     world->addUpdater(std::move(renderUpdater));
