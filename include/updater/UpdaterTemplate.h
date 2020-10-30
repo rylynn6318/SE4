@@ -46,6 +46,7 @@ namespace se4 {
     // callback : 각각의 컴포넌트에 대해 실제로 할 동작 함수
     // compare_id : 특정 id를 가진 엔티티만 callback 을 수행하게 하기 위한 비교문 함수
     // 템플릿 파라메터 : 사용할 컴포넌트의 핸들러
+    // TODO : init() 등 기타 함수도 override 할것인가?
     template<typename... ComponentHandlers>
     class UpdaterTemplate : public se4::Updater {
     private:
@@ -61,7 +62,6 @@ namespace se4 {
 
         template<typename Handler, typename... Handlers>
         auto addComponentToSignature() -> void;
-
 
     public:
         ~UpdaterTemplate() override = default;

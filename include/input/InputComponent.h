@@ -9,7 +9,7 @@
 
 namespace se4 {
     class InputComponent : public Component<InputComponent> {
-
+        // 여기에 콜백을 등록해야 하나? 인풋 컴포넌트가 하는게 뭐지
     };
 }
 
