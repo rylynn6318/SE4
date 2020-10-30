@@ -1,5 +1,6 @@
 #include <iostream>
 #include <utility>
+#include <functional>
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -8,19 +9,17 @@
 
 #include "se4.hpp"
 
-using namespace se4;
-
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
 
 
-struct Position3f : public Component<Position3f> {
+struct Position3f : public se4::Component<Position3f> {
     Position3f(float x, float y, float z) : posX(x), posY(y), posZ(z) {}
 
     float posX, posY, posZ;
 };
 
-struct Volume4f : public Component<Volume4f> {
+struct Volume4f : public se4::Component<Volume4f> {
     //Volume4f(float lt, float rt, float rb, float lb) :leftTop(lt), rightTop(rt), rightBot(rb), leftBot(lb) {}
     Volume4f(float a, float b) : leftTop(a), rightTop(b) {}
 
@@ -28,14 +27,14 @@ struct Volume4f : public Component<Volume4f> {
 };
 
 
-struct Texture : public Component<Texture> {
+struct Texture : public se4::Component<Texture> {
     Texture(const char *path) : texture(nullptr), path(path) {}
 
     const char *path;
     SDL_Texture *texture;
 };
 
-class RenderUpdater : public Updater {
+class RenderUpdater : public se4::Updater {
 public:
     RenderUpdater() = delete;
 
@@ -48,14 +47,13 @@ public:
     }
 
     void render() override {
-        LOG(ERROR) << "render start";
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         SDL_RenderClear(renderer);
 
         for (auto &entity : registeredEntities) {
-            ComponentHandle<Position3f> pos3fHandler;
-            ComponentHandle<Volume4f> vol4fHandler;
-            ComponentHandle<Texture> textureHandler;
+            se4::ComponentHandle<Position3f> pos3fHandler;
+            se4::ComponentHandle<Volume4f> vol4fHandler;
+            se4::ComponentHandle<Texture> textureHandler;
             parentWorld->unpack(entity, pos3fHandler, vol4fHandler, textureHandler);
 
             //여기서 상태에 따른 텍스쳐 정하는거 해줘여함
@@ -78,7 +76,7 @@ public:
 };
 
 
-class YejiUpdater : public Updater {
+class YejiUpdater : public se4::Updater {
 private:
     std::shared_ptr<int> delta;
     int yeji_id;
@@ -92,14 +90,33 @@ public:
         signature.addComponent<Position3f>();
     }
 
+//    void update(int dt) override {
+//        for (auto &entity : registeredEntities) {
+//            se4::ComponentHandle<Position3f> pos3fHandler;
+//            parentWorld->unpack(entity, pos3fHandler);
+//
+//            if (entity.id == yeji_id) {
+//                pos3fHandler->posX += *delta;
+//            }
+//        }
+//    }
 
     void update(int dt) override {
-        for (auto &entity : registeredEntities) {
-            ComponentHandle<Position3f> pos3fHandler;
-            parentWorld->unpack(entity, pos3fHandler);
+        se4::ComponentHandle<Position3f> pos3fHandler;
+        update( dt,
+                [this](int id) -> bool { return id == yeji_id; },
+                [this](se4::ComponentHandle<Position3f> pos3fHandler) -> void { pos3fHandler->posX += *delta; },
+                pos3fHandler);
+    }
 
-            if (entity.id == yeji_id) {
-                pos3fHandler->posX += *delta;
+    // args : ComponentHandles
+    template<typename Function, typename ComponentType, typename... Args>
+    void update(int dt, const std::function<bool(int)> &compare_id, Function &&callback, se4::ComponentHandle<ComponentType> &handle, Args &... args) {
+        for (auto &entity : registeredEntities) {
+            parentWorld->unpack(entity, handle, args...);
+
+            if (compare_id(entity.id)) {
+                std::forward<Function>(callback)(handle, args...);
             }
         }
     }
@@ -126,11 +143,20 @@ int main(int argc, char *argv[]) {
             SDL_WINDOW_SHOWN
     );
 
+//    SDL_Window *window2 = SDL_CreateWindow(
+//            "SE4 engine 222",
+//            SDL_WINDOWPOS_UNDEFINED,
+//            SDL_WINDOWPOS_UNDEFINED,
+//            SCREEN_WIDTH,
+//            SCREEN_HEIGHT,
+//            SDL_WINDOW_SHOWN
+//    );
+
     SDL_Event input;
     bool quit = false;
 
-    auto entityManager = std::make_unique<EntityManager>();
-    auto world = std::make_unique<World>(std::move(entityManager));
+    auto entityManager = std::make_unique<se4::EntityManager>();
+    auto world = std::make_unique<se4::World>(std::move(entityManager));
 
     world->init();
 
@@ -140,9 +166,9 @@ int main(int argc, char *argv[]) {
 
     // Add Updater
     auto yeji_x = std::make_shared<int>();
-    std::unique_ptr<Updater> yejiUpdater = std::make_unique<YejiUpdater>(yeji_x, entity2.entity.id);
+    auto yejiUpdater = std::make_unique<YejiUpdater>(yeji_x, entity2.entity.id);
     world->addUpdater(std::move(yejiUpdater));
-    std::unique_ptr<Updater> renderUpdater = std::make_unique<RenderUpdater>(window);
+    auto renderUpdater = std::make_unique<RenderUpdater>(window);
     world->addUpdater(std::move(renderUpdater));
 
     // 엔티티에 필요한 컴포넌트 선언
@@ -156,15 +182,14 @@ int main(int argc, char *argv[]) {
 
     while (!quit) {
         SDL_PollEvent(&input);
-        *yeji_x = 0;
         switch (input.type) {
             case SDL_KEYDOWN:
                 switch (input.key.keysym.sym) {
                     case SDLK_a:
-                        *yeji_x = -1;
+                        *yeji_x = *yeji_x >= 0 ? -1 : *yeji_x - 1;
                         break;
                     case SDLK_d:
-                        *yeji_x = 1;
+                        *yeji_x = *yeji_x <= 0 ? 1 : *yeji_x + 1;
                         break;
                 }
                 break;
