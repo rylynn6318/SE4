@@ -44,3 +44,10 @@ struct Ki : Component<Ki>
 	int ki;	//표시는 ki / n 만큼 숫자로 표시, ki % n 만큼 막대로 표시 n은 한 칸의 용량
 };
 
+struct Score //승리한 라운드의
+{
+	int finScore; //게임을 이기기 위해 필요한 라운드의 수
+	int score; //승리한 라운드의 수
+	//이렇게 함으로써 얻을 수 있는 것 : 유저간 실력 차가 날 경우 A는 5판승, B는 1판승 이런식으로 승리 조건을 조정할 수 있음 default는 3이 적절할듯?
+};
+
