@@ -3,16 +3,18 @@
 
 namespace se4 {
     struct ComponentMask {
-        unsigned int mask = 0;
+        unsigned mask[32] = {};
 
         template <typename ComponentType>
         void addComponent() {
-            mask |= (1 << GetComponentFamily<ComponentType>());
+            auto family = GetComponentFamily<ComponentType>();
+            mask[family / 32] |= (1 << family % 32);
         }
 
         template <typename ComponentType>
         void removeComponent() {
-            mask &= ~(1 << GetComponentFamily<ComponentType>());
+            auto family = GetComponentFamily<ComponentType>();
+            mask[family / 32] &= ~(1 << family % 32);
         }
 
         bool isNewMatch(ComponentMask oldMask, ComponentMask systemMask);
