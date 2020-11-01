@@ -9,5 +9,15 @@ namespace se4 {
 		return oldMask.matches(systemMask) && !matches(systemMask);
 	}
 
-	bool ComponentMask::matches(se4::ComponentMask systemMask) { return ((mask & systemMask.mask) == systemMask.mask); }
+	bool ComponentMask::matches(se4::ComponentMask systemMask) {
+		for (int i = 0; i < 32; i++)
+		{
+			if ((mask[i] & systemMask.mask[i]) != systemMask.mask[i])
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
 }  // namespace se4
