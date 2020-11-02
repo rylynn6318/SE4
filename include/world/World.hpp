@@ -92,7 +92,7 @@ namespace se4 {
         std::vector<std::unique_ptr<BaseComponentManager>> componentManagers;
         std::map<Entity, ComponentMask> entityMasks;
 
-        void updateEntityMask(Entity const& entity, ComponentMask oldMask);
+        void updateEntityMask(Entity const& entity, ComponentMask& oldMask);
 
         template <typename ComponentType>
         ComponentManager<ComponentType>* getComponentManager() {
