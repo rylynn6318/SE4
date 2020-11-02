@@ -15,5 +15,5 @@ namespace se4 {
         }
     }
 
-    ComponentMask Updater::getSignature() { return signature; }
+    ComponentMask& Updater::getSignature() { return signature; }
 }  
