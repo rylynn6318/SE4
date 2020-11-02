@@ -63,6 +63,8 @@ namespace se4 {
         template<typename Handler, typename... Handlers>
         auto addComponentToSignature() -> void;
 
+        auto update(int dt, std::tuple<ComponentHandlers...> &t) -> void;
+
     public:
         ~UpdaterTemplate() override = default;
 
@@ -70,8 +72,6 @@ namespace se4 {
                         std::function<bool(int)> compare_id);
 
         auto update(int dt) -> void override;
-
-        auto update(int dt, std::tuple<ComponentHandlers...> &t) -> void;
     };
 
     // --------------------------------------------- Implementation --------------------------------------------- //

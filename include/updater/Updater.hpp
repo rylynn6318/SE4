@@ -36,6 +36,7 @@ namespace se4 {
         /*
          * Called every frame
          */
+        // TODO : IRender 로 분리
         virtual void render() {};
 
         /*

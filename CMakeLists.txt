@@ -67,7 +67,7 @@ message("--> BOX2D_BUILD_TESTBED : ${BOX2D_BUILD_TESTBED}")
 #        box2d
 #        )
 
-target_link_libraries(${PROJECT_NAME}_test
+target_link_libraries(${PROJECT_NAME}_test #PUBLIC
         ${SDL2_LIBRARIES}
         ${SDL2_IMAGE_LIBRARIES}
         glog

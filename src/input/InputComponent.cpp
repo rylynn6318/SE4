@@ -3,3 +3,7 @@
 //
 
 #include "InputComponent.h"
+
+auto se4::InputComponent::isSelected() const -> bool {
+    return is_selected;
+}

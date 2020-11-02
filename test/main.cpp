@@ -112,7 +112,6 @@ int main(int argc, char *argv[]) {
     auto entityManager = std::make_unique<se4::EntityManager>();
     auto world = std::make_unique<se4::World>(std::move(entityManager));
 
-    world->init();
 
     // 엔티티 선언
     auto entity = world->createEntity();
@@ -142,6 +141,9 @@ int main(int argc, char *argv[]) {
     entity2.addComponent(Position3f(500.0f, 200.0f, 0.0f));
     entity2.addComponent(Volume4f(800.0f, 521.0f));
     entity2.addComponent(Texture("resource/yeji.png"));
+    // entity2.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
+
+    world->init();
 
     while (!quit) {
         SDL_PollEvent(&input);
@@ -154,10 +156,20 @@ int main(int argc, char *argv[]) {
                     case SDLK_d:
                         *yeji_x = *yeji_x <= 0 ? 1 : *yeji_x + 1;
                         break;
+                    case SDLK_ESCAPE:
+                        quit = true;
+                        break;
                 }
                 break;
-            case SDL_QUIT:
-                quit = true;
+            case SDL_KEYUP:
+                switch (input.key.keysym.sym) {
+                    case SDLK_a:
+                        LOG(ERROR) << "a released";
+                        break;
+                    case SDLK_d:
+                        LOG(ERROR) << "d released";
+                        break;
+                }
                 break;
         }
 
