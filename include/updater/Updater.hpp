@@ -56,7 +56,7 @@ namespace se4 {
          */
         void unRegisterEntity(Entity const &entity);
 
-        ComponentMask getSignature();
+        ComponentMask& getSignature();
 
     protected:
         std::vector<Entity> registeredEntities;
