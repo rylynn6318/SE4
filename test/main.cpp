@@ -22,7 +22,7 @@ struct Position3f : public se4::Component<Position3f> {
     float posX, posY, posZ;
 };
 
-struct Volume4f :public se4::Component<Volume4f>
+struct Volume4f :public se4::Component<Volume4f> {
     float leftTop, rightTop, rightBot, leftBot;
 };
 
@@ -61,9 +61,9 @@ public:
         
         for (auto& entity : registeredEntities)
         {
-            ComponentHandle<Position3f> pos3fHandler;
-            ComponentHandle<Volume2f> vol2fHandler;
-            ComponentHandle<Render> textureHandler;
+            se4::ComponentHandle<Position3f> pos3fHandler;
+            se4::ComponentHandle<Volume2f> vol2fHandler;
+            se4::ComponentHandle<Render> textureHandler;
             parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);
             //여기서 상태에 따른 텍스쳐 정하는거 해줘여함
             //애니메이션 구현할 코드 위치
@@ -153,8 +153,8 @@ int main(int argc, char *argv[]) {
     entity.addComponent(Render("resource/walk.png"));
 
     yeji.addComponent(Position3f(500.0f, 200.0f, 0.0f));
-    yeji.addComponent(Volume4f(800.0f, 521.0f));
-    yeji.addComponent(Texture("resource/yeji.png"));
+    yeji.addComponent(Volume2f(800.0f, 521.0f));
+    yeji.addComponent(Render("resource/yeji.png"));
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
   
     entity2.addComponent(Position3f(200.0f, 100.0f, 0.0f));
@@ -169,22 +169,6 @@ int main(int argc, char *argv[]) {
     {
         SDL_PollEvent(&input);
 
-        lastTime = SDL_GetTicks();
-        frameTime = lastTime - currentTime;
-        if (frameTime > 0.25) frameTime = 0.25;
-        currentTime = lastTime;
-        accumulator += frameTime;
-
-        while (frameTime > 0.0)
-        {            
-            deltaTime = std::min(frameTime, dt);
-            world->update(deltaTime);
-            accumulator += dt;
-            frameTime -= dt;
-            LOG(ERROR) << deltaTime;
-        }
-        
-        world->render();
         switch (input.type) {
             case SDL_KEYDOWN:
                 switch (input.key.keysym.sym) {
@@ -209,7 +193,27 @@ int main(int argc, char *argv[]) {
                         break;
                 }
                 break;
+            case SDL_QUIT:
+                quit = true;
+                break;
         }
+
+        lastTime = SDL_GetTicks();
+        frameTime = lastTime - currentTime;
+        if (frameTime > 0.25) frameTime = 0.25;
+        currentTime = lastTime;
+        accumulator += frameTime;
+
+        while (frameTime > 0.0)
+        {            
+            deltaTime = std::min(frameTime, dt);
+            world->update(deltaTime);
+            accumulator += dt;
+            frameTime -= dt;
+            LOG(ERROR) << deltaTime;
+        }
+
+        world->render();
     }
 
 
