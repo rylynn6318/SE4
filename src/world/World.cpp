@@ -11,7 +11,7 @@ namespace se4 {
         }
     }
 
-    void World::update(int dt) {
+    void World::update(double dt) {
         // TODO(taurheim) check to make sure that the world has called init
         for (auto &updater : updaters) {
             updater->update(dt);
@@ -42,11 +42,11 @@ namespace se4 {
         updaters.push_back(std::move(updater));
     }
 
-    void World::updateEntityMask(se4::Entity const &entity, se4::ComponentMask oldMask) {
-        ComponentMask newMask = entityMasks[entity];
+    void World::updateEntityMask(se4::Entity const& entity, se4::ComponentMask& oldMask) {
+        ComponentMask& newMask = entityMasks[entity];
 
-        for (auto &updater : updaters) {
-            ComponentMask updaterSignature = updater->getSignature();
+        for (auto& updater : updaters) {
+            ComponentMask& updaterSignature = updater->getSignature();
             if (newMask.isNewMatch(oldMask, updaterSignature)) {
                 // We match but didn't match before
                 updater->registerEntity(entity);

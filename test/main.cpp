@@ -12,7 +12,9 @@
 
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
-
+double dt = 1 / 60.0f; //60fps
+double currentTime, lastTime, frameTime, accumulator = 0.0;
+float deltaTime = 0;
 
 struct Position3f : public se4::Component<Position3f> {
     Position3f(float x, float y, float z) : posX(x), posY(y), posZ(z) {}
@@ -20,19 +22,22 @@ struct Position3f : public se4::Component<Position3f> {
     float posX, posY, posZ;
 };
 
-struct Volume4f : public se4::Component<Volume4f> {
-    //Volume4f(float lt, float rt, float rb, float lb) :leftTop(lt), rightTop(rt), rightBot(rb), leftBot(lb) {}
-    Volume4f(float a, float b) : leftTop(a), rightTop(b) {}
-
+struct Volume4f :public se4::Component<Volume4f>
     float leftTop, rightTop, rightBot, leftBot;
 };
 
+struct Volume2f : public se4::Component<Volume2f>
+{
+    Volume2f(float width, float height) :width(width), height(height) {}
+    float width, height;
+};
 
-struct Texture : public se4::Component<Texture> {
-    Texture(const char *path) : texture(nullptr), path(path) {}
-
-    const char *path;
-    SDL_Texture *texture;
+struct Render : public se4::Component<Render>
+{
+    Render(const char *path) : texture(nullptr), path(path) {}
+    
+    const char* path;
+    SDL_Texture* texture;
 };
 
 class RenderUpdater : public se4::Updater {
@@ -45,32 +50,40 @@ public:
 
     RenderUpdater(SDL_Window *window) : renderer(SDL_CreateRenderer(window, -1, 0)) {
         signature.addComponent<Position3f>();
-        signature.addComponent<Volume4f>();
-        signature.addComponent<Texture>();
+        signature.addComponent<Volume2f>();
+        signature.addComponent<Render>();
     }
-
-    void render() override {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  
+    void render()
+    {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
-
-        for (auto &entity : registeredEntities) {
-            se4::ComponentHandle<Position3f> pos3fHandler;
-            se4::ComponentHandle<Volume4f> vol4fHandler;
-            se4::ComponentHandle<Texture> textureHandler;
-            parentWorld->unpack(entity, pos3fHandler, vol4fHandler, textureHandler);
-
+        
+        for (auto& entity : registeredEntities)
+        {
+            ComponentHandle<Position3f> pos3fHandler;
+            ComponentHandle<Volume2f> vol2fHandler;
+            ComponentHandle<Render> textureHandler;
+            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);
             //여기서 상태에 따른 텍스쳐 정하는거 해줘여함
+            //애니메이션 구현할 코드 위치
 
             SDL_Rect rect;
             rect.x = pos3fHandler->posX;
             rect.y = pos3fHandler->posY;
-            rect.w = vol4fHandler->leftTop;
-            rect.h = vol4fHandler->rightTop;
-
-            //textureHandler->texture = SDL_CreateTextureFromSurface(renderer, textureHandler->surface);            
+            rect.w = vol2fHandler->width;
+            rect.h = vol2fHandler->height;
+            
+            SDL_Rect imgPartRect;
+            imgPartRect.x = 0; //시작 x좌표 한상태에서는 여기서만
+            imgPartRect.y = 0; //시작 y좌표 다른상태로 가야할 때
+            imgPartRect.w = rect.w;
+            imgPartRect.h = rect.h;
+                     
             textureHandler->texture = IMG_LoadTexture(renderer, textureHandler->path);
-
-            SDL_RenderCopy(renderer, textureHandler->texture, NULL, &rect);
+            
+            
+            SDL_RenderCopy(renderer, textureHandler->texture, &imgPartRect, &rect);
         }
         SDL_RenderPresent(renderer);
     }
@@ -115,6 +128,7 @@ int main(int argc, char *argv[]) {
 
     // 엔티티 선언
     auto entity = world->createEntity();
+    auto yeji = world->createEntity();
     auto entity2 = world->createEntity();
 
     // Add Updater
@@ -135,18 +149,42 @@ int main(int argc, char *argv[]) {
 
     // 엔티티에 필요한 컴포넌트 선언
     entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
-    entity.addComponent(Volume4f(100.0f, 100.0f));
-    entity.addComponent(Texture("resource/fuck.png"));
+    entity.addComponent(Volume2f(100.0f, 200.0f));
+    entity.addComponent(Render("resource/walk.png"));
 
-    entity2.addComponent(Position3f(500.0f, 200.0f, 0.0f));
-    entity2.addComponent(Volume4f(800.0f, 521.0f));
-    entity2.addComponent(Texture("resource/yeji.png"));
-    // entity2.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
+    yeji.addComponent(Position3f(500.0f, 200.0f, 0.0f));
+    yeji.addComponent(Volume4f(800.0f, 521.0f));
+    yeji.addComponent(Texture("resource/yeji.png"));
+    // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
+  
+    entity2.addComponent(Position3f(200.0f, 100.0f, 0.0f));
+    entity2.addComponent(Volume2f(100.0f, 200.0f));
+    entity2.addComponent(Render("resource/walk.png"));
 
     world->init();
 
-    while (!quit) {
+    currentTime = SDL_GetTicks();
+    double t = 0.0;
+    while (!quit)
+    {
         SDL_PollEvent(&input);
+
+        lastTime = SDL_GetTicks();
+        frameTime = lastTime - currentTime;
+        if (frameTime > 0.25) frameTime = 0.25;
+        currentTime = lastTime;
+        accumulator += frameTime;
+
+        while (frameTime > 0.0)
+        {            
+            deltaTime = std::min(frameTime, dt);
+            world->update(deltaTime);
+            accumulator += dt;
+            frameTime -= dt;
+            LOG(ERROR) << deltaTime;
+        }
+        
+        world->render();
         switch (input.type) {
             case SDL_KEYDOWN:
                 switch (input.key.keysym.sym) {
@@ -172,9 +210,6 @@ int main(int argc, char *argv[]) {
                 }
                 break;
         }
-
-        world->update(20);
-        world->render();
     }
 
 

@@ -23,7 +23,7 @@ namespace se4 {
          * Update game logic. This is unrelated to a frame
          * https://gafferongames.com/post/fix_your_timestep/
          */
-        void update(int dt);
+        void update(double dt);
         /*
          * Render a frame.
          */
@@ -92,7 +92,7 @@ namespace se4 {
         std::vector<std::unique_ptr<BaseComponentManager>> componentManagers;
         std::map<Entity, ComponentMask> entityMasks;
 
-        void updateEntityMask(Entity const& entity, ComponentMask oldMask);
+        void updateEntityMask(Entity const& entity, ComponentMask& oldMask);
 
         template <typename ComponentType>
         ComponentManager<ComponentType>* getComponentManager() {
