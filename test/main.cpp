@@ -22,22 +22,21 @@ struct Position3f : public se4::Component<Position3f> {
     float posX, posY, posZ;
 };
 
-struct Volume4f :public se4::Component<Volume4f> {
+struct Volume4f : public se4::Component<Volume4f> {
     float leftTop, rightTop, rightBot, leftBot;
 };
 
-struct Volume2f : public se4::Component<Volume2f>
-{
-    Volume2f(float width, float height) :width(width), height(height) {}
+struct Volume2f : public se4::Component<Volume2f> {
+    Volume2f(float width, float height) : width(width), height(height) {}
+
     float width, height;
 };
 
-struct Render : public se4::Component<Render>
-{
+struct Render : public se4::Component<Render> {
     Render(const char *path) : texture(nullptr), path(path) {}
-    
-    const char* path;
-    SDL_Texture* texture;
+
+    const char *path;
+    SDL_Texture *texture;
 };
 
 class RenderUpdater : public se4::Updater {
@@ -53,14 +52,12 @@ public:
         signature.addComponent<Volume2f>();
         signature.addComponent<Render>();
     }
-  
-    void render()
-    {
+
+    void render() {
         SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         SDL_RenderClear(renderer);
-        
-        for (auto& entity : registeredEntities)
-        {
+
+        for (auto &entity : registeredEntities) {
             se4::ComponentHandle<Position3f> pos3fHandler;
             se4::ComponentHandle<Volume2f> vol2fHandler;
             se4::ComponentHandle<Render> textureHandler;
@@ -73,16 +70,16 @@ public:
             rect.y = pos3fHandler->posY;
             rect.w = vol2fHandler->width;
             rect.h = vol2fHandler->height;
-            
+
             SDL_Rect imgPartRect;
             imgPartRect.x = 0; //시작 x좌표 한상태에서는 여기서만
             imgPartRect.y = 0; //시작 y좌표 다른상태로 가야할 때
             imgPartRect.w = rect.w;
             imgPartRect.h = rect.h;
-                     
+
             textureHandler->texture = IMG_LoadTexture(renderer, textureHandler->path);
-            
-            
+
+
             SDL_RenderCopy(renderer, textureHandler->texture, &imgPartRect, &rect);
         }
         SDL_RenderPresent(renderer);
@@ -119,7 +116,6 @@ int main(int argc, char *argv[]) {
 //            SDL_WINDOW_SHOWN
 //    );
 
-    SDL_Event input;
     bool quit = false;
 
     auto entityManager = std::make_unique<se4::EntityManager>();
@@ -156,7 +152,7 @@ int main(int argc, char *argv[]) {
     yeji.addComponent(Volume2f(800.0f, 521.0f));
     yeji.addComponent(Render("resource/yeji.png"));
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
-  
+
     entity2.addComponent(Position3f(200.0f, 100.0f, 0.0f));
     entity2.addComponent(Volume2f(100.0f, 200.0f));
     entity2.addComponent(Render("resource/walk.png"));
@@ -165,53 +161,53 @@ int main(int argc, char *argv[]) {
 
     currentTime = SDL_GetTicks();
     double t = 0.0;
-    while (!quit)
-    {
-        SDL_PollEvent(&input);
-
-        switch (input.type) {
-            case SDL_KEYDOWN:
-                switch (input.key.keysym.sym) {
-                    case SDLK_a:
-                        *yeji_x = *yeji_x >= 0 ? -1 : *yeji_x - 1;
-                        break;
-                    case SDLK_d:
-                        *yeji_x = *yeji_x <= 0 ? 1 : *yeji_x + 1;
-                        break;
-                    case SDLK_ESCAPE:
-                        quit = true;
-                        break;
-                }
-                break;
-            case SDL_KEYUP:
-                switch (input.key.keysym.sym) {
-                    case SDLK_a:
-                        LOG(ERROR) << "a released";
-                        break;
-                    case SDLK_d:
-                        LOG(ERROR) << "d released";
-                        break;
-                }
-                break;
-            case SDL_QUIT:
-                quit = true;
-                break;
+    while (!quit) {
+        SDL_Event input;
+        while( SDL_PollEvent(&input) ) {
+            switch (input.type) {
+                case SDL_KEYDOWN:
+                    switch (input.key.keysym.sym) {
+                        case SDLK_a:
+                            *yeji_x = *yeji_x >= 0 ? -1 : *yeji_x - 1;
+                            break;
+                        case SDLK_d:
+                            *yeji_x = *yeji_x <= 0 ? 1 : *yeji_x + 1;
+                            break;
+                        case SDLK_ESCAPE:
+                            quit = true;
+                            break;
+                    }
+                    break;
+                case SDL_KEYUP:
+                    switch (input.key.keysym.sym) {
+                        case SDLK_a:
+                            LOG(ERROR) << "a released";
+                            break;
+                        case SDLK_d:
+                            LOG(ERROR) << "d released";
+                            break;
+                    }
+                    break;
+                case SDL_QUIT:
+                    quit = true;
+                    break;
+            }
         }
 
-        lastTime = SDL_GetTicks();
-        frameTime = lastTime - currentTime;
-        if (frameTime > 0.25) frameTime = 0.25;
-        currentTime = lastTime;
-        accumulator += frameTime;
-
-        while (frameTime > 0.0)
-        {            
-            deltaTime = std::min(frameTime, dt);
-            world->update(deltaTime);
-            accumulator += dt;
-            frameTime -= dt;
-            LOG(ERROR) << deltaTime;
-        }
+//        lastTime = SDL_GetTicks();
+//        frameTime = lastTime - currentTime;
+//        if (frameTime > 0.25) frameTime = 0.25;
+//        currentTime = lastTime;
+//        accumulator += frameTime;
+//
+//        while (frameTime > 0.0)
+//        {
+//            deltaTime = std::min(frameTime, dt);
+//            world->update(deltaTime);
+//            accumulator += dt;
+//            frameTime -= dt;
+//            // LOG(ERROR) << deltaTime;
+//        }
 
         world->render();
     }
