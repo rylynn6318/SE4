@@ -1,684 +1,227 @@
-//#include <iostream>
-//
-//#include "SDL.h"
-//#include "SDL_image.h"
-//#include "glog/logging.h"
-//#include "box2d/box2d.h"
-//
-//#include "se4.hpp"
-//
-//using namespace se4;
-//
-//const int SCREEN_WIDTH = 1200;
-//const int SCREEN_HEIGHT = 800;
-//
-//
-//struct Position3f : public Component<Position3f>
-//{
-//    Position3f(float x, float y, float z) :posX(x), posY(y), posZ(z) {}
-//    float posX, posY, posZ;
-//};
-//
-//struct Volume4f :public Component<Volume4f>
-//{
-//    Volume4f(float lt, float rt, float rb, float lb) :leftTop(lt), rightTop(rt), rightBot(rb), leftBot(lb) {}   
-//    float leftTop, rightTop, rightBot, leftBot;
-//};
-//
-//struct Volume2f : public Component<Volume2f>
-//{
-//    Volume2f(float width, float height) :width(width), height(height) {}
-//    float width, height;
-//};
-//
-//
-//struct Render : public Component<Render>
-//{
-//    Render(const char *path) : texture(nullptr), path(path) {}
-//    
-//    const char* path;
-//    SDL_Texture* texture;
-//};
-//
-//class RenderUpdater : public Updater
-//{
-//public:
-//    RenderUpdater() = delete;
-//    virtual ~RenderUpdater() = default;
-//
-//    RenderUpdater(SDL_Window* window) : renderer(SDL_CreateRenderer(window, -1, 0))
-//    {
-//        signature.addComponent<Position3f>();
-//        signature.addComponent<Volume2f>();
-//        signature.addComponent<Render>();
-//    }
-//    
-//    void render()
-//    {
-//        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-//        SDL_RenderClear(renderer);
-//        
-//        for (auto& entity : registeredEntities)
-//        {
-//            ComponentHandle<Position3f> pos3fHandler;
-//            ComponentHandle<Volume2f> vol2fHandler;
-//            ComponentHandle<Render> textureHandler;
-//            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);
-//           
-//            //여기서 상태에 따른 텍스쳐 정하는거 해줘여함
-//            //애니메이션 구현할 코드 위치
-//
-//            SDL_Rect rect;
-//            rect.x = pos3fHandler->posX;
-//            rect.y = pos3fHandler->posY;
-//            rect.w = vol2fHandler->width;
-//            rect.h = vol2fHandler->height;
-//            
-//            SDL_Rect imgPartRect;
-//            imgPartRect.x = (i++%4)*73;
-//            imgPartRect.y = 0;
-//            imgPartRect.w = 73;
-//            imgPartRect.h = rect.h;
-//                     
-//            textureHandler->texture = IMG_LoadTexture(renderer, textureHandler->path);
-//            
-//            
-//            SDL_RenderCopy(renderer, textureHandler->texture, &imgPartRect, &rect);
-//        }
-//        SDL_RenderPresent(renderer);
-//    }
-//
-//    SDL_Renderer* renderer;
-//};
-//
-//int main(int argc, char* argv[])
-//{
-//    google::InitGoogleLogging(argv[0]);
-//    LOG(INFO) << "test app start";
-//    b2Vec2 gravity = b2Vec2(0.0f, -9.8f);
-//    b2World test_world(gravity);
-//    LOG(ERROR) << "error log test";
-//
-//    SDL_Init(SDL_INIT_EVERYTHING);
-//    //For loading PNG images
-//    IMG_Init(IMG_INIT_PNG);
-//
-//    SDL_Window* window = SDL_CreateWindow(
-//            "SE4 engine",
+#include <iostream>
+#include <utility>
+#include <functional>
+
+#include "SDL.h"
+#include "SDL_image.h"
+#include "glog/logging.h"
+#include "box2d/box2d.h"
+
+#include "se4.hpp"
+#include "updater/UpdaterTemplate.h"
+
+const int SCREEN_WIDTH = 1200;
+const int SCREEN_HEIGHT = 800;
+double dt = 1 / 60.0f; //60fps
+double currentTime, lastTime, frameTime, accumulator = 0.0;
+float deltaTime = 0;
+
+struct Position3f : public se4::Component<Position3f> {
+    Position3f(float x, float y, float z) : posX(x), posY(y), posZ(z) {}
+
+    float posX, posY, posZ;
+};
+
+struct Volume4f :public se4::Component<Volume4f> {
+    float leftTop, rightTop, rightBot, leftBot;
+};
+
+struct Volume2f : public se4::Component<Volume2f>
+{
+    Volume2f(float width, float height) :width(width), height(height) {}
+    float width, height;
+};
+
+struct Render : public se4::Component<Render>
+{
+    Render(const char *path) : texture(nullptr), path(path) {}
+    
+    const char* path;
+    SDL_Texture* texture;
+};
+
+class RenderUpdater : public se4::Updater {
+private:
+    SDL_Renderer *renderer;
+public:
+    RenderUpdater() = delete;
+
+    ~RenderUpdater() override = default;
+
+    RenderUpdater(SDL_Window *window) : renderer(SDL_CreateRenderer(window, -1, 0)) {
+        signature.addComponent<Position3f>();
+        signature.addComponent<Volume2f>();
+        signature.addComponent<Render>();
+    }
+  
+    void render()
+    {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderClear(renderer);
+        
+        for (auto& entity : registeredEntities)
+        {
+            se4::ComponentHandle<Position3f> pos3fHandler;
+            se4::ComponentHandle<Volume2f> vol2fHandler;
+            se4::ComponentHandle<Render> textureHandler;
+            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);
+            //여기서 상태에 따른 텍스쳐 정하는거 해줘여함
+            //애니메이션 구현할 코드 위치
+
+            SDL_Rect rect;
+            rect.x = pos3fHandler->posX;
+            rect.y = pos3fHandler->posY;
+            rect.w = vol2fHandler->width;
+            rect.h = vol2fHandler->height;
+            
+            SDL_Rect imgPartRect;
+            imgPartRect.x = 0; //시작 x좌표 한상태에서는 여기서만
+            imgPartRect.y = 0; //시작 y좌표 다른상태로 가야할 때
+            imgPartRect.w = rect.w;
+            imgPartRect.h = rect.h;
+                     
+            textureHandler->texture = IMG_LoadTexture(renderer, textureHandler->path);
+            
+            
+            SDL_RenderCopy(renderer, textureHandler->texture, &imgPartRect, &rect);
+        }
+        SDL_RenderPresent(renderer);
+    }
+};
+
+int main(int argc, char *argv[]) {
+    google::InitGoogleLogging(argv[0]);
+
+    LOG(INFO) << "test app start";
+    b2Vec2 gravity = b2Vec2(0.0f, -9.8f);
+    b2World test_world(gravity);
+    LOG(ERROR) << "error log test";
+
+    SDL_Init(SDL_INIT_EVERYTHING);
+    //For loading PNG images
+    IMG_Init(IMG_INIT_PNG);
+
+    SDL_Window *window = SDL_CreateWindow(
+            "SE4 engine",
+            SDL_WINDOWPOS_UNDEFINED,
+            SDL_WINDOWPOS_UNDEFINED,
+            SCREEN_WIDTH,
+            SCREEN_HEIGHT,
+            SDL_WINDOW_SHOWN
+    );
+
+//    SDL_Window *window2 = SDL_CreateWindow(
+//            "SE4 engine 222",
 //            SDL_WINDOWPOS_UNDEFINED,
 //            SDL_WINDOWPOS_UNDEFINED,
 //            SCREEN_WIDTH,
 //            SCREEN_HEIGHT,
 //            SDL_WINDOW_SHOWN
 //    );
-//
-//    SDL_Event input;
-//    bool quit = false;
-//
-//    auto entityManager = std::make_unique<EntityManager>();
-//    auto world = std::make_unique<World>(std::move(entityManager));
-//
-//    // Add Updater
-//    std::unique_ptr<Updater> renderUpdater = std::make_unique<RenderUpdater>(window);
-//    world->addUpdater(std::move(renderUpdater));
-//
-//    world->init();
-//
-//
-//
-//    auto entity = world->createEntity();
-//    entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
-//    entity.addComponent(Volume2f(100.0f, 200.0f));
-//    entity.addComponent(Render("resource/walk.png"));
-//
-//    auto entity2 = world->createEntity();
-//    entity2.addComponent(Position3f(200.0f, 100.0f, 0.0f));
-//    entity2.addComponent(Volume2f(100.0f, 200.0f));
-//    entity2.addComponent(Render("resource/walk.png"));
-//
-//
-//    while (!quit)
-//    {
-//        while (SDL_PollEvent(&input) > 0)
-//        {
-//            if (input.type == SDL_QUIT) quit = true;
-//            world->update(20);
-//            world->render();
-//        }
-//    }
-//
-//
-//    SDL_DestroyWindow(window);
-//    //For quitting IMG systems
-//    IMG_Quit();
-//    SDL_Quit();
-//
-//    return 0;
-//}
-//
-/*This source code copyrighted by Lazy Foo' Productions (2004-2020)
-and may not be redistributed without written permission.*/
 
-//Using SDL, SDL_image, standard IO, vectors, and strings
-#include <SDL.h>
-#include <SDL_image.h>
-#include <stdio.h>
-#include <string>
+    SDL_Event input;
+    bool quit = false;
 
-//The dimensions of the level
-const int LEVEL_WIDTH = 1280;
-const int LEVEL_HEIGHT = 960;
+    auto entityManager = std::make_unique<se4::EntityManager>();
+    auto world = std::make_unique<se4::World>(std::move(entityManager));
 
-//Screen dimension constants
-const int SCREEN_WIDTH = 640;
-const int SCREEN_HEIGHT = 480;
 
-//Texture wrapper class
-class LTexture
-{
-public:
-	//Initializes variables
-	LTexture();
+    // 엔티티 선언
+    auto entity = world->createEntity();
+    auto yeji = world->createEntity();
+    auto entity2 = world->createEntity();
 
-	//Deallocates memory
-	~LTexture();
+    // Add Updater
+    auto yeji_x = std::make_shared<int>();
+    // 업데이터 안에서 사용할 콜백 정의
+    auto callback = [&yeji_x](se4::ComponentHandle<Position3f> pos3fHandler,
+                              se4::ComponentHandle<Volume4f> tmp) -> void { pos3fHandler->posX += *yeji_x; };
+    // 예지만 움직이게 하기 위한 함수 정의
+    auto compare_id = [entity2](int id) -> bool { return id == entity2.entity.id; };
+    // 생성자의 템플릿 파라메터로 사용할 컴포넌트의 핸들러 넘겨주고 생성자에는 위에서 선언한 함수 2개 넣어줌
+    auto yejiUpdater = std::make_unique<
+            se4::UpdaterTemplate<se4::ComponentHandle<Position3f>, se4::ComponentHandle<Volume4f>>
+    >(callback, compare_id);
+    world->addUpdater(std::move(yejiUpdater));
 
-	//Loads image at specified path
-	bool loadFromFile(std::string path);
+    auto renderUpdater = std::make_unique<RenderUpdater>(window);
+    world->addUpdater(std::move(renderUpdater));
 
-#if defined(SDL_TTF_MAJOR_VERSION)
-	//Creates image from font string
-	bool loadFromRenderedText(std::string textureText, SDL_Color textColor);
-#endif
+    // 엔티티에 필요한 컴포넌트 선언
+    entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
+    entity.addComponent(Volume2f(100.0f, 200.0f));
+    entity.addComponent(Render("resource/walk.png"));
 
-	//Deallocates texture
-	void free();
+    yeji.addComponent(Position3f(500.0f, 200.0f, 0.0f));
+    yeji.addComponent(Volume2f(800.0f, 521.0f));
+    yeji.addComponent(Render("resource/yeji.png"));
+    // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
+  
+    entity2.addComponent(Position3f(200.0f, 100.0f, 0.0f));
+    entity2.addComponent(Volume2f(100.0f, 200.0f));
+    entity2.addComponent(Render("resource/walk.png"));
 
-	//Set color modulation
-	void setColor(Uint8 red, Uint8 green, Uint8 blue);
+    world->init();
 
-	//Set blending
-	void setBlendMode(SDL_BlendMode blending);
+    currentTime = SDL_GetTicks();
+    double t = 0.0;
+    while (!quit)
+    {
+        SDL_PollEvent(&input);
 
-	//Set alpha modulation
-	void setAlpha(Uint8 alpha);
+        switch (input.type) {
+            case SDL_KEYDOWN:
+                switch (input.key.keysym.sym) {
+                    case SDLK_a:
+                        *yeji_x = *yeji_x >= 0 ? -1 : *yeji_x - 1;
+                        break;
+                    case SDLK_d:
+                        *yeji_x = *yeji_x <= 0 ? 1 : *yeji_x + 1;
+                        break;
+                    case SDLK_ESCAPE:
+                        quit = true;
+                        break;
+                }
+                break;
+            case SDL_KEYUP:
+                switch (input.key.keysym.sym) {
+                    case SDLK_a:
+                        LOG(ERROR) << "a released";
+                        break;
+                    case SDLK_d:
+                        LOG(ERROR) << "d released";
+                        break;
+                }
+                break;
+            case SDL_QUIT:
+                quit = true;
+                break;
+        }
 
-	//Renders texture at given point
-	void render(int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
+        lastTime = SDL_GetTicks();
+        frameTime = lastTime - currentTime;
+        if (frameTime > 0.25) frameTime = 0.25;
+        currentTime = lastTime;
+        accumulator += frameTime;
 
-	//Gets image dimensions
-	int getWidth();
-	int getHeight();
+        while (frameTime > 0.0)
+        {            
+            deltaTime = std::min(frameTime, dt);
+            world->update(deltaTime);
+            accumulator += dt;
+            frameTime -= dt;
+            LOG(ERROR) << deltaTime;
+        }
 
-private:
-	//The actual hardware texture
-	SDL_Texture* mTexture;
+        world->render();
+    }
 
-	//Image dimensions
-	int mWidth;
-	int mHeight;
-};
 
-//The dot that will move around on the screen
-class Dot
-{
-public:
-	//The dimensions of the dot
-	static const int DOT_WIDTH = 20;
-	static const int DOT_HEIGHT = 20;
+    SDL_DestroyWindow(window);
+    //For quitting IMG systems
+    IMG_Quit();
+    SDL_Quit();
 
-	//Maximum axis velocity of the dot
-	static const int DOT_VEL = 10;
-
-	//Initializes the variables
-	Dot();
-
-	//Takes key presses and adjusts the dot's velocity
-	void handleEvent(SDL_Event& e);
-
-	//Moves the dot
-	void move();
-
-	//Shows the dot on the screen relative to the camera
-	void render(int camX, int camY);
-
-	//Position accessors
-	int getPosX();
-	int getPosY();
-
-private:
-	//The X and Y offsets of the dot
-	int mPosX, mPosY;
-
-	//The velocity of the dot
-	int mVelX, mVelY;
-};
-
-//Starts up SDL and creates window
-bool init();
-
-//Loads media
-bool loadMedia();
-
-//Frees media and shuts down SDL
-void close();
-
-//The window we'll be rendering to
-SDL_Window* gWindow = NULL;
-
-//The window renderer
-SDL_Renderer* gRenderer = NULL;
-
-//Scene textures
-LTexture gDotTexture;
-LTexture gBGTexture;
-
-LTexture::LTexture()
-{
-	//Initialize
-	mTexture = NULL;
-	mWidth = 0;
-	mHeight = 0;
+    return 0;
 }
 
-LTexture::~LTexture()
-{
-	//Deallocate
-	free();
-}
-
-bool LTexture::loadFromFile(std::string path)
-{
-	//Get rid of preexisting texture
-	free();
-
-	//The final texture
-	SDL_Texture* newTexture = NULL;
-
-	//Load image at specified path
-	SDL_Surface* loadedSurface = IMG_Load(path.c_str());
-	if (loadedSurface == NULL)
-	{
-		printf("Unable to load image %s! SDL_image Error: %s\n", path.c_str(), IMG_GetError());
-	}
-	else
-	{
-		//Color key image
-		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
-
-		//Create texture from surface pixels
-		newTexture = SDL_CreateTextureFromSurface(gRenderer, loadedSurface);
-		if (newTexture == NULL)
-		{
-			printf("Unable to create texture from %s! SDL Error: %s\n", path.c_str(), SDL_GetError());
-		}
-		else
-		{
-			//Get image dimensions
-			mWidth = loadedSurface->w;
-			mHeight = loadedSurface->h;
-		}
-
-		//Get rid of old loaded surface
-		SDL_FreeSurface(loadedSurface);
-	}
-
-	//Return success
-	mTexture = newTexture;
-	return mTexture != NULL;
-}
-
-#if defined(SDL_TTF_MAJOR_VERSION)
-bool LTexture::loadFromRenderedText(std::string textureText, SDL_Color textColor)
-{
-	//Get rid of preexisting texture
-	free();
-
-	//Render text surface
-	SDL_Surface* textSurface = TTF_RenderText_Solid(gFont, textureText.c_str(), textColor);
-	if (textSurface != NULL)
-	{
-		//Create texture from surface pixels
-		mTexture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
-		if (mTexture == NULL)
-		{
-			printf("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
-		}
-		else
-		{
-			//Get image dimensions
-			mWidth = textSurface->w;
-			mHeight = textSurface->h;
-		}
-
-		//Get rid of old surface
-		SDL_FreeSurface(textSurface);
-	}
-	else
-	{
-		printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-	}
-
-
-	//Return success
-	return mTexture != NULL;
-}
-#endif
-
-void LTexture::free()
-{
-	//Free texture if it exists
-	if (mTexture != NULL)
-	{
-		SDL_DestroyTexture(mTexture);
-		mTexture = NULL;
-		mWidth = 0;
-		mHeight = 0;
-	}
-}
-
-void LTexture::setColor(Uint8 red, Uint8 green, Uint8 blue)
-{
-	//Modulate texture rgb
-	SDL_SetTextureColorMod(mTexture, red, green, blue);
-}
-
-void LTexture::setBlendMode(SDL_BlendMode blending)
-{
-	//Set blending function
-	SDL_SetTextureBlendMode(mTexture, blending);
-}
-
-void LTexture::setAlpha(Uint8 alpha)
-{
-	//Modulate texture alpha
-	SDL_SetTextureAlphaMod(mTexture, alpha);
-}
-
-void LTexture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
-{
-	//Set rendering space and render to screen
-	SDL_Rect renderQuad = { x, y, mWidth, mHeight };
-
-	//Set clip rendering dimensions
-	if (clip != NULL)
-	{
-		renderQuad.w = clip->w;
-		renderQuad.h = clip->h;
-	}
-
-	//Render to screen
-	SDL_RenderCopyEx(gRenderer, mTexture, clip, &renderQuad, angle, center, flip);
-}
-
-int LTexture::getWidth()
-{
-	return mWidth;
-}
-
-int LTexture::getHeight()
-{
-	return mHeight;
-}
-
-Dot::Dot()
-{
-	//Initialize the offsets
-	mPosX = 0;
-	mPosY = 0;
-
-	//Initialize the velocity
-	mVelX = 0;
-	mVelY = 0;
-}
-
-void Dot::handleEvent(SDL_Event& e)
-{
-	//If a key was pressed
-	if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
-	{
-		//Adjust the velocity
-		switch (e.key.keysym.sym)
-		{
-		case SDLK_UP: mVelY -= DOT_VEL; break;
-		case SDLK_DOWN: mVelY += DOT_VEL; break;
-		case SDLK_LEFT: mVelX -= DOT_VEL; break;
-		case SDLK_RIGHT: mVelX += DOT_VEL; break;
-		}
-	}
-	//If a key was released
-	else if (e.type == SDL_KEYUP && e.key.repeat == 0)
-	{
-		//Adjust the velocity
-		switch (e.key.keysym.sym)
-		{
-		case SDLK_UP: mVelY += DOT_VEL; break;
-		case SDLK_DOWN: mVelY -= DOT_VEL; break;
-		case SDLK_LEFT: mVelX += DOT_VEL; break;
-		case SDLK_RIGHT: mVelX -= DOT_VEL; break;
-		}
-	}
-}
-
-void Dot::move()
-{
-	//Move the dot left or right
-	mPosX += mVelX;
-
-	//If the dot went too far to the left or right
-	if ((mPosX < 0) || (mPosX + DOT_WIDTH > LEVEL_WIDTH))
-	{
-		//Move back
-		mPosX -= mVelX;
-	}
-
-	//Move the dot up or down
-	mPosY += mVelY;
-
-	//If the dot went too far up or down
-	if ((mPosY < 0) || (mPosY + DOT_HEIGHT > LEVEL_HEIGHT))
-	{
-		//Move back
-		mPosY -= mVelY;
-	}
-}
-
-void Dot::render(int camX, int camY)
-{
-	//Show the dot relative to the camera
-	gDotTexture.render(mPosX - camX, mPosY - camY);
-}
-
-int Dot::getPosX()
-{
-	return mPosX;
-}
-
-int Dot::getPosY()
-{
-	return mPosY;
-}
-
-bool init()
-{
-	//Initialization flag
-	bool success = true;
-
-	//Initialize SDL
-	if (SDL_Init(SDL_INIT_VIDEO) < 0)
-	{
-		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
-		success = false;
-	}
-	else
-	{
-		//Set texture filtering to linear
-		if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
-		{
-			printf("Warning: Linear texture filtering not enabled!");
-		}
-
-		//Create window
-		gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		if (gWindow == NULL)
-		{
-			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
-			success = false;
-		}
-		else
-		{
-			//Create vsynced renderer for window
-			gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-			if (gRenderer == NULL)
-			{
-				printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
-				success = false;
-			}
-			else
-			{
-				//Initialize renderer color
-				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-
-				//Initialize PNG loading
-				int imgFlags = IMG_INIT_PNG;
-				if (!(IMG_Init(imgFlags) & imgFlags))
-				{
-					printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
-					success = false;
-				}
-			}
-		}
-	}
-
-	return success;
-}
-
-bool loadMedia()
-{
-	//Loading success flag
-	bool success = true;
-
-	//Load dot texture
-	if (!gDotTexture.loadFromFile("30_scrolling/dot.bmp"))
-	{
-		printf("Failed to load dot texture!\n");
-		success = false;
-	}
-
-	//Load background texture
-	if (!gBGTexture.loadFromFile("30_scrolling/bg.png"))
-	{
-		printf("Failed to load background texture!\n");
-		success = false;
-	}
-
-	return success;
-}
-
-void close()
-{
-	//Free loaded images
-	gDotTexture.free();
-	gBGTexture.free();
-
-	//Destroy window	
-	SDL_DestroyRenderer(gRenderer);
-	SDL_DestroyWindow(gWindow);
-	gWindow = NULL;
-	gRenderer = NULL;
-
-	//Quit SDL subsystems
-	IMG_Quit();
-	SDL_Quit();
-}
-
-int main(int argc, char* args[])
-{
-	//Start up SDL and create window
-	if (!init())
-	{
-		printf("Failed to initialize!\n");
-	}
-	else
-	{
-		//Load media
-		if (!loadMedia())
-		{
-			printf("Failed to load media!\n");
-		}
-		else
-		{
-			//Main loop flag
-			bool quit = false;
-
-			//Event handler
-			SDL_Event e;
-
-			//The dot that will be moving around on the screen
-			Dot dot;
-
-			//The camera area
-			SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
-
-			//While application is running
-			while (!quit)
-			{
-				//Handle events on queue
-				while (SDL_PollEvent(&e) != 0)
-				{
-					//User requests quit
-					if (e.type == SDL_QUIT)
-					{
-						quit = true;
-					}
-
-					//Handle input for the dot
-					dot.handleEvent(e);
-				}
-
-				//Move the dot
-				dot.move();
-
-				//Center the camera over the dot
-				camera.x = (dot.getPosX() + Dot::DOT_WIDTH / 2) - SCREEN_WIDTH / 2;
-				camera.y = (dot.getPosY() + Dot::DOT_HEIGHT / 2) - SCREEN_HEIGHT / 2;
-
-				//Keep the camera in bounds
-				if (camera.x < 0)
-				{
-					camera.x = 0;
-				}
-				if (camera.y < 0)
-				{
-					camera.y = 0;
-				}
-				if (camera.x > LEVEL_WIDTH - camera.w)
-				{
-					camera.x = LEVEL_WIDTH - camera.w;
-				}
-				if (camera.y > LEVEL_HEIGHT - camera.h)
-				{
-					camera.y = LEVEL_HEIGHT - camera.h;
-				}
-
-				//Clear screen
-				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-				SDL_RenderClear(gRenderer);
-
-				//Render background
-				gBGTexture.render(0, 0, &camera);
-
-				//Render objects
-				dot.render(camera.x, camera.y);
-
-				//Update screen
-				SDL_RenderPresent(gRenderer);
-			}
-		}
-	}
-
-	//Free resources and close SDL
-	close();
-
-	return 0;
-}

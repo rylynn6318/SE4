@@ -7,10 +7,10 @@
 
 namespace se4 {
     enum class InputState {
+        DEFAULT,
         PRESSED,
-        눌리는중, // TODO : 네이밍 추천좀
-        RELEASED,
-        기본상태
+        HELD_DOWN,
+        RELEASED
     };
 }
 

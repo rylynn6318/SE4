@@ -2,57 +2,65 @@
 
 #include <bitset>
 #include <vector>
+#include <functional>
 #include "component/ComponentMask.hpp"
 #include "entity/Entity.hpp"
 
 namespace se4 {
-	class World;
+    class World;
 
-	class Updater {
-	public:
-		Updater() = default;
-		virtual ~Updater() = default;
-		Updater(const Updater&) = default;
-		Updater& operator=(const Updater&) = default;
-		Updater(Updater&&) = default;
-		Updater& operator=(Updater&&) = default;
+    class Updater {
+    public:
+        Updater() = default;
 
-		/*
-		 * Called before the game starts but after the world initializes
-		 */
-		virtual void init() {};
+        virtual ~Updater() = default;
 
-		/*
-		 * Called every game update
-		 */
-		virtual void update(int dt) {};
+        Updater(const Updater &) = default;
 
-		/*
-		 * Called every frame
-		 */
-		virtual void render() {};
+        Updater &operator=(const Updater &) = default;
 
-		/*
-		 * When a Updater is added to the world, the world will register itself
-		 */
-		void registerWorld(World* world);
+        Updater(Updater &&) = default;
 
-		/*
-		 * When a component is added such that this Updater should begin acting on it,
-		 * register will be called.
-		 */
-		void registerEntity(Entity const& entity);
+        Updater &operator=(Updater &&) = default;
 
-		/*
-		 * If a component is removed from an entity such that the Updater should stop
-		 * acting on it, unRegister will be called.
-		 */
-		void unRegisterEntity(Entity const& entity);
-		ComponentMask getSignature();
+        /*
+         * Called before the game starts but after the world initializes
+         */
+        virtual void init() {};
 
-	protected:
-		std::vector<Entity> registeredEntities;
-		World* parentWorld;
-		ComponentMask signature;
-	};
-}  
+        /*
+         * Called every game update
+         */
+        virtual void update(int dt) {};
+
+        /*
+         * Called every frame
+         */
+        // TODO : IRender 로 분리
+        virtual void render() {};
+
+        /*
+         * When a Updater is added to the world, the world will register itself
+         */
+        void registerWorld(World *world);
+
+        /*
+         * When a component is added such that this Updater should begin acting on it,
+         * register will be called.
+         */
+        void registerEntity(Entity const &entity);
+
+        /*
+         * If a component is removed from an entity such that the Updater should stop
+         * acting on it, unRegister will be called.
+         */
+        void unRegisterEntity(Entity const &entity);
+
+        ComponentMask& getSignature();
+
+    protected:
+        std::vector<Entity> registeredEntities;
+        World *parentWorld;
+        ComponentMask signature;
+    };
+}
