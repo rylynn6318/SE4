@@ -10,7 +10,8 @@ namespace se4 {
         DEFAULT,
         PRESSED,
         HELD_DOWN,
-        RELEASED
+        RELEASED,
+        NONE // null
     };
 }
 

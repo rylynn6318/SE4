@@ -16,13 +16,15 @@ namespace se4 {
     // 키 입력과 실제 수행할 작업은 BindAction으로 연결해서 컨테이너로 관리한다
     // InputManager는 현재 키맵을 보고 조건에 맞는 BindAction을 실행하는 함수 processInput(가칭)을 제공한다.
     class InputManager {
-    private:
+    protected:
         // 입력 맵(데이터)은 외부에 구조체나 뭐 그런걸로 빼고 인터페이스만 남기는게 나을 듯
         std::map<Key, InputState> keymap; // on-off 상태가 있는 입력
         // std::map<KeyType, InputData> keymap2; // 데이터를 가지는 입력
 
     public:
-        virtual void pollInput() = 0;
+        auto Keymap() -> std::map<Key, InputState> const;
+
+        virtual auto pollInput() -> void = 0;
     };
 }
 
