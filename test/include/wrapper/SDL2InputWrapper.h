@@ -19,8 +19,9 @@ public:
     auto pollInput() -> void override; //override
     auto registerKeyEvent() -> void;
 
-    // 기본적으로 InputManager에는 윈도우 관련 이벤트만 넣고 적절히 처리
-    bool quit;
+    // TODO : 기본적으로 InputManager에는 윈도우 관련 이벤트만 넣고 적절히 처리
+    // quit 을 비롯한 것들 일단은 public에 박음
+    bool quit = false;
 };
 
 #endif //SE4_SDL2INPUTWRAPPER_H
