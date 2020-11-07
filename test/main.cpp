@@ -221,7 +221,6 @@ int main(int argc, char *argv[]) {
         inputWrapper.pollInput();
         quit = inputWrapper.quit;
 
-        inputUpdater.update(0);
         world->update(0);
         world->render();
     }
