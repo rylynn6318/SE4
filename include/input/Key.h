@@ -1,9 +1,10 @@
-namespace se4
-{
-    enum class Key
-    {
+#ifndef SE4_KEY_H
+#define SE4_KEY_H
+
+namespace se4 {
+    enum class Key {
         NONE,
-        A = 65,
+        A,
         B,
         C,
         D,
@@ -28,6 +29,20 @@ namespace se4
         W,
         X,
         Y,
-        Z
+        Z,
+
+        // for iter
+        FIRST = NONE,
+        LAST = Z
     };
+
+    auto operator++(Key &x) -> Key;
+
+    auto operator*(Key k) -> Key;
+
+    auto begin(Key) -> Key;
+
+    auto end(Key) -> Key;
 }
+
+#endif
