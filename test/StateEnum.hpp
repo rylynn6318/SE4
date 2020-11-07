@@ -1,4 +1,4 @@
-enum class State
+enum class State1
 {
 	Standing,
 	Sitting,

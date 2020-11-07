@@ -10,7 +10,7 @@ struct Health : Component<Health>
 
 struct State : Component<State>
 {
-	State state;
+	State1 state;
 	State2 state2;
 };
 
@@ -21,12 +21,14 @@ struct Rigidity : Component<Rigidity>
 
 struct Position : Component<Position>
 {
-	float x;
-	float y;
+	Position(float x, float y) : posX(x), posY(y){}
+	float posX;
+	float posY;
 };
 
 struct Speed : Component<Speed>
 {
+	Speed(float velX, float velY) : xVelocity(velX), yVelocity(velY){}
 	float xVeloticy;
 	float yVelocity;
 };
