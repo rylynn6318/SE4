@@ -158,9 +158,7 @@ int main(int argc, char *argv[]) {
     auto yeji = world->createEntity();
     auto entity2 = world->createEntity();
 
-    // Input 관련 정의들
-    InputUpdater inputUpdater;
-
+    // Input 값을 처리하는 Updater
     auto input_acc_callback = [&inputWrapper](se4::ComponentHandle<se4::InputComponent> inputHandler,
                                               se4::ComponentHandle<XAxisAcceleration> accelerationHandler) -> void {
         auto keymap = inputWrapper.Keymap();
@@ -173,13 +171,11 @@ int main(int argc, char *argv[]) {
                         accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 1;
         }
     };
-    auto always_true = [](int id) -> bool { return true; };
     auto input_acc = std::make_unique<
             se4::UpdaterTemplate<
                     se4::ComponentHandle<se4::InputComponent>, se4::ComponentHandle<XAxisAcceleration>
             >
-    >(input_acc_callback, always_true);
-    // inputUpdater.funcs.push_back(std::move(input_acc));
+    >(input_acc_callback);
     world->addUpdater(std::move(input_acc));
 
     // Add Updater

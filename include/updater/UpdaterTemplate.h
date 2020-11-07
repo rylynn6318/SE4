@@ -50,8 +50,8 @@ namespace se4 {
     template<typename... ComponentHandlers>
     class UpdaterTemplate : public se4::Updater {
     private:
-        std::function<bool(int)> compare_id;
         std::function<void(ComponentHandlers ...)> callback;
+        std::function<bool(int)> compare_id;
         // 컴포넌트 값 수정을 위해 존재하는 temp handlers
         // 매 프레임 만드는거 보다(기존 Updater 코드) 멤버변수로 들고 있는게 낫다고 판단함
         std::tuple<ComponentHandlers...> tuple;
@@ -68,6 +68,8 @@ namespace se4 {
     public:
         ~UpdaterTemplate() override = default;
 
+        UpdaterTemplate(std::function<void(ComponentHandlers ...)> callback);
+
         UpdaterTemplate(std::function<void(ComponentHandlers ...)> callback,
                         std::function<bool(int)> compare_id);
 
@@ -77,10 +79,16 @@ namespace se4 {
     // --------------------------------------------- Implementation --------------------------------------------- //
 
     template<typename... ComponentHandlers>
-    UpdaterTemplate<ComponentHandlers...>::UpdaterTemplate
-            (std::function<void(ComponentHandlers...)> callback, std::function<bool(int)> compare_id)
-            : compare_id(std::move(compare_id)),
-              callback(std::move(callback)) {
+    UpdaterTemplate<ComponentHandlers...>::UpdaterTemplate(std::function<void(ComponentHandlers...)> callback)
+            : callback(std::move(callback)) {
+        addComponentToSignature<ComponentHandlers...>();
+        compare_id = [](int id) -> bool { return true; };
+    }
+
+    template<typename... ComponentHandlers>
+    UpdaterTemplate<ComponentHandlers...>::UpdaterTemplate(std::function<void(ComponentHandlers...)> callback,
+                                                           std::function<bool(int)> compare_id)
+            : callback(std::move(callback)), compare_id(std::move(compare_id)) {
         addComponentToSignature<ComponentHandlers...>();
     }
 
