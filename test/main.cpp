@@ -161,12 +161,11 @@ int main(int argc, char *argv[]) {
     // Input 값을 처리하는 Updater
     auto input_acc_callback = [&inputWrapper](se4::ComponentHandle<se4::InputComponent> inputHandler,
                                               se4::ComponentHandle<XAxisAcceleration> accelerationHandler) -> void {
-        auto keymap = inputWrapper.Keymap();
         if (inputHandler->is_selected) {
-            if (keymap[se4::Key::A] == se4::InputState::PRESSED)
+            if (inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::PRESSED)
                 accelerationHandler->acceleration =
                         accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 1;
-            if (keymap[se4::Key::D] == se4::InputState::PRESSED)
+            if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED)
                 accelerationHandler->acceleration =
                         accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 1;
         }
@@ -187,11 +186,9 @@ int main(int argc, char *argv[]) {
     // 예지만 움직이게 하기 위한 함수 정의
     auto compare_id = [yeji](int id) -> bool { return id == yeji.entity.id; };
     // 생성자의 템플릿 파라메터로 사용할 컴포넌트의 핸들러 넘겨주고 생성자에는 위에서 선언한 함수 2개 넣어줌
-    auto yejiUpdater = std::make_unique<
-            se4::UpdaterTemplate<
-                    se4::ComponentHandle<Position3f>, se4::ComponentHandle<XAxisAcceleration>
-            >
-    >(callback, compare_id);
+    auto yejiUpdater = std::make_unique<se4::UpdaterTemplate<
+            se4::ComponentHandle<Position3f>, se4::ComponentHandle<XAxisAcceleration>
+    > >(callback, compare_id);
     world->addUpdater(std::move(yejiUpdater));
 
     auto renderUpdater = std::make_unique<RenderUpdater>(window);
