@@ -8,12 +8,11 @@
 #include "component/Component.hpp"
 
 namespace se4 {
-    class InputComponent : public Component<InputComponent> {
-    private:
-        bool is_selected;
+    struct InputComponent : public Component<InputComponent> {
+        InputComponent() = delete;
+        explicit InputComponent(bool isSelected);
 
-    public:
-        auto isSelected() const -> bool;
+        bool is_selected;
     };
 }
 

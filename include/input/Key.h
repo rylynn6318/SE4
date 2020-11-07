@@ -2,7 +2,7 @@ namespace se4
 {
     enum class Key
     {
-        MOUSE_LEFT_BUTTON,
+        NONE,
         A = 65,
         B,
         C,
