@@ -8,7 +8,7 @@
 #include <functional>
 #include "entity/Entity.hpp"
 #include "Key.h"
-#include "InputState.h"
+#include "KeyState.h"
 
 namespace se4 {
     // TODO : Callable 한 객체를 모두 받을 수 있게 할것

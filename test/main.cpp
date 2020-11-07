@@ -161,12 +161,11 @@ int main(int argc, char *argv[]) {
     // Input 값을 처리하는 Updater
     auto input_acc_callback = [&inputWrapper](se4::ComponentHandle<se4::InputComponent> inputHandler,
                                               se4::ComponentHandle<XAxisAcceleration> accelerationHandler) -> void {
-        auto keymap = inputWrapper.Keymap();
         if (inputHandler->is_selected) {
-            if (keymap[se4::Key::A] == se4::InputState::PRESSED)
+            if (inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::PRESSED)
                 accelerationHandler->acceleration =
                         accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 1;
-            if (keymap[se4::Key::D] == se4::InputState::PRESSED)
+            if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED)
                 accelerationHandler->acceleration =
                         accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 1;
         }
