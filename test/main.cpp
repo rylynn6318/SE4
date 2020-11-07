@@ -6,11 +6,9 @@
 #include "SDL_image.h"
 #include "glog/logging.h"
 #include "box2d/box2d.h"
-
 #include "se4.hpp"
 #include "updater/UpdaterTemplate.h"
 #include "input/InputComponent.h"
-
 #include "wrapper/SDL2InputWrapper.h"
 
 const int SCREEN_WIDTH = 1200;
@@ -48,6 +46,77 @@ struct Texture : public se4::Component<Texture> {
     Texture(const char *path) : texture(IMG_LoadTexture(mainRenderer, path)){}
     
     SDL_Texture *texture;
+};
+
+// 나중에 world클래스로 옮기거나 해야함 or 메인문에서 선언하고 주소값 넘여주기도 가능하긴함
+b2Vec2 gravity(0.0f, 10.0f);
+b2World b2world(gravity);
+
+struct PhysicsBody : public se4::Component<PhysicsBody> 
+{
+    PhysicsBody(bool isMovable):isMovable(isMovable) {}
+    
+    bool isMovable;
+    b2Body* body;
+};
+
+class PhysicsUpdater : public se4::Updater 
+{
+public:
+    PhysicsUpdater() 
+    {
+        signature.addComponent<Position3f>();
+        signature.addComponent<Volume2f>();
+        signature.addComponent<PhysicsBody>();
+    }
+
+    void init()
+    {
+        for (auto& entity : registeredEntities)
+        {
+            se4::ComponentHandle<Position3f> pos3fHandler;
+            se4::ComponentHandle<Volume2f> vol2fHandler;
+            se4::ComponentHandle<PhysicsBody> physicsHandler;
+            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler);
+
+
+            b2BodyDef bodyDef;
+            if (physicsHandler->isMovable) bodyDef.type = b2_dynamicBody;
+            else bodyDef.type = b2_staticBody;
+
+            bodyDef.position.Set(pos3fHandler->posX, pos3fHandler->posY);
+            physicsHandler->body = b2world.CreateBody(&bodyDef);
+
+            b2PolygonShape dynamicBox;
+            dynamicBox.SetAsBox(50.0f, 100.0f);
+            
+
+            b2FixtureDef fixtureDef;
+            fixtureDef.shape = &dynamicBox;
+            fixtureDef.density = 1.0f;
+            fixtureDef.friction = 0.3f;
+
+            physicsHandler->body->CreateFixture(&fixtureDef);
+        }    
+    }
+
+    void update(int dt)
+    {    
+        for (auto& entity : registeredEntities)
+        {
+            se4::ComponentHandle<Position3f> pos3fHandler;
+            se4::ComponentHandle<Volume2f> vol2fHandler;
+            se4::ComponentHandle<PhysicsBody> physicsHandler;
+            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler);
+
+            b2world.Step(1.0f / 60.0f, 1, 1);
+            b2Vec2 pos = physicsHandler->body->GetPosition();
+            pos3fHandler->posX = pos.x;
+            pos3fHandler->posY = pos.y;
+
+            
+        }
+    }
 };
 
 class RenderUpdater : public se4::Updater {
@@ -146,16 +215,19 @@ int main(int argc, char *argv[]) {
     auto yeji = world->createEntity();
     auto entity2 = world->createEntity();
 
+    auto physicsUpdater = std::make_unique<PhysicsUpdater>();
+    world->addUpdater(std::move(physicsUpdater));
+
     // Input 값을 처리하는 Updater
     auto input_acc_callback = [&inputWrapper](se4::ComponentHandle<se4::InputComponent> inputHandler,
                                               se4::ComponentHandle<XAxisAcceleration> accelerationHandler) -> void {
         if (inputHandler->is_selected) {
             if (inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::PRESSED)
                 accelerationHandler->acceleration =
-                        accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 1;
+                        accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 1.1f;
             if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED)
                 accelerationHandler->acceleration =
-                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 1;
+                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 1.1f;
         }
     };
     auto input_acc = std::make_unique<
@@ -182,20 +254,24 @@ int main(int argc, char *argv[]) {
     auto renderUpdater = std::make_unique<RenderUpdater>();
     world->addUpdater(std::move(renderUpdater));
 
+
     // 엔티티에 필요한 컴포넌트 선언
     entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
     entity.addComponent(Volume2f(100.0f, 200.0f));
     entity.addComponent(Texture("resource/walk.png"));
+    entity.addComponent(PhysicsBody(true));
 
-    yeji.addComponent(Position3f(500.0f, 200.0f, 0.0f));
+    yeji.addComponent(Position3f(500.0f, 500.0f, 0.0f));
     yeji.addComponent(Volume2f(100.0f,100.0f));
     yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(Texture("resource/yeji.png"));
+    yeji.addComponent(PhysicsBody(false));
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
-    entity2.addComponent(Position3f(200.0f, 200.0f, 0.0f));
+    entity2.addComponent(Position3f(100.0f, 600.0f, 0.0f));
     entity2.addComponent(Volume2f(100.0f, 200.0f));
+    entity2.addComponent(PhysicsBody(false));
     entity2.addComponent(Texture("resource/walk.png"));
 
     world->init();
