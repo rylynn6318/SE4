@@ -19,9 +19,9 @@ message("--> SOUᅟRCE FILES : ${SOURCE_FILE}")
 message("--> HEADER FILES : ${HEADER_FILE}")
 
 # STATIC 라이브러리로 뱉어낸다
-add_library(${PROJECT_NAME} STATIC ${HEADER_FILE} ${SOURCE_FILE})
+add_library(${PROJECT_NAME} STATIC ${HEADER_FILE} ${SOURCE_FILE} "test/demoMain.cpp")
 # TODO : test/ 경로에 있는 파일들 추가해야함. 여긴 일단 GLOB_RECURSE 안씀.
-add_executable(${PROJECT_NAME}_test test/main.cpp ${TEST_SOURCE_FILE} ${TEST_HEADER_FILE})
+add_executable(${PROJECT_NAME}_test test/main.cpp ${TEST_SOURCE_FILE} ${TEST_HEADER_FILE} "test/demoMain.cpp")
 # 테스트 실행용 리소스 파일 복사
 file(COPY "test/resource" DESTINATION ${CMAKE_BINARY_DIR})
 

@@ -23,7 +23,7 @@ public:
     auto registerKeyEvent() -> void;
 
     // 기본적으로 InputManager에는 윈도우 관련 이벤트만 넣고 적절히 처리
-    bool quit;
+    bool quit = false;
 };
 
 #endif //SE4_SDL2INPUTWRAPPER_H
