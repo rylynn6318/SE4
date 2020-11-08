@@ -54,10 +54,12 @@ b2World b2world(gravity);
 
 struct PhysicsBody : public se4::Component<PhysicsBody> 
 {
-    PhysicsBody(bool isMovable):isMovable(isMovable) {}
+    PhysicsBody(bool isMovable):isMovable(isMovable),body(nullptr) {}
     
     bool isMovable;
     b2Body* body;
+    b2BodyDef bodyDef;
+    b2FixtureDef fixtureDef;
 };
 
 class PhysicsUpdater : public se4::Updater 
@@ -78,25 +80,21 @@ public:
             se4::ComponentHandle<Volume2f> vol2fHandler;
             se4::ComponentHandle<PhysicsBody> physicsHandler;
             parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler);
+            
+            if (physicsHandler->isMovable) physicsHandler->bodyDef.type = b2_dynamicBody;
+            else physicsHandler->bodyDef.type = b2_staticBody;
 
-
-            b2BodyDef bodyDef;
-            if (physicsHandler->isMovable) bodyDef.type = b2_dynamicBody;
-            else bodyDef.type = b2_staticBody;
-
-            bodyDef.position.Set(pos3fHandler->posX, pos3fHandler->posY);
-            physicsHandler->body = b2world.CreateBody(&bodyDef);
+            physicsHandler->bodyDef.position.Set(pos3fHandler->posX, pos3fHandler->posY);
+            physicsHandler->body = b2world.CreateBody(&physicsHandler->bodyDef);
 
             b2PolygonShape dynamicBox;
-            dynamicBox.SetAsBox(50.0f, 100.0f);
-            
+            dynamicBox.SetAsBox(vol2fHandler->width/2, vol2fHandler->height/2);  
+           
+            physicsHandler->fixtureDef.shape = &dynamicBox;
+            physicsHandler->fixtureDef.density = 1.0f;
+            physicsHandler->fixtureDef.friction = 0.3f;
 
-            b2FixtureDef fixtureDef;
-            fixtureDef.shape = &dynamicBox;
-            fixtureDef.density = 1.0f;
-            fixtureDef.friction = 0.3f;
-
-            physicsHandler->body->CreateFixture(&fixtureDef);
+            physicsHandler->body->CreateFixture(&physicsHandler->fixtureDef);
         }    
     }
 
@@ -108,6 +106,16 @@ public:
             se4::ComponentHandle<Volume2f> vol2fHandler;
             se4::ComponentHandle<PhysicsBody> physicsHandler;
             parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler);
+
+            //포지션 설정
+            physicsHandler->bodyDef.position.Set(pos3fHandler->posX, pos3fHandler->posY);
+            
+
+            //크기 갱신
+            b2PolygonShape dynamicBox;
+            dynamicBox.SetAsBox(vol2fHandler->width / 2, vol2fHandler->height / 2);
+
+            //fixture 갱신
 
             b2world.Step(1.0f / 60.0f, 1, 1);
             b2Vec2 pos = physicsHandler->body->GetPosition();
@@ -266,7 +274,7 @@ int main(int argc, char *argv[]) {
     yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(Texture("resource/yeji.png"));
-    yeji.addComponent(PhysicsBody(false));
+    //yeji.addComponent(PhysicsBody(false));
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
     entity2.addComponent(Position3f(100.0f, 600.0f, 0.0f));
