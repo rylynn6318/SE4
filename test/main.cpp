@@ -50,17 +50,23 @@ struct Texture : public se4::Component<Texture> {
 };
 
 // 나중에 world클래스로 옮기거나 해야함 or 메인문에서 선언하고 주소값 넘여주기도 가능하긴함
-b2Vec2 gravity(0.0f, 10.0f);
+b2Vec2 gravity(0.0f, 1.0f);
 b2World b2world(gravity);
 
 struct PhysicsBody : public se4::Component<PhysicsBody> 
 {
-    PhysicsBody(bool isMovable):isMovable(isMovable),body(nullptr),lastVec2(0.0f,0.0f) {}
-    
+    PhysicsBody(bool isMovable, float friction) :
+        isMovable(isMovable),
+        body(nullptr),
+        lastVec2(0.0f, 0.0f)
+    {
+        fixtureDef.friction = friction;
+    }
+
     bool isMovable;
     b2Body* body;
-    //b2BodyDef bodyDef;
-    //b2FixtureDef fixtureDef;    
+    b2BodyDef bodyDef;
+    b2FixtureDef fixtureDef;    
     b2Vec2 lastVec2;
 };
 
@@ -85,38 +91,36 @@ public:
             se4::ComponentHandle<PhysicsBody> physicsHandler;
             parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler);
 
-            b2BodyDef bodyDef;
-            b2FixtureDef fixtureDef;
+            
             //동적, 정적 설정
             if (physicsHandler->isMovable) 
             {
-                bodyDef.type = b2_dynamicBody;
+                physicsHandler->bodyDef.type = b2_dynamicBody;
             }                
             else 
             {
-                bodyDef.type = b2_staticBody;
+                physicsHandler->bodyDef.type = b2_staticBody;
             }                
             
-            bodyDef.position.Set(pos3fHandler->posX/SCALE, pos3fHandler->posY/SCALE);
+            physicsHandler->bodyDef.position.Set(pos3fHandler->posX/SCALE, pos3fHandler->posY/SCALE);
             if(physicsHandler->body)
               b2world.DestroyBody(physicsHandler->body);
 
-            physicsHandler->body = b2world.CreateBody(&bodyDef);
+            physicsHandler->body = b2world.CreateBody(&physicsHandler->bodyDef);
 
             b2PolygonShape dynamicBox;
-            dynamicBox.SetAsBox(vol2fHandler->width / 2/SCALE, vol2fHandler->height / 2/SCALE);
+            dynamicBox.SetAsBox(vol2fHandler->width / 2 / SCALE, vol2fHandler->height / 2 / SCALE);
 
-            fixtureDef.shape = &dynamicBox;
-            fixtureDef.density = 1.0f;
-            fixtureDef.friction = 0.3f;
+            physicsHandler->fixtureDef.shape = &dynamicBox;
+            physicsHandler->fixtureDef.density = 1.0f;
+         
+            physicsHandler->body->CreateFixture(&physicsHandler->fixtureDef);
 
-            physicsHandler->body->CreateFixture(&fixtureDef);
-
-            //이전 속도값 더해줌
-           
+            //이전 속도값 더해줌           
             physicsHandler->body->SetLinearVelocity(physicsHandler->lastVec2);
-            std::cout<< physicsHandler->body->GetLinearVelocity().x << ", " 
-                    << physicsHandler->body->GetLinearVelocity().y << std::endl;
+
+            //포지션 표시
+            //std::cout<< physicsHandler->body->GetLinearVelocity().x << ", " << physicsHandler->body->GetLinearVelocity().y << std::endl;
 
             b2world.Step(1.0f / 60.0f, 6, 2);
 
@@ -125,7 +129,7 @@ public:
             physicsHandler->lastVec2 = physicsHandler->body->GetLinearVelocity();
             //포지션 갱신
             pos3fHandler->posX = pos.x*SCALE;
-            pos3fHandler->posY = pos.y*SCALE;            
+            pos3fHandler->posY = pos.y*SCALE;       
         }
     }
 };
@@ -184,11 +188,9 @@ public:
 };
 
 int main(int argc, char *argv[]) {
-    google::InitGoogleLogging(argv[0]);
 
+    google::InitGoogleLogging(argv[0]);
     LOG(INFO) << "test app start";
-    b2Vec2 gravity = b2Vec2(0.0f, -9.8f);
-    b2World test_world(gravity);
     LOG(ERROR) << "error log test";
 
     SDL_Init(SDL_INIT_EVERYTHING);
@@ -225,6 +227,9 @@ int main(int argc, char *argv[]) {
     auto entity = world->createEntity();
     auto yeji = world->createEntity();
     auto entity2 = world->createEntity();
+    auto floor = world->createEntity();
+    auto leftWall = world->createEntity();
+    auto rightWall = world->createEntity();
 
     auto physicsUpdater = std::make_unique<PhysicsUpdater>();
     world->addUpdater(std::move(physicsUpdater));
@@ -238,7 +243,7 @@ int main(int argc, char *argv[]) {
                         accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 0.1f;
             if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED)
                 accelerationHandler->acceleration =
-                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 0.1f;
+                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 0.1f;         
         }
     };
     auto input_acc = std::make_unique<
@@ -270,21 +275,34 @@ int main(int argc, char *argv[]) {
     entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
     entity.addComponent(Volume2f(100.0f, 200.0f));
     entity.addComponent(Texture("resource/walk.png"));
-    entity.addComponent(PhysicsBody(true));
+    entity.addComponent(PhysicsBody(true, 0));
 
-    yeji.addComponent(Position3f(500.0f, 500.0f, 0.0f));
+    yeji.addComponent(Position3f(600.0f, 0.0f, 0.0f));
     yeji.addComponent(Volume2f(100.0f,100.0f));
     yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(Texture("resource/yeji.png"));
-    yeji.addComponent(PhysicsBody(false));
+    yeji.addComponent(PhysicsBody(true, 0));
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
-    entity2.addComponent(Position3f(100.0f, 600.0f, 0.0f));
+    entity2.addComponent(Position3f(201.0f, 400.0f, 0.0f));
     entity2.addComponent(Volume2f(100.0f, 200.0f));
-    entity2.addComponent(PhysicsBody(false));
+    entity2.addComponent(PhysicsBody(true, 30));
     entity2.addComponent(Texture("resource/walk.png"));
 
+    floor.addComponent(Position3f(0, SCREEN_HEIGHT - 200.0f, 0.0f));
+    floor.addComponent(Volume2f(SCREEN_WIDTH * 2, 1.0f));
+    floor.addComponent(PhysicsBody(false, 0.3f));
+
+    leftWall.addComponent(Position3f(-100.0f, 0.0f, 0.0f));
+    leftWall.addComponent(Volume2f(100.0f, SCREEN_HEIGHT * 200));
+    leftWall.addComponent(PhysicsBody(false, 0.3f));
+
+    rightWall.addComponent(Position3f(SCREEN_WIDTH, 0.0f, 0.0f));
+    rightWall.addComponent(Volume2f(100.0f, SCREEN_HEIGHT * 2));
+    rightWall.addComponent(PhysicsBody(false, 0.3f));
+    
+    
     world->init();
 
     currentTime = SDL_GetTicks();
