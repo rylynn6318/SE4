@@ -39,6 +39,7 @@ struct Volume2f : public se4::Component<Volume2f> {
     float width, height;
 };
 
+
 //렌더러 이거 나중에 클래스의 변수로 옮겨야함
 SDL_Renderer* mainRenderer = nullptr;
 
@@ -54,13 +55,16 @@ b2World b2world(gravity);
 
 struct PhysicsBody : public se4::Component<PhysicsBody> 
 {
-    PhysicsBody(bool isMovable):isMovable(isMovable),body(nullptr) {}
+    PhysicsBody(bool isMovable):isMovable(isMovable),body(nullptr),lastVec2(0.0f,0.0f) {}
     
     bool isMovable;
     b2Body* body;
-    b2BodyDef bodyDef;
-    b2FixtureDef fixtureDef;
+    //b2BodyDef bodyDef;
+    //b2FixtureDef fixtureDef;    
+    b2Vec2 lastVec2;
 };
+
+const float SCALE = 100.0f;
 
 class PhysicsUpdater : public se4::Updater 
 {
@@ -72,32 +76,6 @@ public:
         signature.addComponent<PhysicsBody>();
     }
 
-    void init()
-    {
-        for (auto& entity : registeredEntities)
-        {
-            se4::ComponentHandle<Position3f> pos3fHandler;
-            se4::ComponentHandle<Volume2f> vol2fHandler;
-            se4::ComponentHandle<PhysicsBody> physicsHandler;
-            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler);
-            
-            if (physicsHandler->isMovable) physicsHandler->bodyDef.type = b2_dynamicBody;
-            else physicsHandler->bodyDef.type = b2_staticBody;
-
-            physicsHandler->bodyDef.position.Set(pos3fHandler->posX, pos3fHandler->posY);
-            physicsHandler->body = b2world.CreateBody(&physicsHandler->bodyDef);
-
-            b2PolygonShape dynamicBox;
-            dynamicBox.SetAsBox(vol2fHandler->width/2, vol2fHandler->height/2);  
-           
-            physicsHandler->fixtureDef.shape = &dynamicBox;
-            physicsHandler->fixtureDef.density = 1.0f;
-            physicsHandler->fixtureDef.friction = 0.3f;
-
-            physicsHandler->body->CreateFixture(&physicsHandler->fixtureDef);
-        }    
-    }
-
     void update(int dt)
     {    
         for (auto& entity : registeredEntities)
@@ -107,22 +85,47 @@ public:
             se4::ComponentHandle<PhysicsBody> physicsHandler;
             parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler);
 
-            //포지션 설정
-            physicsHandler->bodyDef.position.Set(pos3fHandler->posX, pos3fHandler->posY);
+            b2BodyDef bodyDef;
+            b2FixtureDef fixtureDef;
+            //동적, 정적 설정
+            if (physicsHandler->isMovable) 
+            {
+                bodyDef.type = b2_dynamicBody;
+            }                
+            else 
+            {
+                bodyDef.type = b2_staticBody;
+            }                
             
+            bodyDef.position.Set(pos3fHandler->posX/SCALE, pos3fHandler->posY/SCALE);
+            if(physicsHandler->body)
+              b2world.DestroyBody(physicsHandler->body);
 
-            //크기 갱신
+            physicsHandler->body = b2world.CreateBody(&bodyDef);
+
             b2PolygonShape dynamicBox;
-            dynamicBox.SetAsBox(vol2fHandler->width / 2, vol2fHandler->height / 2);
+            dynamicBox.SetAsBox(vol2fHandler->width / 2/SCALE, vol2fHandler->height / 2/SCALE);
 
-            //fixture 갱신
+            fixtureDef.shape = &dynamicBox;
+            fixtureDef.density = 1.0f;
+            fixtureDef.friction = 0.3f;
 
-            b2world.Step(1.0f / 60.0f, 1, 1);
+            physicsHandler->body->CreateFixture(&fixtureDef);
+
+            //이전 속도값 더해줌
+           
+            physicsHandler->body->SetLinearVelocity(physicsHandler->lastVec2);
+            std::cout<< physicsHandler->body->GetLinearVelocity().x << ", " 
+                    << physicsHandler->body->GetLinearVelocity().y << std::endl;
+
+            b2world.Step(1.0f / 60.0f, 6, 2);
+
             b2Vec2 pos = physicsHandler->body->GetPosition();
-            pos3fHandler->posX = pos.x;
-            pos3fHandler->posY = pos.y;
-
-            
+            //속도값 저장
+            physicsHandler->lastVec2 = physicsHandler->body->GetLinearVelocity();
+            //포지션 갱신
+            pos3fHandler->posX = pos.x*SCALE;
+            pos3fHandler->posY = pos.y*SCALE;            
         }
     }
 };
@@ -232,10 +235,10 @@ int main(int argc, char *argv[]) {
         if (inputHandler->is_selected) {
             if (inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::PRESSED)
                 accelerationHandler->acceleration =
-                        accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 1.1f;
+                        accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 0.1f;
             if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED)
                 accelerationHandler->acceleration =
-                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 1.1f;
+                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 0.1f;
         }
     };
     auto input_acc = std::make_unique<
@@ -274,7 +277,7 @@ int main(int argc, char *argv[]) {
     yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(Texture("resource/yeji.png"));
-    //yeji.addComponent(PhysicsBody(false));
+    yeji.addComponent(PhysicsBody(false));
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
     entity2.addComponent(Position3f(100.0f, 600.0f, 0.0f));
