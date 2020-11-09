@@ -50,7 +50,7 @@ struct Texture : public se4::Component<Texture> {
 };
 
 // 나중에 world클래스로 옮기거나 해야함 or 메인문에서 선언하고 주소값 넘여주기도 가능하긴함
-b2Vec2 gravity(0.0f, 1.0f);
+b2Vec2 gravity(0.0f, 0.0f);
 b2World b2world(gravity);
 
 struct PhysicsBody : public se4::Component<PhysicsBody> 
@@ -236,19 +236,25 @@ int main(int argc, char *argv[]) {
 
     // Input 값을 처리하는 Updater
     auto input_acc_callback = [&inputWrapper](se4::ComponentHandle<se4::InputComponent> inputHandler,
-                                              se4::ComponentHandle<XAxisAcceleration> accelerationHandler) -> void {
+                                              se4::ComponentHandle<PhysicsBody> physicsHandler) -> void {
         if (inputHandler->is_selected) {
-            if (inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::PRESSED)
-                accelerationHandler->acceleration =
-                        accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 0.1f;
-            if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED)
-                accelerationHandler->acceleration =
-                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 0.1f;         
+            if (inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::PRESSED ||
+                inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::HELD_DOWN )
+                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(-0.00001, 0);
+            if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED ||
+                inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::HELD_DOWN )
+                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0.00001, 0);
+            if (inputWrapper.Keymap().at(se4::Key::W) == se4::KeyState::PRESSED||
+                inputWrapper.Keymap().at(se4::Key::W) == se4::KeyState::HELD_DOWN )
+                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, -0.00001);
+            if (inputWrapper.Keymap().at(se4::Key::S) == se4::KeyState::PRESSED||
+                inputWrapper.Keymap().at(se4::Key::S) == se4::KeyState::HELD_DOWN )
+                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.00001);
         }
     };
     auto input_acc = std::make_unique<
             se4::UpdaterTemplate<
-                    se4::ComponentHandle<se4::InputComponent>, se4::ComponentHandle<XAxisAcceleration>
+                    se4::ComponentHandle<se4::InputComponent>, se4::ComponentHandle<PhysicsBody>
             >
     >(input_acc_callback);
     world->addUpdater(std::move(input_acc));
@@ -265,7 +271,7 @@ int main(int argc, char *argv[]) {
     auto yejiUpdater = std::make_unique<se4::UpdaterTemplate<
             se4::ComponentHandle<Position3f>, se4::ComponentHandle<XAxisAcceleration>
     > >(callback, compare_id);
-    world->addUpdater(std::move(yejiUpdater));
+    // world->addUpdater(std::move(yejiUpdater));
 
     auto renderUpdater = std::make_unique<RenderUpdater>();
     world->addUpdater(std::move(renderUpdater));
@@ -278,7 +284,7 @@ int main(int argc, char *argv[]) {
     entity.addComponent(PhysicsBody(true, 0));
 
     yeji.addComponent(Position3f(600.0f, 0.0f, 0.0f));
-    yeji.addComponent(Volume2f(100.0f,100.0f));
+    yeji.addComponent(Volume2f(200.0f,200.0f));
     yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(Texture("resource/yeji.png"));
