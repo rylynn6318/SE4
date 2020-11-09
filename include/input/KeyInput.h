@@ -17,6 +17,7 @@ namespace se4 {
 
     protected:
         virtual auto toSE4Key(int keycode) -> Key = 0;
+
         virtual auto toButtonState(int state) -> ButtonState = 0;
 
         auto saveToKeymap(Key key, ButtonState state) -> void;
@@ -24,7 +25,8 @@ namespace se4 {
     public:
         KeyInput();
 
-        [[nodiscard]] auto Keymap() const -> std::map<Key, KeyState> const &;
+        [[nodiscard]]
+        auto Keymap() const -> std::map<Key, KeyState> const &;
 
         auto saveKeymap(int const keycode, int const state) {
             saveToKeymap(toSE4Key(keycode), toButtonState(state));
