@@ -90,7 +90,7 @@ public:
             se4::ComponentHandle<Volume2f> vol2fHandler;
             se4::ComponentHandle<PhysicsBody> physicsHandler;
             parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler);
-
+            
             
             //동적, 정적 설정
             if (physicsHandler->isMovable) 
@@ -290,6 +290,9 @@ int main(int argc, char *argv[]) {
     entity2.addComponent(PhysicsBody(true, 30));
     entity2.addComponent(Texture("resource/walk.png"));
 
+    //지형 관련 엔티티, 이건 추후 지형관련 옵션으로 따로 빼서
+    //ShapePolygon 말고 Edge로 처리해서 더 깔끔하게 코드짤 수 있을듯
+    //https://www.iforce2d.net/b2dtut/fixtures
     floor.addComponent(Position3f(0, SCREEN_HEIGHT - 200.0f, 0.0f));
     floor.addComponent(Volume2f(SCREEN_WIDTH * 2, 1.0f));
     floor.addComponent(PhysicsBody(false, 0.3f));
