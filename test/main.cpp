@@ -156,6 +156,7 @@ public:
             se4::ComponentHandle<Texture> textureHandler;
             parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);           
 
+            //중심좌표가 ( posX, posY )인 가로세로 width, height인 Rect
             SDL_Rect rect;
             rect.w = vol2fHandler->width;
             rect.h = vol2fHandler->height;
