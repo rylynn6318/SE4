@@ -50,7 +50,7 @@ struct Texture : public se4::Component<Texture> {
 };
 
 // 나중에 world클래스로 옮기거나 해야함 or 메인문에서 선언하고 주소값 넘여주기도 가능하긴함
-b2Vec2 gravity(0.0f, 0.0f);
+b2Vec2 gravity(0.0f, 10.0f);
 b2World b2world(gravity);
 
 struct PhysicsBody : public se4::Component<PhysicsBody> 
@@ -113,6 +113,7 @@ public:
 
             physicsHandler->fixtureDef.shape = &dynamicBox;
             physicsHandler->fixtureDef.density = 1.0f;
+            physicsHandler->fixtureDef.restitution = 0.1f;
          
             physicsHandler->body->CreateFixture(&physicsHandler->fixtureDef);
 
@@ -240,16 +241,16 @@ int main(int argc, char *argv[]) {
         if (inputHandler->is_selected) {
             if (inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::PRESSED ||
                 inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::HELD_DOWN )
-                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(-0.00001, 0);
+                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(-0.1, 0);
             if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED ||
                 inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::HELD_DOWN )
-                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0.00001, 0);
+                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0.1, 0);
             if (inputWrapper.Keymap().at(se4::Key::W) == se4::KeyState::PRESSED||
                 inputWrapper.Keymap().at(se4::Key::W) == se4::KeyState::HELD_DOWN )
-                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, -0.00001);
+                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, -0.1);
             if (inputWrapper.Keymap().at(se4::Key::S) == se4::KeyState::PRESSED||
                 inputWrapper.Keymap().at(se4::Key::S) == se4::KeyState::HELD_DOWN )
-                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.00001);
+                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
         }
     };
     auto input_acc = std::make_unique<
