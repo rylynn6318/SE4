@@ -50,7 +50,7 @@ struct Texture : public se4::Component<Texture> {
 };
 
 // 나중에 world클래스로 옮기거나 해야함 or 메인문에서 선언하고 주소값 넘여주기도 가능하긴함
-b2Vec2 gravity(0.0f, 10.0f);
+b2Vec2 gravity(0.0f, 0.0f);
 b2World b2world(gravity);
 
 struct PhysicsBody : public se4::Component<PhysicsBody> 
@@ -157,10 +157,11 @@ public:
             parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);           
 
             SDL_Rect rect;
-            rect.x = pos3fHandler->posX;
-            rect.y = pos3fHandler->posY;
             rect.w = vol2fHandler->width;
-            rect.h = vol2fHandler->height;    
+            rect.h = vol2fHandler->height;
+            rect.x = pos3fHandler->posX - (rect.w / 2);
+            rect.y = pos3fHandler->posY - (rect.h / 2);
+                
 
             SDL_RenderCopy(mainRenderer, textureHandler->texture,  NULL , &rect);
         }
@@ -231,6 +232,7 @@ int main(int argc, char *argv[]) {
     auto floor = world->createEntity();
     auto leftWall = world->createEntity();
     auto rightWall = world->createEntity();
+    auto ceil = world->createEntity();
 
     auto physicsUpdater = std::make_unique<PhysicsUpdater>();
     world->addUpdater(std::move(physicsUpdater));
@@ -279,12 +281,12 @@ int main(int argc, char *argv[]) {
 
 
     // 엔티티에 필요한 컴포넌트 선언
-    entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
+    entity.addComponent(Position3f(150.0f, 200.0f, 0.0f));
     entity.addComponent(Volume2f(100.0f, 200.0f));
     entity.addComponent(Texture("resource/walk.png"));
     entity.addComponent(PhysicsBody(true, 0));
 
-    yeji.addComponent(Position3f(600.0f, 0.0f, 0.0f));
+    yeji.addComponent(Position3f(600.0f, 100.0f, 0.0f));
     yeji.addComponent(Volume2f(200.0f,200.0f));
     yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(se4::InputComponent(true));
@@ -304,12 +306,16 @@ int main(int argc, char *argv[]) {
     floor.addComponent(Volume2f(SCREEN_WIDTH * 2, 1.0f));
     floor.addComponent(PhysicsBody(false, 0.3f));
 
-    leftWall.addComponent(Position3f(-100.0f, 0.0f, 0.0f));
-    leftWall.addComponent(Volume2f(100.0f, SCREEN_HEIGHT * 200));
+    ceil.addComponent(Position3f(0, 0.0f, 0.0f));
+    ceil.addComponent(Volume2f(SCREEN_WIDTH * 2, 1.0f));
+    ceil.addComponent(PhysicsBody(false, 0.3f));
+
+    leftWall.addComponent(Position3f(0.0f, 0.0f, 0.0f));
+    leftWall.addComponent(Volume2f(0.0f, SCREEN_HEIGHT * 200));
     leftWall.addComponent(PhysicsBody(false, 0.3f));
 
     rightWall.addComponent(Position3f(SCREEN_WIDTH, 0.0f, 0.0f));
-    rightWall.addComponent(Volume2f(100.0f, SCREEN_HEIGHT * 2));
+    rightWall.addComponent(Volume2f(0.0f, SCREEN_HEIGHT * 2));
     rightWall.addComponent(PhysicsBody(false, 0.3f));
     
     
