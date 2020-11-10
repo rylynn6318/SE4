@@ -287,7 +287,7 @@ int main(int argc, char *argv[]) {
     entity.addComponent(Texture("resource/walk.png"));
     entity.addComponent(PhysicsBody(true, 0));
 
-    yeji.addComponent(Position3f(600.0f, 100.0f, 0.0f));
+    yeji.addComponent(Position3f(600.0f, 000.0f, 0.0f));
     yeji.addComponent(Volume2f(200.0f,200.0f));
     yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(se4::InputComponent(true));
@@ -307,8 +307,8 @@ int main(int argc, char *argv[]) {
     floor.addComponent(Volume2f(SCREEN_WIDTH * 2, 1.0f));
     floor.addComponent(PhysicsBody(false, 0.3f));
 
-    ceil.addComponent(Position3f(0, 0.0f, 0.0f));
-    ceil.addComponent(Volume2f(SCREEN_WIDTH * 2, 1.0f));
+    ceil.addComponent(Position3f(0.0, 0.0f, 0.0f));
+    ceil.addComponent(Volume2f(SCREEN_WIDTH * 2, 200.0f));
     ceil.addComponent(PhysicsBody(false, 0.3f));
 
     leftWall.addComponent(Position3f(0.0f, 0.0f, 0.0f));
