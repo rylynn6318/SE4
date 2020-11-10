@@ -7,6 +7,12 @@ project(
 
 set(CMAKE_CXX_STANDARD 20)
 
+# ---------------------------------- 엔진 설정 -----------------------------------
+# Available : SDL2
+set(ENGINE_SDK "SDL2")
+
+configure_file(${PROJECT_SOURCE_DIR}/include/EngineConfig.h.in ${PROJECT_SOURCE_DIR}/include/EngineConfig.h)
+
 # ---------------------------------- 빌드 설정 -----------------------------------
 # TODO : CAUTION : 일단 편의를 위해 GLOB_RECURSE 사용함
 file(GLOB_RECURSE SOURCE_FILE src/*.c*)
@@ -27,12 +33,13 @@ file(COPY "test/resource" DESTINATION ${CMAKE_BINARY_DIR})
 
 # ------------------------------ 프로젝트 파일들 설정 ------------------------------
 target_include_directories(${PROJECT_NAME} PUBLIC
-        include
-        include/component
-        include/entity
-        include/input
-        include/updater
-        include/world
+        include/
+#        include/component/
+#        include/entity/
+#        include/input/
+#        include/updater/
+#        include/world/
+#        include/window/
         )
 
 # 테스트용

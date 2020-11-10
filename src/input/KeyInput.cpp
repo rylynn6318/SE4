@@ -2,7 +2,7 @@
 // Created by ssm on 20. 11. 7..
 //
 
-#include "KeyInput.h"
+#include "input/KeyInput.h"
 
 auto se4::KeyInput::saveToKeymap(se4::Key key, se4::ButtonState state) -> void {
     // std::map []로 접근하면, 키가 없으면 만들고 있으면 그걸 씀

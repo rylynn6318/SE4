@@ -1,0 +1,7 @@
+#ifndef SE4_ENGINECONFIG_H
+#define SE4_ENGINECONFIG_H
+
+// SDL2, GLFW
+#define SDK "SDL2"
+
+#endif //SE4_ENGINECONFIG_H
