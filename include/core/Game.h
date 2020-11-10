@@ -34,10 +34,6 @@ namespace se4 {
         addWorlds(world_ptr, worlds_ptr...);
     }
 
-    auto Game::addWorlds(std::unique_ptr<World> world_ptr) -> void {
-        worlds.push_back(std::move(world_ptr));
-    }
-
     template<typename... Worlds>
     auto Game::addWorlds(std::unique_ptr<World> world_ptr, std::unique_ptr<Worlds>... worlds_ptr) -> void {
         worlds.push_back(std::move(world_ptr));
