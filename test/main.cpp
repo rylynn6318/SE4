@@ -50,17 +50,18 @@ struct Texture : public se4::Component<Texture> {
 };
 
 // 나중에 world클래스로 옮기거나 해야함 or 메인문에서 선언하고 주소값 넘여주기도 가능하긴함
-b2Vec2 gravity(0.0f, 0.0f);
+b2Vec2 gravity(0.0f, 10.0f);
 b2World b2world(gravity);
 
 struct PhysicsBody : public se4::Component<PhysicsBody> 
 {
-    PhysicsBody(bool isMovable, float friction) :
+    PhysicsBody(bool isMovable, float friction, float restitution) :
         isMovable(isMovable),
         body(nullptr),
         lastVec2(0.0f, 0.0f)
     {
         fixtureDef.friction = friction;
+        fixtureDef.restitution = restitution;
     }
 
     bool isMovable;
@@ -113,7 +114,6 @@ public:
 
             physicsHandler->fixtureDef.shape = &dynamicBox;
             physicsHandler->fixtureDef.density = 1.0f;
-            physicsHandler->fixtureDef.restitution = 0.1f;
          
             physicsHandler->body->CreateFixture(&physicsHandler->fixtureDef);
 
@@ -285,19 +285,19 @@ int main(int argc, char *argv[]) {
     entity.addComponent(Position3f(150.0f, 200.0f, 0.0f));
     entity.addComponent(Volume2f(100.0f, 200.0f));
     entity.addComponent(Texture("resource/walk.png"));
-    entity.addComponent(PhysicsBody(true, 0));
+    entity.addComponent(PhysicsBody(true, 0, 0.1f));
 
     yeji.addComponent(Position3f(600.0f, 000.0f, 0.0f));
     yeji.addComponent(Volume2f(200.0f,200.0f));
     yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(Texture("resource/yeji.png"));
-    yeji.addComponent(PhysicsBody(true, 0));
+    yeji.addComponent(PhysicsBody(true, 0.0f, 0.1f));
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
     entity2.addComponent(Position3f(201.0f, 400.0f, 0.0f));
     entity2.addComponent(Volume2f(100.0f, 200.0f));
-    entity2.addComponent(PhysicsBody(true, 30));
+    entity2.addComponent(PhysicsBody(true, 30, 0.1f));
     entity2.addComponent(Texture("resource/walk.png"));
 
     //지형 관련 엔티티, 이건 추후 지형관련 옵션으로 따로 빼서
@@ -305,19 +305,19 @@ int main(int argc, char *argv[]) {
     //https://www.iforce2d.net/b2dtut/fixtures
     floor.addComponent(Position3f(0, SCREEN_HEIGHT - 200.0f, 0.0f));
     floor.addComponent(Volume2f(SCREEN_WIDTH * 2, 1.0f));
-    floor.addComponent(PhysicsBody(false, 0.3f));
+    floor.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
     ceil.addComponent(Position3f(0.0, 0.0f, 0.0f));
     ceil.addComponent(Volume2f(SCREEN_WIDTH * 2, 200.0f));
-    ceil.addComponent(PhysicsBody(false, 0.3f));
+    ceil.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
     leftWall.addComponent(Position3f(0.0f, 0.0f, 0.0f));
     leftWall.addComponent(Volume2f(0.0f, SCREEN_HEIGHT * 200));
-    leftWall.addComponent(PhysicsBody(false, 0.3f));
+    leftWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
     rightWall.addComponent(Position3f(SCREEN_WIDTH, 0.0f, 0.0f));
     rightWall.addComponent(Volume2f(0.0f, SCREEN_HEIGHT * 2));
-    rightWall.addComponent(PhysicsBody(false, 0.3f));
+    rightWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
     
     
     world->init();
