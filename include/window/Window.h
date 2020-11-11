@@ -5,6 +5,7 @@
 #ifndef SE4_WINDOW_H
 #define SE4_WINDOW_H
 
+#include <string_view>
 #include <input/Key.h>
 #include <input/Input.h>
 #include "EngineConfig.h"

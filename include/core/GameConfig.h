@@ -5,6 +5,9 @@
 #ifndef SE4_GAMECONFIG_H
 #define SE4_GAMECONFIG_H
 
+#include <string_view>
+#include <string>
+
 namespace se4 {
     struct GameConfig {
         GameConfig(int width, int height, int max_fps, std::string_view title)

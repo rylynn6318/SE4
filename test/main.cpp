@@ -138,20 +138,13 @@ int main(int argc, char *argv[]) {
     auto input_acc_callback = [&input](se4::ComponentHandle<se4::InputComponent> inputHandler,
                                        se4::ComponentHandle<XAxisAcceleration> accelerationHandler) -> void {
         if (inputHandler->is_selected) {
-            if (input.checkKey(se4::KeyState::PRESSED, se4::Key::A)
-//                || inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::HELD_DOWN
-                    ){
-                LOG(ERROR) << "a pressed";
-                accelerationHandler->acceleration =
-                        accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 1;
+            if (input.checkKey(se4::KeyState::PRESSED, se4::Key::A) ||
+                input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::A)) {
+                accelerationHandler->acceleration -= 0.1;
             }
-            if (input.checkKey(se4::KeyState::PRESSED, se4::Key::D)
-//                || inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::HELD_DOWN
-                    ){
-                LOG(ERROR) << "d pressed";
-
-                accelerationHandler->acceleration =
-                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 1;
+            if (input.checkKey(se4::KeyState::PRESSED, se4::Key::D)||
+                input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::D)) {
+                accelerationHandler->acceleration += 0.1;
             }
         }
     };
@@ -197,7 +190,7 @@ int main(int argc, char *argv[]) {
 
     world->init();
 
-    int const  max_loop = 5;
+    int const max_loop = 5;
     auto const MS_PER_UPDATE = 16ms;
     auto lag = 0ms;
     auto previous = sc::system_clock::now();
