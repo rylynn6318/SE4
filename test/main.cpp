@@ -1,6 +1,7 @@
 #include <iostream>
 #include <utility>
 #include <functional>
+#include <cstring>
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -11,7 +12,8 @@
 #include "updater/UpdaterTemplate.h"
 #include "input/InputComponent.h"
 
-#include "wrapper/SDL2InputWrapper.h"
+#include "input/Input.h"
+#include "window/Window.h"
 
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
@@ -42,19 +44,20 @@ struct Volume2f : public se4::Component<Volume2f> {
 };
 
 //렌더러 이거 나중에 클래스의 변수로 옮겨야함
-SDL_Renderer* mainRenderer = nullptr;
+SDL_Renderer *mainRenderer = nullptr;
 
 struct Texture : public se4::Component<Texture> {
-    Texture(const char *path) : texture(IMG_LoadTexture(mainRenderer, path)){}
-    
+    Texture(const char *path) : texture(IMG_LoadTexture(mainRenderer, path)) {}
+
     SDL_Texture *texture;
 };
 
 class RenderUpdater : public se4::Updater {
-public:  
+public:
 
     ~RenderUpdater() override = default;
-    RenderUpdater(){
+
+    RenderUpdater() {
         signature.addComponent<Position3f>();
         signature.addComponent<Volume2f>();
         signature.addComponent<Texture>();
@@ -69,15 +72,15 @@ public:
             se4::ComponentHandle<Position3f> pos3fHandler;
             se4::ComponentHandle<Volume2f> vol2fHandler;
             se4::ComponentHandle<Texture> textureHandler;
-            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);           
+            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);
 
             SDL_Rect rect;
             rect.x = pos3fHandler->posX;
             rect.y = pos3fHandler->posY;
             rect.w = vol2fHandler->width;
-            rect.h = vol2fHandler->height;    
+            rect.h = vol2fHandler->height;
 
-            SDL_RenderCopy(mainRenderer, textureHandler->texture,  NULL , &rect);
+            SDL_RenderCopy(mainRenderer, textureHandler->texture, NULL, &rect);
         }
         SDL_RenderPresent(mainRenderer);
     }
@@ -111,32 +114,15 @@ int main(int argc, char *argv[]) {
     b2World test_world(gravity);
     LOG(ERROR) << "error log test";
 
-    SDL_Init(SDL_INIT_EVERYTHING);
+    se4::Window se4window("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
+    se4::Input input;
+
     //For loading PNG images
     IMG_Init(IMG_INIT_PNG);
 
-    SDL_Window *window = SDL_CreateWindow(
-            "SE4 engine",
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            SDL_WINDOW_SHOWN
-    );
-
-//    SDL_Window *window2 = SDL_CreateWindow(
-//            "SE4 engine 222",
-//            SDL_WINDOWPOS_UNDEFINED,
-//            SDL_WINDOWPOS_UNDEFINED,
-//            SCREEN_WIDTH,
-//            SCREEN_HEIGHT,
-//            SDL_WINDOW_SHOWN
-//    );
-
     bool quit = false;
-    mainRenderer = SDL_CreateRenderer(window, -1, 0);
+    mainRenderer = SDL_CreateRenderer(se4window.tmp_getWindow(), -1, 0);
     // 이건 Game.h 혹은 World.h에 있어야 함
-    SDL2InputWrapper inputWrapper;
 
     auto entityManager = std::make_unique<se4::EntityManager>();
     auto world = std::make_unique<se4::World>(std::move(entityManager));
@@ -147,15 +133,19 @@ int main(int argc, char *argv[]) {
     auto entity2 = world->createEntity();
 
     // Input 값을 처리하는 Updater
-    auto input_acc_callback = [&inputWrapper](se4::ComponentHandle<se4::InputComponent> inputHandler,
-                                              se4::ComponentHandle<XAxisAcceleration> accelerationHandler) -> void {
+    auto input_acc_callback = [&input](se4::ComponentHandle<se4::InputComponent> inputHandler,
+                                       se4::ComponentHandle<XAxisAcceleration> accelerationHandler) -> void {
         if (inputHandler->is_selected) {
-            if (inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::PRESSED)
+            if (input.checkKey(se4::KeyState::PRESSED, se4::Key::A)
+//                || inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::HELD_DOWN
+                    )
                 accelerationHandler->acceleration =
-                        accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 1;
-            if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED)
+                        accelerationHandler->acceleration >= 0 ? -0.01 : accelerationHandler->acceleration - 0.01;
+            if (input.checkKey(se4::KeyState::PRESSED, se4::Key::D)
+//                || inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::HELD_DOWN
+                    )
                 accelerationHandler->acceleration =
-                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 1;
+                        accelerationHandler->acceleration <= 0 ? 0.01 : accelerationHandler->acceleration + 0.01;
         }
     };
     auto input_acc = std::make_unique<
@@ -188,7 +178,7 @@ int main(int argc, char *argv[]) {
     entity.addComponent(Texture("resource/walk.png"));
 
     yeji.addComponent(Position3f(500.0f, 200.0f, 0.0f));
-    yeji.addComponent(Volume2f(100.0f,100.0f));
+    yeji.addComponent(Volume2f(100.0f, 100.0f));
     yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(Texture("resource/yeji.png"));
@@ -203,14 +193,13 @@ int main(int argc, char *argv[]) {
     currentTime = SDL_GetTicks();
     double t = 0.0;
     while (!quit) {
-        inputWrapper.pollInput();
-        quit = inputWrapper.quit;
+        se4window.pollKeyEvent(input);
+        quit = input.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
 
         world->update(0);
         world->render();
     }
 
-    SDL_DestroyWindow(window);
     //For quitting IMG systems
     IMG_Quit();
     SDL_Quit();

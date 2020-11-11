@@ -9,7 +9,7 @@ set(CMAKE_CXX_STANDARD 20)
 
 # ---------------------------------- 엔진 설정 -----------------------------------
 # Available : SDL2
-set(ENGINE_SDK "SDL2")
+set(ENGINE_SDK SDL2)
 
 configure_file(${PROJECT_SOURCE_DIR}/include/EngineConfig.h.in ${PROJECT_SOURCE_DIR}/include/EngineConfig.h)
 

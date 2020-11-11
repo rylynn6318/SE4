@@ -4,6 +4,7 @@
 namespace se4 {
     enum class Key {
         NONE,
+        ESC,
         A,
         B,
         C,
