@@ -2,6 +2,8 @@
 #include <utility>
 #include <functional>
 #include <cstring>
+#include <chrono>
+#include <thread>
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -17,9 +19,9 @@
 
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
-double dt = 1 / 60.0f; //60fps
-double currentTime, lastTime, frameTime, accumulator = 0.0;
-float deltaTime = 0;
+
+using namespace std::chrono_literals;
+namespace sc = std::chrono;
 
 struct Position3f : public se4::Component<Position3f> {
     Position3f(float x, float y, float z) : posX(x), posY(y), posZ(z) {}
@@ -138,14 +140,19 @@ int main(int argc, char *argv[]) {
         if (inputHandler->is_selected) {
             if (input.checkKey(se4::KeyState::PRESSED, se4::Key::A)
 //                || inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::HELD_DOWN
-                    )
+                    ){
+                LOG(ERROR) << "a pressed";
                 accelerationHandler->acceleration =
-                        accelerationHandler->acceleration >= 0 ? -0.01 : accelerationHandler->acceleration - 0.01;
+                        accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 1;
+            }
             if (input.checkKey(se4::KeyState::PRESSED, se4::Key::D)
 //                || inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::HELD_DOWN
-                    )
+                    ){
+                LOG(ERROR) << "d pressed";
+
                 accelerationHandler->acceleration =
-                        accelerationHandler->acceleration <= 0 ? 0.01 : accelerationHandler->acceleration + 0.01;
+                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 1;
+            }
         }
     };
     auto input_acc = std::make_unique<
@@ -190,14 +197,24 @@ int main(int argc, char *argv[]) {
 
     world->init();
 
-    currentTime = SDL_GetTicks();
-    double t = 0.0;
+    int const  max_loop = 5;
+    auto const MS_PER_UPDATE = 16ms;
+    auto lag = 0ms;
+    auto previous = sc::system_clock::now();
     while (!quit) {
+        auto current = sc::system_clock::now();
+        auto elapsed = current - previous;
+        previous = current;
+        lag += sc::duration_cast<sc::milliseconds>(elapsed);
+
         se4window.pollKeyEvent(input);
         quit = input.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
 
         world->update(0);
         world->render();
+
+        // 일단은 남는 시간동안 sleep 때림
+        std::this_thread::sleep_for(current + MS_PER_UPDATE - sc::system_clock::now());
     }
 
     //For quitting IMG systems
