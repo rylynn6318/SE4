@@ -134,6 +134,10 @@ int main(int argc, char *argv[]) {
                 pos3fHandler->posX += accelerationHandler->acceleration;
             }
     );
+    std::function yejiUpdater2 = [](int dt, Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler, YejiHandle yeji) -> void {
+        pos3fHandler->posX += accelerationHandler->acceleration;
+    };
+    // auto wrapper = se4::UpdaterFunctionWrapper(yejiUpdater2);
     world->addUpdater(std::move(yejiUpdater));
 
     auto renderUpdater = std::make_unique<RenderUpdater>();
