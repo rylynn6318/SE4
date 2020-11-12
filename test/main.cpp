@@ -85,11 +85,7 @@ struct PhysicsBody : public se4::Component<PhysicsBody>
 };
 
 const float SCALE = 100.0f;
-enum Type
-{
-    PLAYER,
-    WALL
-};
+
 
 class PhysicsUpdater : public se4::Updater 
 {
@@ -114,13 +110,11 @@ public:
             //동적, 정적 설정
             if (physicsHandler->isMovable)
             {
-                physicsHandler->bodyDef.type = b2_dynamicBody;                    
-                physicsHandler->body->SetUserData(reinterpret_cast<void*>(Type::PLAYER));
+                physicsHandler->bodyDef.type = b2_dynamicBody;   
             }
             else 
             {
-                physicsHandler->bodyDef.type = b2_staticBody;    
-                physicsHandler->body->SetUserData(reinterpret_cast<void*>(Type::WALL));
+                physicsHandler->bodyDef.type = b2_staticBody; 
             }                
             
             physicsHandler->bodyDef.position.Set(pos3fHandler->posX/SCALE, pos3fHandler->posY/SCALE);
@@ -167,21 +161,23 @@ public:
     }
 };
 
-class PlayerWallListener : public b2ContactListener, se4::Updater
+
+
+class PlayerListener : public b2ContactListener, se4::Updater
 {
 public:
-    PlayerWallListener()
+    PlayerListener()
     {
         signature.addComponent<Position3f>();
         signature.addComponent<Volume2f>();
         signature.addComponent<PhysicsBody>();
         signature.addComponent<Player>();
-        signature.addComponent<Wall>();
     }
     void BeginContact(b2Contact* contact)
     {
-        void* data = contact->GetFixtureA()->GetBody()->GetUserData();
+        void* entity = contact->GetFixtureA()->GetBody()->GetUserData();
     }
+
     void update(int dt)
     {
         for (auto& entity : registeredEntities)
@@ -189,14 +185,14 @@ public:
             se4::ComponentHandle<Position3f> pos3fHandler;
             se4::ComponentHandle<Volume2f> vol2fHandler;
             se4::ComponentHandle<PhysicsBody> physicsHandler;
-            se4::ComponentHandle<Player> playerHandler;
-            se4::ComponentHandle<Wall> wallHandler;
-            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler, playerHandler, wallHandler);
-
-            
-            
+            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler);
+            for (b2Contact* contact = b2world.GetContactList(); contact; contact->GetNext())
+            {
+                contact->GetFixtureA()->GetBody()->GetUserData();
+            }
         }
     }
+
 };
 
 
