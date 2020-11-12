@@ -17,7 +17,7 @@ namespace se4 {
         SDL_DestroyWindow(window);
     }
 
-    auto Window::pollKeyEvent(se4::Input& input) -> void {
+    auto Window::pollKeyEvent(se4::Input &input) -> void {
         SDL_PumpEvents();
         Uint8 const *keystate = SDL_GetKeyboardState(nullptr);
         for (int keycode = 0; keycode < SDL_NUM_SCANCODES; ++keycode) {
@@ -34,12 +34,12 @@ namespace se4 {
     Sdl2Window::Sdl2Window(char const *title, int width, int height) {
         SDL_Init(SDL_INIT_EVERYTHING);
         window = SDL_CreateWindow(
-                        title,
-                        SDL_WINDOWPOS_UNDEFINED,
-                        SDL_WINDOWPOS_UNDEFINED,
-                        width,
-                        height,
-                        SDL_WINDOW_SHOWN
-                );
+                title,
+                SDL_WINDOWPOS_UNDEFINED,
+                SDL_WINDOWPOS_UNDEFINED,
+                width,
+                height,
+                SDL_WINDOW_SHOWN
+        );
     }
 }

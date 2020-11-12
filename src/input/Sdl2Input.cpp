@@ -69,6 +69,7 @@ auto se4::Input::toButtonState(int state) -> se4::ButtonState {
         return se4::ButtonState::UP;
 }
 
+// TODO : 이런게 SDK_INPUT 필요없는건 Input.cpp 만들어서 거기 둬야할 듯
 auto se4::Input::checkKey(se4::KeyState state, se4::Key key) -> bool {
     return keymap.at(key) == state;
 }

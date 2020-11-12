@@ -12,7 +12,7 @@
 #include SDK_WINDOW_H
 
 namespace se4 {
-    class Window : public SDK_WINDOW {
+class Window : public SDK_WINDOW {
     public:
         Window(std::string_view title, int width, int height);
         ~Window();

@@ -15,6 +15,8 @@
 #include "input/Input.h"
 #include "window/Window.h"
 
+#include "box2d/box2d.h"
+
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
 
@@ -43,7 +45,7 @@ struct Volume2f : public se4::Component<Volume2f> {
 SDL_Renderer *mainRenderer = nullptr;
 
 struct Texture : public se4::Component<Texture> {
-    Texture(const char *path) : texture(IMG_LoadTexture(mainRenderer, path)) {}
+    explicit Texture(const char *path) : texture(IMG_LoadTexture(mainRenderer, path)) {}
 
     SDL_Texture *texture;
 };
@@ -53,14 +55,14 @@ public:
 
     ~RenderUpdater() override = default;
 
-    RenderUpdater() {
+    explicit RenderUpdater() {
         signature.addComponent<Position3f>();
         signature.addComponent<Volume2f>();
         signature.addComponent<Texture>();
     }
 
     // 텍스쳐 선택 바꿔야함
-    void render() {
+    void update(int dt) override {
         SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
         SDL_RenderClear(mainRenderer);
 
@@ -71,10 +73,10 @@ public:
             parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);
 
             SDL_Rect rect;
-            rect.x = pos3fHandler->posX;
-            rect.y = pos3fHandler->posY;
             rect.w = vol2fHandler->width;
             rect.h = vol2fHandler->height;
+            rect.x = pos3fHandler->posX - (rect.w / 2);
+            rect.y = pos3fHandler->posY - (rect.h / 2);
 
             SDL_RenderCopy(mainRenderer, textureHandler->texture, NULL, &rect);
         }
@@ -94,7 +96,7 @@ int main(int argc, char *argv[]) {
     mainRenderer = SDL_CreateRenderer(se4window.tmp_getWindow(), -1, 0);
 
     auto entityManager = std::make_unique<se4::EntityManager>();
-    auto world = std::make_unique<se4::World>(std::move(entityManager));
+    auto world = std::make_shared<se4::World>(std::move(entityManager));
 
     // 엔티티 선언
     auto entity = world->createEntity();
@@ -163,7 +165,7 @@ int main(int argc, char *argv[]) {
         se4window.pollKeyEvent(input);
 
         world->update(0);
-        world->render();
+        // renderUpdater->render();
 
         // 일단은 남는 시간동안 sleep 때림
         std::this_thread::sleep_for(start + MS_PER_UPDATE - sc::system_clock::now());

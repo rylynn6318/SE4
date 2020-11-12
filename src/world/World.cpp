@@ -21,7 +21,7 @@ namespace se4 {
     // TODO : render, updater 분리
     void World::render() {
         for (auto &updater : updaters) {
-            updater->render();
+            // updater->render();
         }
     }
 

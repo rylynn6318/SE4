@@ -26,18 +26,12 @@ namespace se4 {
         /*
          * Called before the game starts but after the world initializes
          */
-        virtual void init() {};
+        virtual bool init() { return true; };
 
         /*
          * Called every game update
          */
         virtual void update(int dt) {};
-
-        /*
-         * Called every frame
-         */
-        // TODO : IRender 로 분리
-        virtual void render() {};
 
         /*
          * When a Updater is added to the world, the world will register itself
