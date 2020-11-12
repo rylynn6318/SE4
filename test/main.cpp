@@ -39,6 +39,16 @@ struct Volume2f : public se4::Component<Volume2f> {
     float width, height;
 };
 
+struct Player : public se4::Component<Player>
+{
+    
+};
+
+struct Wall : public se4::Component<Wall>
+{
+
+};
+
 
 //렌더러 이거 나중에 클래스의 변수로 옮겨야함
 SDL_Renderer* mainRenderer = nullptr;
@@ -53,14 +63,15 @@ struct Texture : public se4::Component<Texture> {
 b2Vec2 gravity(0.0f, 10.0f);
 b2World b2world(gravity);
 
-struct PhysicsBody : public se4::Component<PhysicsBody> 
+struct PhysicsBody : public se4::Component<PhysicsBody>
 {
     PhysicsBody(bool isMovable, float friction, float restitution) :
         isMovable(isMovable),
         body(nullptr),
         lastVec2(0.0f, 0.0f),
-        jumpSteps(0)
+        jumpSteps(0)        
     {
+        
         fixtureDef.friction = friction;
         fixtureDef.restitution = restitution;
     }
@@ -74,6 +85,11 @@ struct PhysicsBody : public se4::Component<PhysicsBody>
 };
 
 const float SCALE = 100.0f;
+enum Type
+{
+    PLAYER,
+    WALL
+};
 
 class PhysicsUpdater : public se4::Updater 
 {
@@ -96,13 +112,15 @@ public:
             
             
             //동적, 정적 설정
-            if (physicsHandler->isMovable) 
+            if (physicsHandler->isMovable)
             {
-                physicsHandler->bodyDef.type = b2_dynamicBody;
-            }                
+                physicsHandler->bodyDef.type = b2_dynamicBody;                    
+                physicsHandler->body->SetUserData(reinterpret_cast<void*>(Type::PLAYER));
+            }
             else 
             {
-                physicsHandler->bodyDef.type = b2_staticBody;
+                physicsHandler->bodyDef.type = b2_staticBody;    
+                physicsHandler->body->SetUserData(reinterpret_cast<void*>(Type::WALL));
             }                
             
             physicsHandler->bodyDef.position.Set(pos3fHandler->posX/SCALE, pos3fHandler->posY/SCALE);
@@ -149,6 +167,39 @@ public:
     }
 };
 
+class PlayerWallListener : public b2ContactListener, se4::Updater
+{
+public:
+    PlayerWallListener()
+    {
+        signature.addComponent<Position3f>();
+        signature.addComponent<Volume2f>();
+        signature.addComponent<PhysicsBody>();
+        signature.addComponent<Player>();
+        signature.addComponent<Wall>();
+    }
+    void BeginContact(b2Contact* contact)
+    {
+        void* data = contact->GetFixtureA()->GetBody()->GetUserData();
+    }
+    void update(int dt)
+    {
+        for (auto& entity : registeredEntities)
+        {
+            se4::ComponentHandle<Position3f> pos3fHandler;
+            se4::ComponentHandle<Volume2f> vol2fHandler;
+            se4::ComponentHandle<PhysicsBody> physicsHandler;
+            se4::ComponentHandle<Player> playerHandler;
+            se4::ComponentHandle<Wall> wallHandler;
+            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler, playerHandler, wallHandler);
+
+            
+            
+        }
+    }
+};
+
+
 class RenderUpdater : public se4::Updater {
 public:  
 
@@ -159,6 +210,7 @@ public:
         signature.addComponent<Texture>();
     }
 
+  
     // 텍스쳐 선택 바꿔야함
     void render() {
         SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
@@ -309,6 +361,7 @@ int main(int argc, char *argv[]) {
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(Texture("resource/yeji.png"));
     yeji.addComponent(PhysicsBody(true, 0.0f, 0.1f));
+    yeji.addComponent(Player());
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
     entity2.addComponent(Position3f(201.0f, 400.0f, 0.0f));
@@ -330,10 +383,12 @@ int main(int argc, char *argv[]) {
     leftWall.addComponent(Position3f(0.0f, 0.0f, 0.0f));
     leftWall.addComponent(Volume2f(0.0f, SCREEN_HEIGHT * 200));
     leftWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+    leftWall.addComponent(Wall());
 
     rightWall.addComponent(Position3f(SCREEN_WIDTH, 0.0f, 0.0f));
     rightWall.addComponent(Volume2f(0.0f, SCREEN_HEIGHT * 2));
     rightWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+    rightWall.addComponent(Wall());
     
     
     world->init();
