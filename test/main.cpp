@@ -112,7 +112,8 @@ int main(int argc, char *argv[]) {
     using YejiHandle = se4::ComponentHandle<Yeji>;
 
     // Input 값을 처리하는 Updater
-    auto input_acc_callback = [&input](int dt, InputHandle inputHandler, XAxisAccelerationHandle accelerationHandler) -> void {
+    std::function input_acc_callback = [&input](int dt, InputHandle inputHandler,
+                                                XAxisAccelerationHandle accelerationHandler) -> void {
         if (inputHandler->is_selected) {
             if (input.checkKey(se4::KeyState::PRESSED, se4::Key::A) ||
                 input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::A)) {
@@ -124,20 +125,14 @@ int main(int argc, char *argv[]) {
             }
         }
     };
-    auto input_acc = std::make_unique<se4::UpdaterFunction<InputHandle, XAxisAccelerationHandle> >(input_acc_callback);
+    auto input_acc = se4::makeUpdater(input_acc_callback);
     world->addUpdater(std::move(input_acc));
 
-    // Add Updater
-    // 생성자의 템플릿 파라메터로 사용할 컴포넌트의 핸들러 넘겨주고 생성자에는 위에서 선언한 함수 2개 넣어줌
-    auto yejiUpdater = std::make_unique<se4::UpdaterFunction<Position3fHandle, XAxisAccelerationHandle, YejiHandle> >(
-            [](int dt, Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler, YejiHandle yeji) -> void {
+    auto yejiUpdater = se4::makeUpdater(
+            [](int dt, Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler,
+               YejiHandle yeji) -> void {
                 pos3fHandler->posX += accelerationHandler->acceleration;
-            }
-    );
-    std::function yejiUpdater2 = [](int dt, Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler, YejiHandle yeji) -> void {
-        pos3fHandler->posX += accelerationHandler->acceleration;
-    };
-    // auto wrapper = se4::UpdaterFunctionWrapper(yejiUpdater2);
+            });
     world->addUpdater(std::move(yejiUpdater));
 
     auto renderUpdater = std::make_unique<RenderUpdater>();

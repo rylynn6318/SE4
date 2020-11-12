@@ -62,13 +62,23 @@ namespace se4 {
         }
     };
 
-    template<typename F>
-    struct UpdaterFunctionWrapper {
-        UpdaterFunction<typename F::argument_type> updater;
-        explicit UpdaterFunctionWrapper(F func){
-            updater = UpdaterFunction<typename F::argument_type>(func);
-        }
-    };
+    // std::function 을 받아서 그걸로 Updater 만들어서 반환함.
+    template<typename... Arg>
+    constexpr auto makeUpdater(std::function<void(int, Arg...)> f) {
+        return std::make_unique<UpdaterFunction<Arg...>>(f);
+    }
+
+    // 함수 포인터를 std::function 으로 바꿔서 makeUpdater 호출
+    template<typename FuncPtr>
+    constexpr auto makeUpdater(FuncPtr *func) {
+        return makeUpdater(std::function<FuncPtr>(func));
+    }
+
+    // 람다를 std::function 으로 바꿔서 makeUpdater 호출
+    template<typename Lambda>
+    constexpr auto makeUpdater(Lambda func) {
+        return makeUpdater(std::function(func));
+    }
 }
 
 #endif //SE4_UPDATERFUNCTION_H
