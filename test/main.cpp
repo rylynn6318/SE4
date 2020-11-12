@@ -41,6 +41,9 @@ struct Volume2f : public se4::Component<Volume2f> {
     float width, height;
 };
 
+struct Yeji : public se4::Component<Yeji> {
+};
+
 //렌더러 이거 나중에 클래스의 변수로 옮겨야함
 SDL_Renderer *mainRenderer = nullptr;
 
@@ -106,10 +109,10 @@ int main(int argc, char *argv[]) {
     using InputHandle = se4::ComponentHandle<se4::InputComponent>;
     using XAxisAccelerationHandle = se4::ComponentHandle<XAxisAcceleration>;
     using Position3fHandle = se4::ComponentHandle<Position3f>;
+    using YejiHandle = se4::ComponentHandle<Yeji>;
 
     // Input 값을 처리하는 Updater
-    auto input_acc_callback = [&input](InputHandle inputHandler,
-                                       XAxisAccelerationHandle accelerationHandler) -> void {
+    auto input_acc_callback = [&input](int dt, InputHandle inputHandler, XAxisAccelerationHandle accelerationHandler) -> void {
         if (inputHandler->is_selected) {
             if (input.checkKey(se4::KeyState::PRESSED, se4::Key::A) ||
                 input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::A)) {
@@ -121,19 +124,16 @@ int main(int argc, char *argv[]) {
             }
         }
     };
-    auto input_acc = std::make_unique<se4::UpdaterTemplate<InputHandle, XAxisAccelerationHandle> >(input_acc_callback);
+    auto input_acc = std::make_unique<se4::UpdaterFunction<InputHandle, XAxisAccelerationHandle> >(input_acc_callback);
     world->addUpdater(std::move(input_acc));
 
     // Add Updater
-    // 업데이터 안에서 사용할 콜백 정의
-    auto callback = [](Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler) -> void {
-        pos3fHandler->posX += accelerationHandler->acceleration;
-    };
-    // 예지만 움직이게 하기 위한 함수 정의
-    auto compare_id = [yeji](int id) -> bool { return id == yeji.entity.id; };
     // 생성자의 템플릿 파라메터로 사용할 컴포넌트의 핸들러 넘겨주고 생성자에는 위에서 선언한 함수 2개 넣어줌
-    auto yejiUpdater = std::make_unique<se4::UpdaterTemplate<Position3fHandle, XAxisAccelerationHandle> >(callback,
-                                                                                                          compare_id);
+    auto yejiUpdater = std::make_unique<se4::UpdaterFunction<Position3fHandle, XAxisAccelerationHandle, YejiHandle> >(
+            [](int dt, Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler, YejiHandle yeji) -> void {
+                pos3fHandler->posX += accelerationHandler->acceleration;
+            }
+    );
     world->addUpdater(std::move(yejiUpdater));
 
     auto renderUpdater = std::make_unique<RenderUpdater>();
@@ -149,6 +149,7 @@ int main(int argc, char *argv[]) {
     yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(Texture("resource/yeji.png"));
+    yeji.addComponent(Yeji());
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
     entity2.addComponent(Position3f(200.0f, 200.0f, 0.0f));
