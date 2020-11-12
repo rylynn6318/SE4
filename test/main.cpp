@@ -9,7 +9,7 @@
 #include "glog/logging.h"
 
 #include "se4.hpp"
-#include "updater/UpdaterTemplate.h"
+#include "updater/UpdaterFunction.h"
 #include "input/InputComponent.h"
 
 #include "input/Input.h"
