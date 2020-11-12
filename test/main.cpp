@@ -58,7 +58,8 @@ struct PhysicsBody : public se4::Component<PhysicsBody>
     PhysicsBody(bool isMovable, float friction, float restitution) :
         isMovable(isMovable),
         body(nullptr),
-        lastVec2(0.0f, 0.0f)
+        lastVec2(0.0f, 0.0f),
+        jumpSteps(0)
     {
         fixtureDef.friction = friction;
         fixtureDef.restitution = restitution;
@@ -69,6 +70,7 @@ struct PhysicsBody : public se4::Component<PhysicsBody>
     b2BodyDef bodyDef;
     b2FixtureDef fixtureDef;    
     b2Vec2 lastVec2;
+    int jumpSteps;
 };
 
 const float SCALE = 100.0f;
@@ -113,21 +115,33 @@ public:
             dynamicBox.SetAsBox(vol2fHandler->width / 2 / SCALE, vol2fHandler->height / 2 / SCALE);
 
             physicsHandler->fixtureDef.shape = &dynamicBox;
-            physicsHandler->fixtureDef.density = 1.0f;
-         
-            physicsHandler->body->CreateFixture(&physicsHandler->fixtureDef);
+            physicsHandler->fixtureDef.density = 1.0f;         
+
+            //fixture delete?
+            physicsHandler->body->CreateFixture(&physicsHandler->fixtureDef);            
 
             //이전 속도값 더해줌           
             physicsHandler->body->SetLinearVelocity(physicsHandler->lastVec2);
+            
+            while (physicsHandler->jumpSteps > 0) 
+            {
+                float force = physicsHandler->body->GetMass() * 100 / (1 / 60.0); //f = mv/t
+                 //spread this over 6 time steps
+                force /= 6.0;
+                physicsHandler->body->ApplyForceToCenter(b2Vec2(0, force), true);
+                physicsHandler->jumpSteps--;
+            }
+            
 
             //포지션 표시
             //std::cout<< physicsHandler->body->GetLinearVelocity().x << ", " << physicsHandler->body->GetLinearVelocity().y << std::endl;
 
             b2world.Step(1.0f / 60.0f, 6, 2);
-
+            
             b2Vec2 pos = physicsHandler->body->GetPosition();
             //속도값 저장
             physicsHandler->lastVec2 = physicsHandler->body->GetLinearVelocity();
+            
             //포지션 갱신
             pos3fHandler->posX = pos.x*SCALE;
             pos3fHandler->posY = pos.y*SCALE;       
@@ -248,12 +262,14 @@ int main(int argc, char *argv[]) {
             if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED ||
                 inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::HELD_DOWN )
                 physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0.1, 0);
-            if (inputWrapper.Keymap().at(se4::Key::W) == se4::KeyState::PRESSED||
-                inputWrapper.Keymap().at(se4::Key::W) == se4::KeyState::HELD_DOWN )
-                physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, -0.1);
+            if (inputWrapper.Keymap().at(se4::Key::W) == se4::KeyState::PRESSED ||
+                inputWrapper.Keymap().at(se4::Key::W) == se4::KeyState::HELD_DOWN)
+                physicsHandler->jumpSteps = 6;
             if (inputWrapper.Keymap().at(se4::Key::S) == se4::KeyState::PRESSED||
                 inputWrapper.Keymap().at(se4::Key::S) == se4::KeyState::HELD_DOWN )
                 physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
+            
+                
         }
     };
     auto input_acc = std::make_unique<
