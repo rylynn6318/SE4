@@ -11,6 +11,9 @@
 #include "se4.hpp"
 #include "updater/UpdaterFunction.h"
 #include "input/InputComponent.h"
+#include "component/Position2d.h"
+#include "component/Volume2d.h"
+#include "graphics/RenderComponent.h"
 
 #include "input/Input.h"
 #include "window/Window.h"
@@ -23,76 +26,18 @@ const int SCREEN_HEIGHT = 800;
 using namespace std::chrono_literals;
 namespace sc = std::chrono;
 
-struct Position3f : public se4::Component<Position3f> {
-    Position3f(float x, float y, float z) : posX(x), posY(y), posZ(z) {}
-
-    float posX, posY, posZ;
-};
-
 struct XAxisAcceleration : public se4::Component<XAxisAcceleration> {
     explicit XAxisAcceleration(float x) : acceleration(x) {}
 
     float acceleration;
 };
 
-struct Volume2f : public se4::Component<Volume2f> {
-    Volume2f(float width, float height) : width(width), height(height) {}
-
-    float width, height;
-};
-
 struct Yeji : public se4::Component<Yeji> {
-};
-
-//렌더러 이거 나중에 클래스의 변수로 옮겨야함
-SDL_Renderer *mainRenderer = nullptr;
-
-struct Texture : public se4::Component<Texture> {
-    explicit Texture(const char *path) : texture(IMG_LoadTexture(mainRenderer, path)) {}
-
-    SDL_Texture *texture;
-};
-
-class RenderUpdater : public se4::Updater {
-public:
-
-    ~RenderUpdater() override = default;
-
-    explicit RenderUpdater() {
-        signature.addComponent<Position3f>();
-        signature.addComponent<Volume2f>();
-        signature.addComponent<Texture>();
-    }
-
-    // 텍스쳐 선택 바꿔야함
-    void update(int dt) override {
-        SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
-        SDL_RenderClear(mainRenderer);
-
-        for (auto &entity : registeredEntities) {
-            se4::ComponentHandle<Position3f> pos3fHandler;
-            se4::ComponentHandle<Volume2f> vol2fHandler;
-            se4::ComponentHandle<Texture> textureHandler;
-            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);
-
-            SDL_Rect rect;
-            rect.w = vol2fHandler->width;
-            rect.h = vol2fHandler->height;
-            rect.x = pos3fHandler->posX - (rect.w / 2);
-            rect.y = pos3fHandler->posY - (rect.h / 2);
-
-            SDL_RenderCopy(mainRenderer, textureHandler->texture, NULL, &rect);
-        }
-        SDL_RenderPresent(mainRenderer);
-    }
-};
-
-struct NotComponent {
 };
 
 using InputHandle = se4::ComponentHandle<se4::InputComponent>;
 using XAxisAccelerationHandle = se4::ComponentHandle<XAxisAcceleration>;
-using Position3fHandle = se4::ComponentHandle<Position3f>;
+using Position3fHandle = se4::ComponentHandle<se4::Position2d>;
 using YejiHandle = se4::ComponentHandle<Yeji>;
 
 se4::Input input;
@@ -112,15 +57,14 @@ auto inputCallback(int dt, InputHandle inputHandler, XAxisAccelerationHandle acc
 int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
 
-    se4::Window se4window("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
+    auto se4window = std::make_unique<se4::Window>("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
 
     //For loading PNG images
     IMG_Init(IMG_INIT_PNG);
 
-    mainRenderer = SDL_CreateRenderer(se4window.tmp_getWindow(), -1, 0);
-
     auto entityManager = std::make_unique<se4::EntityManager>();
     auto world = std::make_shared<se4::World>(std::move(entityManager));
+    world->setRenderWindow(std::move(se4window));
 
     // 엔티티 선언
     auto entity = world->createEntity();
@@ -133,29 +77,26 @@ int main(int argc, char *argv[]) {
     auto yejiUpdater = se4::makeUpdater(
             [](int dt, Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler,
                YejiHandle yeji) -> void {
-                pos3fHandler->posX += accelerationHandler->acceleration;
+                pos3fHandler->x += accelerationHandler->acceleration;
             });
     world->addUpdater(std::move(yejiUpdater));
 
-    auto renderUpdater = std::make_unique<RenderUpdater>();
-    world->addUpdater(std::move(renderUpdater));
-
     // 엔티티에 필요한 컴포넌트 선언
-    entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
-    entity.addComponent(Volume2f(100.0f, 200.0f));
-    entity.addComponent(Texture("resource/walk.png"));
+    entity.addComponent(se4::Position2d(100, 100));
+    entity.addComponent(se4::Volume2d(100.0f, 200.0f));
+    entity.addComponent(se4::RenderComponent("resource/walk.png"));
 
-    yeji.addComponent(Position3f(500.0f, 200.0f, 0.0f));
-    yeji.addComponent(Volume2f(100.0f, 100.0f));
-    yeji.addComponent(XAxisAcceleration(0.0f));
+    yeji.addComponent(se4::Position2d(500, 200));
+    yeji.addComponent(se4::Volume2d(100.0f, 100.0f));
     yeji.addComponent(se4::InputComponent(true));
-    yeji.addComponent(Texture("resource/yeji.png"));
+    yeji.addComponent(se4::RenderComponent("resource/yeji.png"));
+    yeji.addComponent(XAxisAcceleration(0.0f));
     yeji.addComponent(Yeji());
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
-    entity2.addComponent(Position3f(200.0f, 200.0f, 0.0f));
-    entity2.addComponent(Volume2f(100.0f, 200.0f));
-    entity2.addComponent(Texture("resource/walk.png"));
+    entity2.addComponent(se4::Position2d(200, 200));
+    entity2.addComponent(se4::Volume2d(100.0f, 200.0f));
+    entity2.addComponent(se4::RenderComponent("resource/walk.png"));
 
     world->init();
 
@@ -164,10 +105,12 @@ int main(int argc, char *argv[]) {
     while (!input.checkKey(se4::KeyState::PRESSED, se4::Key::ESC)) {
         auto start = sc::system_clock::now();
 
-        se4window.pollKeyEvent(input);
+        // se4window.pollKeyEvent(input);
 
         world->update(0);
         // renderUpdater->render();
+
+        world->render(0);
 
         // 일단은 남는 시간동안 sleep 때림
         std::this_thread::sleep_for(start + MS_PER_UPDATE - sc::system_clock::now());

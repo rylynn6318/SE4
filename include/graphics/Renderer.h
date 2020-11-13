@@ -6,21 +6,22 @@
 #define SE4_RENDERER_H
 
 #include "EngineConfig.h"
-#include <world/World.hpp>
+#include "updater/Updater.hpp"
 #include "window/Window.h"
 #include SDK_RENDERER_H
 
 namespace se4 {
-    class Renderer : public SDK_RENDERER, private se4::Updater {
+    class Renderer : public se4::Updater, SDK_RENDERER {
     public:
-        Renderer(se4::World world);
+        Renderer();
 
-        auto init() -> bool;
+        auto init() -> bool override;
 
-        auto render(double time) -> void;
+        auto render(int time) -> void;
 
-    private:
-        std::unique_ptr<World> world;
+    public:
+        // 일단 pulbic으로 둠
+        std::unique_ptr<Window> window;
     };
 }
 

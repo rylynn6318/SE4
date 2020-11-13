@@ -6,7 +6,7 @@
 
 
 
-auto se4::Game::addWorlds(std::unique_ptr<World> world_ptr) -> void {
+auto se4::Game::addWorlds(std::shared_ptr<World> world_ptr) -> void {
     worlds.push_back(std::move(world_ptr));
 }
 

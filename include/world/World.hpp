@@ -7,6 +7,8 @@
 #include "entity/Entity.hpp"
 #include "entity/EntityManager.hpp"
 #include "updater/Updater.hpp"
+#include "graphics/Renderer.h"
+#include "window/Window.h"
 
 namespace se4 {
     struct EntityHandle;
@@ -27,7 +29,9 @@ namespace se4 {
         /*
          * Render a frame.
          */
-        void render();
+        void render(int dt);
+        auto setRenderWindow(std::unique_ptr<Window> window) -> void;
+        auto unsetRenderWindow() -> std::unique_ptr<Window>;
         EntityHandle createEntity();
         void addUpdater(std::unique_ptr<Updater> updater);
         void destroyEntity(Entity entity);
@@ -91,6 +95,7 @@ namespace se4 {
         std::vector<std::unique_ptr<Updater>> updaters;
         std::vector<std::unique_ptr<BaseComponentManager>> componentManagers;
         std::map<Entity, ComponentMask> entityMasks;
+        Renderer* renderer;
 
         void updateEntityMask(Entity const& entity, ComponentMask& oldMask);
 
