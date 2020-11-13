@@ -173,9 +173,10 @@ public:
         signature.addComponent<PhysicsBody>();
         signature.addComponent<Player>();
     }
-    void BeginContact(b2Contact* contact)
+    void BeginContact(b2Contact* contact) override
     {
-        void* entity = contact->GetFixtureA()->GetBody()->GetUserData();
+         auto entity = (void *)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
+         auto phygics = static_cast<PhysicsBody*>(entity);
     }
 
     void update(int dt)
@@ -186,9 +187,9 @@ public:
             se4::ComponentHandle<Volume2f> vol2fHandler;
             se4::ComponentHandle<PhysicsBody> physicsHandler;
             parentWorld->unpack(entity, pos3fHandler, vol2fHandler, physicsHandler);
-            for (b2Contact* contact = b2world.GetContactList(); contact; contact->GetNext())
+            for (b2Contact* contact = b2world.GetContactList(); contact != nullptr; contact->GetNext())
             {
-                contact->GetFixtureA()->GetBody()->GetUserData();
+                // contact->GetFixtureA()->GetBody()->GetUserData();
             }
         }
     }
