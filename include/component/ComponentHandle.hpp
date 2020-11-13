@@ -1,10 +1,10 @@
 #pragma once
+#include "Component.hpp"
 #include "ComponentManager.hpp"
 #include "entity/Entity.hpp"
 
-
 namespace se4 {
-    template <typename ComponentType>
+    template <is_component ComponentType>
     struct ComponentHandle {
         using ExposedComponentType = typename ComponentManager<ComponentType>::LookupType;
 

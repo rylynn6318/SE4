@@ -1,14 +1,13 @@
 #pragma once
-#include <type_traits>
-#include "ComponentManager.hpp"
-#include "entity/Entity.hpp"
+
+#include <concepts>
 
 namespace se4 {
     struct ComponentCounter {
         static int familyCounter;
     };
 
-    template <typename ComponentType>
+    template<typename ComponentType>
     struct Component {
         static inline int family() {
             static int family = ComponentCounter::familyCounter++;
@@ -17,8 +16,11 @@ namespace se4 {
     };
 
     // Util method for getting family given type
-    template <typename C>
+    template<typename C>
     static int GetComponentFamily() {
         return Component<typename std::remove_const<C>::type>::family();
     }
+
+    template<class T>
+    concept is_component = std::derived_from<T, Component<T>>;
 }  // namespace se4

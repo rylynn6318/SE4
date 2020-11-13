@@ -32,15 +32,14 @@ namespace se4 {
 
     template<typename... Worlds>
     Game::Game(GameConfig config, std::unique_ptr<World> world_ptr, std::unique_ptr<Worlds>... worlds_ptr) {
-        addWorlds(world_ptr, worlds_ptr...);
+        this->addWorlds(world_ptr, worlds_ptr...);
     }
 
     template<typename... Worlds>
     auto Game::addWorlds(std::unique_ptr<World> world_ptr, std::unique_ptr<Worlds>... worlds_ptr) -> void {
         worlds.push_back(std::move(world_ptr));
-        ᅟaddWorlds(worlds_ptr...);
+        this->addWorlds(worlds_ptr ...);
     }
-
 }
 
 #endif //SE4_GAME_H

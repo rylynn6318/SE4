@@ -87,11 +87,32 @@ public:
     }
 };
 
+struct NotComponent {
+};
+
+using InputHandle = se4::ComponentHandle<se4::InputComponent>;
+using XAxisAccelerationHandle = se4::ComponentHandle<XAxisAcceleration>;
+using Position3fHandle = se4::ComponentHandle<Position3f>;
+using YejiHandle = se4::ComponentHandle<Yeji>;
+
+se4::Input input;
+auto inputCallback(int dt, InputHandle inputHandler, XAxisAccelerationHandle accelerationHandler) {
+    if (inputHandler->is_selected) {
+        if (input.checkKey(se4::KeyState::PRESSED, se4::Key::A) ||
+            input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::A)) {
+            accelerationHandler->acceleration -= 0.1;
+        }
+        if (input.checkKey(se4::KeyState::PRESSED, se4::Key::D) ||
+            input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::D)) {
+            accelerationHandler->acceleration += 0.1;
+        }
+    }
+}
+
 int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
 
     se4::Window se4window("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
-    se4::Input input;
 
     //For loading PNG images
     IMG_Init(IMG_INIT_PNG);
@@ -106,26 +127,7 @@ int main(int argc, char *argv[]) {
     auto yeji = world->createEntity();
     auto entity2 = world->createEntity();
 
-    using InputHandle = se4::ComponentHandle<se4::InputComponent>;
-    using XAxisAccelerationHandle = se4::ComponentHandle<XAxisAcceleration>;
-    using Position3fHandle = se4::ComponentHandle<Position3f>;
-    using YejiHandle = se4::ComponentHandle<Yeji>;
-
-    // Input 값을 처리하는 Updater
-    std::function input_acc_callback = [&input](int dt, InputHandle inputHandler,
-                                                XAxisAccelerationHandle accelerationHandler) -> void {
-        if (inputHandler->is_selected) {
-            if (input.checkKey(se4::KeyState::PRESSED, se4::Key::A) ||
-                input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::A)) {
-                accelerationHandler->acceleration -= 0.1;
-            }
-            if (input.checkKey(se4::KeyState::PRESSED, se4::Key::D) ||
-                input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::D)) {
-                accelerationHandler->acceleration += 0.1;
-            }
-        }
-    };
-    auto input_acc = se4::makeUpdater(input_acc_callback);
+    auto input_acc = se4::makeUpdater(inputCallback);
     world->addUpdater(std::move(input_acc));
 
     auto yejiUpdater = se4::makeUpdater(

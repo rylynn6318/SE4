@@ -36,7 +36,7 @@ namespace se4 {
 
         explicit UpdaterFunction(std::function<void(int, ComponentHandlers ...)> callback)
                 : callback(std::move(callback)) {
-            init_callback = []() -> bool { return true; };
+            init_callback = std::function([]() -> bool { return true; });
             addComponentToSignature<ComponentHandlers...>();
         }
 

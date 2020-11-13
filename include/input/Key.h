@@ -33,8 +33,8 @@ namespace se4 {
         Z,
 
         // for iter
-        FIRST = NONE,
-        LAST = Z
+        FIRST = static_cast<int>(NONE),
+        LAST = static_cast<int>(Z)
     };
 
     auto operator++(Key &x) -> Key;
