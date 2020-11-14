@@ -17,7 +17,8 @@ class Window : public SDK_WINDOW {
         Window(std::string_view title, int width, int height);
         ~Window();
 
-        auto pollKeyEvent(se4::Input& input) -> void;
+        // TODO : 일단 static으로
+        static auto pollKeyEvent(se4::Input& input) -> void;
         auto tmp_getWindow() -> SDL_Window*;
     private:
     };
