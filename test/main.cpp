@@ -1,6 +1,9 @@
 #include <iostream>
 #include <utility>
 #include <functional>
+#include <cstring>
+#include <chrono>
+#include <thread>
 
 #include "SDL.h"
 #include "SDL_image.h"
@@ -8,22 +11,22 @@
 #include "box2d/box2d.h"
 
 #include "se4.hpp"
-#include "updater/UpdaterTemplate.h"
+#include "updater/UpdaterFunction.h"
 #include "input/InputComponent.h"
+#include "component/Position2d.h"
+#include "component/Volume2d.h"
+#include "graphics/RenderComponent.h"
 
-#include "wrapper/SDL2InputWrapper.h"
+#include "input/Input.h"
+#include "window/Window.h"
+
+#include "box2d/box2d.h"
 
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
-double dt = 1 / 60.0f; //60fps
-double currentTime, lastTime, frameTime, accumulator = 0.0;
-float deltaTime = 0;
 
-struct Position3f : public se4::Component<Position3f> {
-    Position3f(float x, float y, float z) : posX(x), posY(y), posZ(z) {}
-
-    float posX, posY, posZ;
-};
+using namespace std::chrono_literals;
+namespace sc = std::chrono;
 
 struct XAxisAcceleration : public se4::Component<XAxisAcceleration> {
     explicit XAxisAcceleration(float x) : acceleration(x) {}
@@ -31,276 +34,238 @@ struct XAxisAcceleration : public se4::Component<XAxisAcceleration> {
     float acceleration;
 };
 
-struct Volume4f : public se4::Component<Volume4f> {
-    float leftTop, rightTop, rightBot, leftBot;
+struct Yeji : public se4::Component<Yeji> {
 };
 
-struct Volume2f : public se4::Component<Volume2f> {
-    Volume2f(float width, float height) : width(width), height(height) {}
+using InputHandle = se4::ComponentHandle<se4::InputComponent>;
+using XAxisAccelerationHandle = se4::ComponentHandle<XAxisAcceleration>;
+using Position3fHandle = se4::ComponentHandle<se4::Position2d>;
+using YejiHandle = se4::ComponentHandle<Yeji>;
 
-    float width, height;
-};
+b2Vec2 gravity(0.0f, 10.0f);
+b2World b2world(gravity);
 
-//렌더러 이거 나중에 클래스의 변수로 옮겨야함 
-SDL_Renderer* mainRenderer = nullptr;
+struct PhysicsBody : public se4::Component<PhysicsBody> {
+    PhysicsBody(bool isMovable, float friction, float restitution) :
+            isMovable(isMovable),
+            body(nullptr),
+            lastVec2(0.0f, 0.0f),
+            jumpSteps(0) {
 
-struct Texture : public se4::Component<Texture> {
-    Texture(const char *path) : texture(IMG_LoadTexture(mainRenderer, path)){}
-    
-    SDL_Texture *texture;
-};
-
-class CameraUpdater : public se4::Updater
-{
-    float aspectRatio; // 종횡비
-    int width;
-    int height;
-    int x;
-    int y;
-
-    //SCREEN width, height를 필드의 width, height로 바꿔야 할 부분은 주석으로 V 써놓음
-    CameraUpdater(float ratio) : aspectRatio(ratio)
-    {
-        se4::Updater::signature.addComponent<Position3f>();
-        width = SCREEN_WIDTH; //V
-        height = SCREEN_HEIGHT; //V
-        x = width / 2 - SCREEN_WIDTH; // 처음 화면 나올 때 화면의 중앙을 잡음 여기껀 SCREEN 맞음
-        y = height / 2 - SCREEN_HEIGHT;
+        fixtureDef.friction = friction;
+        fixtureDef.restitution = restitution;
     }
 
-    SDL_Rect cam(std::vector<se4::Entity> entities)
-    {
-        //일단 0번째 entity를 기준으로 포지션을 잡음
-        se4::ComponentHandle<Position3f> defaultLocationHandler;
-        parentWorld->unpack(entities.at(0), defaultLocationHandler);
-        x = defaultLocationHandler->posX;
-        y = defaultLocationHandler->posY;
-        //더이상 entity가 없으면 그대로 리턴
-        if (entities.size() == 1)
-            return;
-        //아닐 경우 첫 entity의 값을 기초값으로 잡고 registeredEntities를 끝까지 돌면서 minX, maxX, minY, maxY를 구함
-        int minX = x;
-        int maxX = x;
-        int minY = y;
-        int maxY = y;
-
-        for (auto& entity : entities)
-        {
-            se4::ComponentHandle<Position3f> posHandler;
-            parentWorld->unpack(entity, posHandler);
-
-            if (posHandler->posX > maxX)
-            {
-                maxX = posHandler->posX;
-            }
-            else if (posHandler->posX > minX)
-            {
-                minX = posHandler->posX;
-            }
-
-            if (posHandler->posY > maxY)
-            {
-                maxY = posHandler->posY;
-            }
-            else if (posHandler->posY > minY)
-            {
-                minY = posHandler->posY;
-            }
-        }
-        //xy의 좌표값과 width, height 도출
-        x = (minX + maxX) / 2;
-        y = (minY + maxY) / 2;
-        width = maxX - minX;
-        height = maxY - minY;
-
-        //종횡비에 따라 width, height 보정
-        if (width * aspectRatio > height)
-            height = width * aspectRatio;
-        else if (height / aspectRatio > width)
-            width = height / aspectRatio;
-
-        //
-        if (x + width > SCREEN_WIDTH)
-        {
-            x = SCREEN_WIDTH - width;
-        }
-
-        if (y + height > SCREEN_HEIGHT)
-        {
-            y = SCREEN_HEIGHT - height;
-        }
-
-        SDL_Rect result;
-        result.x = x;
-        result.y = y;
-        result.w = width;
-        result.h = height;
-
-        return result;
-    }
+    bool isMovable;
+    b2Body *body;
+    b2BodyDef bodyDef;
+    b2FixtureDef fixtureDef;
+    b2Vec2 lastVec2;
+    int jumpSteps;
 };
 
-class RenderUpdater : public se4::Updater {
-public:  
+const float SCALE = 100.0f;
 
-    ~RenderUpdater() override = default;
-    RenderUpdater(){
-        signature.addComponent<Position3f>();
-        signature.addComponent<Volume2f>();
-        signature.addComponent<Texture>();
-    }
 
-    // 텍스쳐 선택 바꿔야함
-    void render() {
-        SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
-        SDL_RenderClear(mainRenderer);
-
-        for (auto &entity : registeredEntities) {
-            se4::ComponentHandle<Position3f> pos3fHandler;
-            se4::ComponentHandle<Volume2f> vol2fHandler;
-            se4::ComponentHandle<Texture> textureHandler;
-            parentWorld->unpack(entity, pos3fHandler, vol2fHandler, textureHandler);           
-
-            SDL_Rect rect;
-            rect.x = pos3fHandler->posX;
-            rect.y = pos3fHandler->posY;
-            rect.w = vol2fHandler->width;
-            rect.h = vol2fHandler->height;    
-
-            SDL_RenderCopy(mainRenderer, textureHandler->texture,  NULL , &rect);
-        }
-        SDL_RenderPresent(mainRenderer);
-    }
-};
-
-class InputUpdater : public se4::Updater {
+class PhysicsUpdater : public se4::Updater {
 public:
-    InputUpdater() = default;
-
-    ~InputUpdater() override = default;
-
-    void init() override {
-        // add all signature
-        signature.addComponent<se4::InputComponent>();
+    PhysicsUpdater() {
+        signature.addComponent<se4::Position2d>();
+        signature.addComponent<se4::Volume2d>();
+        signature.addComponent<PhysicsBody>();
     }
 
-    std::vector<std::unique_ptr<se4::Updater>> funcs;
+    void update(int dt) {
+        for (auto &entity : registeredEntities) {
+            se4::ComponentHandle<se4::Position2d> pos2dHandler;
+            se4::ComponentHandle<se4::Volume2d> vol2dHandler;
+            se4::ComponentHandle<PhysicsBody> physicsHandler;
+            parentWorld->unpack(entity, pos2dHandler, vol2dHandler, physicsHandler);
 
-    void update(int dtt) override {
-        for (auto &func : funcs) {
-            func->update(dtt);
+
+            //동적, 정적 설정
+            if (physicsHandler->isMovable) {
+                physicsHandler->bodyDef.type = b2_dynamicBody;
+            } else {
+                physicsHandler->bodyDef.type = b2_staticBody;
+            }
+
+            physicsHandler->bodyDef.position.Set(pos2dHandler->x / SCALE, pos2dHandler->y / SCALE);
+            if (physicsHandler->body)
+                b2world.DestroyBody(physicsHandler->body);
+
+            physicsHandler->body = b2world.CreateBody(&physicsHandler->bodyDef);
+
+            b2PolygonShape dynamicBox;
+            dynamicBox.SetAsBox(vol2dHandler->width / 2 / SCALE, vol2dHandler->height / 2 / SCALE);
+
+            physicsHandler->fixtureDef.shape = &dynamicBox;
+            physicsHandler->fixtureDef.density = 1.0f;
+
+            //fixture delete?
+            physicsHandler->body->CreateFixture(&physicsHandler->fixtureDef);
+
+            //이전 속도값 더해줌
+            physicsHandler->body->SetLinearVelocity(physicsHandler->lastVec2);
+
+            while (physicsHandler->jumpSteps > 0) {
+                float force = physicsHandler->body->GetMass() * 100 / (1 / 60.0); //f = mv/t
+                //spread this over 6 time steps
+                force /= 6.0;
+                physicsHandler->body->ApplyForceToCenter(b2Vec2(0, force), true);
+                physicsHandler->jumpSteps--;
+            }
+
+
+            //포지션 표시
+            //std::cout<< physicsHandler->body->GetLinearVelocity().x << ", " << physicsHandler->body->GetLinearVelocity().y << std::endl;
+
+            b2world.Step(1.0f / 60.0f, 6, 2);
+
+            b2Vec2 pos = physicsHandler->body->GetPosition();
+            //속도값 저장
+            physicsHandler->lastVec2 = physicsHandler->body->GetLinearVelocity();
+
+            //포지션 갱신
+            pos2dHandler->x = pos.x * SCALE;
+            pos2dHandler->y = pos.y * SCALE;
         }
     }
 };
+
+class PlayerListener : public b2ContactListener, se4::Updater {
+public:
+    PlayerListener() {
+        signature.addComponent<se4::Position2d>();
+        signature.addComponent<se4::Volume2d>();
+        signature.addComponent<PhysicsBody>();
+    }
+
+    void BeginContact(b2Contact *contact) override {
+        auto entity = (void *) contact->GetFixtureA()->GetBody()->GetUserData().pointer;
+        auto phygics = static_cast<PhysicsBody *>(entity);
+    }
+
+    void update(int dt) {
+        for (auto &entity : registeredEntities) {
+            se4::ComponentHandle<se4::Position2d> pos2dHandler;
+            se4::ComponentHandle<se4::Volume2d> vol2dHandler;
+            se4::ComponentHandle<PhysicsBody> physicsHandler;
+            parentWorld->unpack(entity, pos2dHandler, vol2dHandler, physicsHandler);
+            for (b2Contact *contact = b2world.GetContactList(); contact != nullptr; contact->GetNext()) {
+                // contact->GetFixtureA()->GetBody()->GetUserData();
+            }
+        }
+    }
+
+};
+
+se4::Input input;
+
+auto inputCallback(int dt, InputHandle inputHandler, se4::ComponentHandle<PhysicsBody> physicsHandler) {
+    if (inputHandler->is_selected) {
+        if (input.checkKey(se4::KeyState::PRESSED, se4::Key::A) ||
+            input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::A))
+            physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(-0.1, 0);
+        if (input.checkKey(se4::KeyState::PRESSED, se4::Key::D) ||
+            input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::D))
+            physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0.1, 0);
+        if (input.checkKey(se4::KeyState::PRESSED, se4::Key::W))
+            physicsHandler->jumpSteps = 6;
+        if (input.checkKey(se4::KeyState::PRESSED, se4::Key::S))
+            physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
+    }
+}
 
 int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
 
-    LOG(INFO) << "test app start";
-    b2Vec2 gravity = b2Vec2(0.0f, -9.8f);
-    b2World test_world(gravity);
-    LOG(ERROR) << "error log test";
+    auto se4window = std::make_unique<se4::Window>("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
 
-    SDL_Init(SDL_INIT_EVERYTHING);
     //For loading PNG images
     IMG_Init(IMG_INIT_PNG);
 
-    SDL_Window *window = SDL_CreateWindow(
-            "SE4 engine",
-            SDL_WINDOWPOS_UNDEFINED,
-            SDL_WINDOWPOS_UNDEFINED,
-            SCREEN_WIDTH,
-            SCREEN_HEIGHT,
-            SDL_WINDOW_SHOWN
-    );
-
-//    SDL_Window *window2 = SDL_CreateWindow(
-//            "SE4 engine 222",
-//            SDL_WINDOWPOS_UNDEFINED,
-//            SDL_WINDOWPOS_UNDEFINED,
-//            SCREEN_WIDTH,
-//            SCREEN_HEIGHT,
-//            SDL_WINDOW_SHOWN
-//    );
-
-    bool quit = false;
-    mainRenderer = SDL_CreateRenderer(window, -1, 0);
-    // 이건 Game.h 혹은 World.h에 있어야 함
-    SDL2InputWrapper inputWrapper;
-
     auto entityManager = std::make_unique<se4::EntityManager>();
-    auto world = std::make_unique<se4::World>(std::move(entityManager));
+    auto world = std::make_shared<se4::World>(std::move(entityManager));
+    world->setRenderWindow(std::move(se4window));
 
     // 엔티티 선언
     auto entity = world->createEntity();
     auto yeji = world->createEntity();
     auto entity2 = world->createEntity();
+    auto floor = world->createEntity();
+    auto leftWall = world->createEntity();
+    auto rightWall = world->createEntity();
+    auto ceil = world->createEntity();
 
-    // Input 값을 처리하는 Updater
-    auto input_acc_callback = [&inputWrapper](se4::ComponentHandle<se4::InputComponent> inputHandler,
-                                              se4::ComponentHandle<XAxisAcceleration> accelerationHandler) -> void {
-        if (inputHandler->is_selected) {
-            if (inputWrapper.Keymap().at(se4::Key::A) == se4::KeyState::PRESSED)
-                accelerationHandler->acceleration =
-                        accelerationHandler->acceleration >= 0 ? -1 : accelerationHandler->acceleration - 1;
-            if (inputWrapper.Keymap().at(se4::Key::D) == se4::KeyState::PRESSED)
-                accelerationHandler->acceleration =
-                        accelerationHandler->acceleration <= 0 ? 1 : accelerationHandler->acceleration + 1;
-        }
-    };
-    auto input_acc = std::make_unique<
-            se4::UpdaterTemplate<
-                    se4::ComponentHandle<se4::InputComponent>, se4::ComponentHandle<XAxisAcceleration>
-            >
-    >(input_acc_callback);
+    auto physicsUpdater = std::make_unique<PhysicsUpdater>();
+    world->addUpdater(std::move(physicsUpdater));
+
+    auto input_acc = se4::makeUpdater(inputCallback);
     world->addUpdater(std::move(input_acc));
 
-    // Add Updater
-    // 업데이터 안에서 사용할 콜백 정의
-    auto callback = [](se4::ComponentHandle<Position3f> pos3fHandler,
-                       se4::ComponentHandle<XAxisAcceleration> accelerationHandler) -> void {
-        pos3fHandler->posX += accelerationHandler->acceleration;
-    };
-    // 예지만 움직이게 하기 위한 함수 정의
-    auto compare_id = [yeji](int id) -> bool { return id == yeji.entity.id; };
-    // 생성자의 템플릿 파라메터로 사용할 컴포넌트의 핸들러 넘겨주고 생성자에는 위에서 선언한 함수 2개 넣어줌
-    auto yejiUpdater = std::make_unique<se4::UpdaterTemplate<
-            se4::ComponentHandle<Position3f>, se4::ComponentHandle<XAxisAcceleration>
-    > >(callback, compare_id);
+    auto yejiUpdater = se4::makeUpdater(
+            [](int dt, Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler,
+               YejiHandle yeji) -> void {
+                pos3fHandler->x += accelerationHandler->acceleration;
+            });
     world->addUpdater(std::move(yejiUpdater));
 
-    auto renderUpdater = std::make_unique<RenderUpdater>();
-    world->addUpdater(std::move(renderUpdater));
-
     // 엔티티에 필요한 컴포넌트 선언
-    entity.addComponent(Position3f(100.0f, 100.0f, 0.0f));
-    entity.addComponent(Volume2f(100.0f, 200.0f));
-    entity.addComponent(Texture("resource/walk.png"));
+    entity.addComponent(se4::Position2d(100, 100));
+    entity.addComponent(se4::Volume2d(100.0f, 200.0f));
+    entity.addComponent(se4::RenderComponent("resource/walk.png"));
 
-    yeji.addComponent(Position3f(500.0f, 200.0f, 0.0f));
-    yeji.addComponent(Volume2f(100.0f,100.0f));
-    yeji.addComponent(XAxisAcceleration(0.0f));
+    yeji.addComponent(se4::Position2d(500, 200));
+    yeji.addComponent(se4::Volume2d(100.0f, 100.0f));
     yeji.addComponent(se4::InputComponent(true));
-    yeji.addComponent(Texture("resource/yeji.png"));
+    yeji.addComponent(se4::RenderComponent("resource/yeji.png"));
+    yeji.addComponent(PhysicsBody(true, 0.0f, 0.1f));
+    yeji.addComponent(Yeji());
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
-    entity2.addComponent(Position3f(200.0f, 200.0f, 0.0f));
-    entity2.addComponent(Volume2f(100.0f, 200.0f));
-    entity2.addComponent(Texture("resource/walk.png"));
+    entity2.addComponent(se4::Position2d(200, 200));
+    entity2.addComponent(se4::Volume2d(100.0f, 200.0f));
+    entity2.addComponent(se4::RenderComponent("resource/walk.png"));
+
+    //지형 관련 엔티티, 이건 추후 지형관련 옵션으로 따로 빼서
+    //ShapePolygon 말고 Edge로 처리해서 더 깔끔하게 코드짤 수 있을듯
+    //https://www.iforce2d.net/b2dtut/fixtures
+    floor.addComponent(se4::Position2d(0, SCREEN_HEIGHT - 200.0f));
+    floor.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 1.0f));
+    floor.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+
+    ceil.addComponent(se4::Position2d(0.0, 0.0f));
+    ceil.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 200.0f));
+    ceil.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+
+    leftWall.addComponent(se4::Position2d(0.0f, 0.0f));
+    leftWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 200));
+    leftWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+
+    rightWall.addComponent(se4::Position2d(SCREEN_WIDTH, 0.0f));
+    rightWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 2));
+    rightWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+
 
     world->init();
 
-    currentTime = SDL_GetTicks();
-    double t = 0.0;
-    while (!quit) {
-        inputWrapper.pollInput();
-        quit = inputWrapper.quit;
+    auto const MS_PER_UPDATE = 16ms;
+    auto previous = sc::system_clock::now();
+    while (!input.checkKey(se4::KeyState::PRESSED, se4::Key::ESC)) {
+        auto start = sc::system_clock::now();
+
+        se4::Window::pollKeyEvent(input);
 
         world->update(0);
-        world->render();
+        // renderUpdater->render();
+
+        world->render(0);
+
+        // 일단은 남는 시간동안 sleep 때림
+        std::this_thread::sleep_for(start + MS_PER_UPDATE - sc::system_clock::now());
     }
 
-    SDL_DestroyWindow(window);
     //For quitting IMG systems
     IMG_Quit();
     SDL_Quit();

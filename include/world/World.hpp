@@ -7,6 +7,8 @@
 #include "entity/Entity.hpp"
 #include "entity/EntityManager.hpp"
 #include "updater/Updater.hpp"
+#include "graphics/Renderer.h"
+#include "window/Window.h"
 
 namespace se4 {
     struct EntityHandle;
@@ -27,7 +29,9 @@ namespace se4 {
         /*
          * Render a frame.
          */
-        void render();
+        void render(int dt);
+        auto setRenderWindow(std::unique_ptr<Window> window) -> void;
+        auto unsetRenderWindow() -> std::unique_ptr<Window>;
         EntityHandle createEntity();
         void addUpdater(std::unique_ptr<Updater> updater);
         void destroyEntity(Entity entity);
@@ -36,7 +40,7 @@ namespace se4 {
          * This is only necessary for bridge component managers.
          * TODO write blog post on bridge component managers
          */
-        template <typename ComponentType>
+        template <is_component ComponentType>
         void addCustomComponentManager(std::unique_ptr<ComponentManager<ComponentType>> manager) {
             int family = GetComponentFamily<ComponentType>();
             if (family >= componentManagers.size()) {
@@ -45,7 +49,7 @@ namespace se4 {
             componentManagers[family] = manager;
         }
 
-        template <typename ComponentType>
+        template <is_component ComponentType>
         void addComponent(Entity const& entity, ComponentType&& component) {
             ComponentManager<ComponentType>* manager = getComponentManager<ComponentType>();
             manager->addComponent(entity, component);
@@ -56,7 +60,7 @@ namespace se4 {
             updateEntityMask(entity, oldMask);
         }
 
-        template <typename ComponentType>
+        template <is_component ComponentType>
         void removeComponent(Entity const& entity) {
             ComponentManager<ComponentType>* manager = getComponentManager<ComponentType>();
             ComponentHandle<ComponentType> component = manager->lookup(entity);
@@ -68,7 +72,7 @@ namespace se4 {
             updateEntityMask(entity, oldMask);
         }
 
-        template <typename ComponentType, typename... Args>
+        template <is_component ComponentType, is_component... Args>
         void unpack(Entity e, ComponentHandle<ComponentType>& handle, ComponentHandle<Args> &... args) {
             typedef ComponentManager<ComponentType> ComponentManagerType;
             auto mgr = getComponentManager<ComponentType>();
@@ -79,7 +83,7 @@ namespace se4 {
         }
 
         // Base case
-        template <typename ComponentType>
+        template <is_component ComponentType>
         void unpack(Entity e, ComponentHandle<ComponentType>& handle) {
             typedef ComponentManager<ComponentType> ComponentManagerType;
             auto mgr = getComponentManager<ComponentType>();
@@ -91,10 +95,11 @@ namespace se4 {
         std::vector<std::unique_ptr<Updater>> updaters;
         std::vector<std::unique_ptr<BaseComponentManager>> componentManagers;
         std::map<Entity, ComponentMask> entityMasks;
+        Renderer* renderer;
 
         void updateEntityMask(Entity const& entity, ComponentMask& oldMask);
 
-        template <typename ComponentType>
+        template <is_component ComponentType>
         ComponentManager<ComponentType>* getComponentManager() {
             // Need to make sure we actually have a component manager.
             // TODO(taurheim) this is a performance hit every time we add and remove a component

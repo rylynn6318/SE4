@@ -1,6 +1,6 @@
 # extern
-
-
+html
+latex
 cmake-build-debug
 .idea
 out
