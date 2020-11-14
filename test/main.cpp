@@ -21,7 +21,7 @@
 #include "window/Window.h"
 
 #include "box2d/box2d.h"
-//커밋테스트
+
 const int SCREEN_WIDTH = 1200;
 const int SCREEN_HEIGHT = 800;
 
@@ -51,7 +51,14 @@ struct PhysicsBody : public se4::Component<PhysicsBody> {
             body(nullptr),
             lastVec2(0.0f, 0.0f),
             jumpSteps(0) {
-
+        if (isMovable) {
+            fixtureDef.filter.categoryBits = 2;
+            fixtureDef.filter.maskBits = 4;
+        }
+        else {
+            fixtureDef.filter.categoryBits = 4;
+            fixtureDef.filter.maskBits = 2;
+        }
         fixtureDef.friction = friction;
         fixtureDef.restitution = restitution;
     }
@@ -75,7 +82,7 @@ public:
         signature.addComponent<PhysicsBody>();
     }
 
-    void update(int dt) {
+    void update(int dt) override {
         for (auto &entity : registeredEntities) {
             se4::ComponentHandle<se4::Position2d> pos2dHandler;
             se4::ComponentHandle<se4::Volume2d> vol2dHandler;
@@ -133,27 +140,27 @@ public:
     }
 };
 
-class PlayerListener : public b2ContactListener, se4::Updater {
+class PlayerListener : public se4::Updater{
 public:
     PlayerListener() {
         signature.addComponent<se4::Position2d>();
         signature.addComponent<se4::Volume2d>();
         signature.addComponent<PhysicsBody>();
     }
-
-    void BeginContact(b2Contact *contact) override {
-        auto entity = (void *) contact->GetFixtureA()->GetBody()->GetUserData().pointer;
-        auto phygics = static_cast<PhysicsBody *>(entity);
-    }
-
-    void update(int dt) {
+    //void BeginContact(b2Contact *contact) override {
+    //    auto entity = (void *) contact->GetFixtureA()->GetBody()->GetUserData().pointer;
+    //    auto phygics = static_cast<PhysicsBody *>(entity);
+    //}
+    void update(int dt) override {
         for (auto &entity : registeredEntities) {
             se4::ComponentHandle<se4::Position2d> pos2dHandler;
             se4::ComponentHandle<se4::Volume2d> vol2dHandler;
             se4::ComponentHandle<PhysicsBody> physicsHandler;
             parentWorld->unpack(entity, pos2dHandler, vol2dHandler, physicsHandler);
-            for (b2Contact *contact = b2world.GetContactList(); contact != nullptr; contact->GetNext()) {
-                // contact->GetFixtureA()->GetBody()->GetUserData();
+            for (b2Contact *contact = b2world.GetContactList(); contact != nullptr; contact=contact->GetNext()) {
+                auto data1 = (void*)( contact->GetFixtureA()->GetBody()->GetUserData().pointer);
+                auto data2 = (void*)( contact->GetFixtureB()->GetBody()->GetUserData().pointer);
+               
             }
         }
     }
@@ -201,6 +208,9 @@ int main(int argc, char *argv[]) {
     auto physicsUpdater = std::make_unique<PhysicsUpdater>();
     world->addUpdater(std::move(physicsUpdater));
 
+    auto playerListener = std::make_unique<PlayerListener>();
+    world->addUpdater(std::move(playerListener));
+
     auto input_acc = se4::makeUpdater(inputCallback);
     world->addUpdater(std::move(input_acc));
 
@@ -217,7 +227,7 @@ int main(int argc, char *argv[]) {
     entity.addComponent(se4::RenderComponent("resource/walk.png"));
 
     yeji.addComponent(se4::Position2d(500, 200));
-    yeji.addComponent(se4::Volume2d(100.0f, 100.0f));
+    yeji.addComponent(se4::Volume2d(100.0f, 100.0f)); 
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(se4::RenderComponent("resource/yeji.png"));
     yeji.addComponent(PhysicsBody(true, 0.0f, 0.1f));
@@ -235,17 +245,17 @@ int main(int argc, char *argv[]) {
     floor.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 1.0f));
     floor.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
-    ceil.addComponent(se4::Position2d(0.0, 0.0f));
-    ceil.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 200.0f));
-    ceil.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+    //ceil.addComponent(se4::Position2d(0.0, 0.0f));
+    //ceil.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 200.0f));
+    //ceil.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
-    leftWall.addComponent(se4::Position2d(0.0f, 0.0f));
-    leftWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 200));
-    leftWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+    //leftWall.addComponent(se4::Position2d(0.0f, 0.0f));
+    //leftWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 200));
+    //leftWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
-    rightWall.addComponent(se4::Position2d(SCREEN_WIDTH, 0.0f));
-    rightWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 2));
-    rightWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+    //rightWall.addComponent(se4::Position2d(SCREEN_WIDTH, 0.0f));
+    //rightWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 2));
+    //rightWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
 
     world->init();
