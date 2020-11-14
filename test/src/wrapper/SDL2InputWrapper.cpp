@@ -12,6 +12,10 @@ auto SDL2InputWrapper::toSE4Key(int keycode) -> se4::Key {
             return se4::Key::B;
         case SDLK_d:
             return se4::Key::D;
+        case SDLK_w:
+            return se4::Key::W;
+        case SDLK_s:
+            return se4::Key::S;
         default:
             return se4::Key::NONE;
     }
