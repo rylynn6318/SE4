@@ -17,3 +17,4 @@ A. SDL2는 소스에 CMakeLists.txt 있어서 쉽게 빌드 하는데 SDL2_image
 MIT  
 todo : 외부 라이센스 명시  
 SDL2, SDL2_image, glog, box2d
+https://github.com/taurheim/NomadECS
