@@ -66,6 +66,103 @@ struct PhysicsBody : public se4::Component<PhysicsBody> {
 
 const float SCALE = 100.0f;
 
+class CameraUpdater : public se4::Updater
+{
+    float aspectRatio; // 종횡비
+    int width;
+    int height;
+    int x;
+    int y;
+
+    //SCREEN width, height를 필드의 width, height로 바꿔야 할 부분은 주석으로 V 써놓음
+    CameraUpdater(float ratio) : aspectRatio(ratio)
+    {
+        se4::Updater::signature.addComponent<se4::Position2d>();
+        width = SCREEN_WIDTH; //V
+        height = SCREEN_HEIGHT; //V
+        x = width / 2 - SCREEN_WIDTH; // 처음 화면 나올 때 화면의 중앙을 잡음 여기껀 SCREEN 맞음
+        y = height / 2 - SCREEN_HEIGHT;
+    }
+
+    SDL_Rect cam(std::vector<se4::Entity> entities)
+    {
+        //일단 0번째 entity를 기준으로 포지션을 잡음
+        se4::ComponentHandle<se4::Position2d> defaultLocationHandler;
+        se4::ComponentHandle<se4::Volume2d> vol2dHandler;
+        parentWorld->unpack(entities.at(0), defaultLocationHandler);
+        x = defaultLocationHandler->x;
+        y = defaultLocationHandler->y;
+        //더이상 entity가 없으면 그대로 리턴
+        if (entities.size() == 1)
+        {
+            SDL_Rect result;
+            result.x = x;
+            result.y = y;
+            result.w = SCREEN_WIDTH;
+            result.h = SCREEN_HEIGHT;
+            return;
+        }
+        //아닐 경우 첫 entity의 값을 기초값으로 잡고 registeredEntities를 끝까지 돌면서 minX, maxX, minY, maxY를 구함
+        int minX = x;
+        int maxX = x;
+        int minY = y;
+        int maxY = y;
+
+        for (auto& entity : entities)
+        {
+            se4::ComponentHandle < se4:: Position2d > posHandler;
+            parentWorld->unpack(entity, posHandler);
+
+            if (posHandler->x > maxX)
+            {
+                maxX = posHandler->x;
+            }
+            else if (posHandler->x > minX)
+            {
+                minX = posHandler->x;
+            }
+
+            if (posHandler->y > maxY)
+            {
+                maxY = posHandler->y;
+            }
+            else if (posHandler->y > minY)
+            {
+                minY = posHandler->y;
+            }
+        }
+        //xy의 좌표값과 width, height 도출
+        x = (minX + maxX) / 2;
+        y = (minY + maxY) / 2;
+        width = maxX - minX;
+        height = maxY - minY;
+
+        //종횡비에 따라 width, height 보정
+        if (width * aspectRatio > height)
+            height = width * aspectRatio;
+        else if (height / aspectRatio > width)
+            width = height / aspectRatio;
+
+        //
+        if (x + width > SCREEN_WIDTH)
+        {
+            x = SCREEN_WIDTH - width;
+        }
+
+        if (y + height > SCREEN_HEIGHT)
+        {
+            y = SCREEN_HEIGHT - height;
+        }
+
+        SDL_Rect result;
+        result.x = x;
+        result.y = y;
+        result.w = width;
+        result.h = height;
+
+        return result;
+    }
+};
 
 class PhysicsUpdater : public se4::Updater {
 public:
