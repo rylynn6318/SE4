@@ -50,6 +50,88 @@ struct Texture : public se4::Component<Texture> {
     SDL_Texture *texture;
 };
 
+struct CameraUpdater : public se4::Updater
+{
+    float aspectRatio; // 종횡비
+    int width;
+    int height;
+    int x;
+    int y;
+
+    //SCREEN width, height를 필드의 width, height로 바꿔야 할 부분은 주석으로 V 써놓음
+    CameraUpdater(float ratio) : aspectRatio(ratio)
+    {
+        se4::Updater::signature.addComponent<Position3f>();
+        width = SCREEN_WIDTH; //V
+        height = SCREEN_HEIGHT; //V
+        x = width / 2 - SCREEN_WIDTH; // 처음 화면 나올 때 화면의 중앙을 잡음 여기껀 SCREEN 맞음
+        y = height / 2 - SCREEN_HEIGHT;
+    }
+
+    void cam(std::vector<se4::Entity> entities)
+    {
+        //일단 0번째 entity를 기준으로 포지션을 잡음
+        se4::ComponentHandle<Position3f> defaultLocationHandler;
+        parentWorld->unpack(entities.at(0), defaultLocationHandler);
+        x = defaultLocationHandler->posX;
+        y = defaultLocationHandler->posY;
+        //더이상 entity가 없으면 그대로 리턴
+        if (entities.size() == 1)
+            return;
+        //아닐 경우 첫 entity의 값을 기초값으로 잡고 registeredEntities를 끝까지 돌면서 minX, maxX, minY, maxY를 구함
+        int minX = x;
+        int maxX = x;
+        int minY = y;
+        int maxY = y;
+
+        for (auto& entity : entities)
+        {
+            se4::ComponentHandle<Position3f> posHandler;
+            parentWorld->unpack(entity, posHandler);
+
+            if (posHandler->posX > maxX)
+            {
+                maxX = posHandler->posX;
+            }
+            else if (posHandler->posX > minX)
+            {
+                minX = posHandler->posX;
+            }
+
+            if (posHandler->posY > maxY)
+            {
+                maxY = posHandler->posY;
+            }
+            else if (posHandler->posY > minY)
+            {
+                minY = posHandler->posY;
+            }
+        }
+        //xy의 좌표값과 width, height 도출
+        x = (minX + maxX) / 2;
+        y = (minY + maxY) / 2;
+        width = maxX - minX;
+        height = maxY - minY;
+
+        //종횡비에 따라 width, height 보정
+        if (width * aspectRatio > height)
+            height = width * aspectRatio;
+        else if (height / aspectRatio > width)
+            width = height / aspectRatio;
+
+        //
+        if (x + width > SCREEN_WIDTH)
+        {
+            x = SCREEN_WIDTH - width;
+        }
+
+        if (y + height > SCREEN_HEIGHT)
+        {
+            y = SCREEN_HEIGHT - height;
+        }
+    }
+};
+
 class RenderUpdater : public se4::Updater {
 public:  
 
