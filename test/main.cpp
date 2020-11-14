@@ -50,7 +50,7 @@ struct Texture : public se4::Component<Texture> {
     SDL_Texture *texture;
 };
 
-struct CameraUpdater : public se4::Updater
+class CameraUpdater : public se4::Updater
 {
     float aspectRatio; // 종횡비
     int width;
@@ -68,7 +68,7 @@ struct CameraUpdater : public se4::Updater
         y = height / 2 - SCREEN_HEIGHT;
     }
 
-    void cam(std::vector<se4::Entity> entities)
+    SDL_Rect cam(std::vector<se4::Entity> entities)
     {
         //일단 0번째 entity를 기준으로 포지션을 잡음
         se4::ComponentHandle<Position3f> defaultLocationHandler;
@@ -129,6 +129,14 @@ struct CameraUpdater : public se4::Updater
         {
             y = SCREEN_HEIGHT - height;
         }
+
+        SDL_Rect result;
+        result.x = x;
+        result.y = y;
+        result.w = width;
+        result.h = height;
+
+        return result;
     }
 };
 
