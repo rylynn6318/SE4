@@ -39,18 +39,6 @@ struct Volume2f : public se4::Component<Volume2f> {
     float width, height;
 };
 
-struct Player : public se4::Component<Player>
-{
-    
-};
-
-struct Wall : public se4::Component<Wall>
-{
-
-};
-
-
-//렌더러 이거 나중에 클래스의 변수로 옮겨야함
 SDL_Renderer* mainRenderer = nullptr;
 
 struct Texture : public se4::Component<Texture> {
