@@ -7,6 +7,12 @@ project(
 
 set(CMAKE_CXX_STANDARD 20)
 
+# ---------------------------------- 엔진 설정 -----------------------------------
+# Available : SDL2
+set(ENGINE_SDK SDL2)
+
+configure_file(${PROJECT_SOURCE_DIR}/include/EngineConfig.h.in ${PROJECT_SOURCE_DIR}/include/EngineConfig.h)
+
 # ---------------------------------- 빌드 설정 -----------------------------------
 # TODO : CAUTION : 일단 편의를 위해 GLOB_RECURSE 사용함
 file(GLOB_RECURSE SOURCE_FILE src/*.c*)
@@ -15,8 +21,8 @@ file(GLOB_RECURSE TEST_SOURCE_FILE test/src/*.c*)
 file(GLOB_RECURSE TEST_HEADER_FILE test/include/*.h*)
 
 # 디버깅용
-message("--> SOUᅟRCE FILES : ${SOURCE_FILE}")
-message("--> HEADER FILES : ${HEADER_FILE}")
+message("--> SOURCE FILES : ${TEST_SOURCE_FILE}")
+message("--> HEADER FILES : ${TEST_HEADER_FILE}")
 
 # STATIC 라이브러리로 뱉어낸다
 add_library(${PROJECT_NAME} STATIC ${HEADER_FILE} ${SOURCE_FILE})
@@ -26,19 +32,20 @@ add_executable(${PROJECT_NAME}_test test/main.cpp ${TEST_SOURCE_FILE} ${TEST_HEA
 file(COPY "test/resource" DESTINATION ${CMAKE_BINARY_DIR})
 
 # ------------------------------ 프로젝트 파일들 설정 ------------------------------
-
-# 새 디렉토리 추가시 여기도 추가할 것
-include_directories(include)
-include_directories(include/component)
-include_directories(include/entity)
-include_directories(include/input)
-include_directories(include/updater)
-include_directories(include/world)
+target_include_directories(${PROJECT_NAME} PUBLIC
+        include/
+#        include/component/
+#        include/entity/
+#        include/input/
+#        include/updater/
+#        include/world/
+#        include/window/
+        )
 
 # 테스트용
 target_include_directories(${PROJECT_NAME}_test PUBLIC test/include)
 
-# ----------------------------- 외부 라이브러리 추가--------------------------------
+# ----------------------------- 외부 라이브러리 추가 --------------------------------
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/")
 
 # SDL2와 똘마니들
@@ -52,7 +59,7 @@ set(GLOG_DIR "extern/glog")
 add_subdirectory("${GLOG_DIR}")
 include_directories("${GLOG_DIR}/include")
 
-# box2d 로드해서 캐시에 저장되기 전에 옵션 기본값을 off로 설정함
+# box2d 로드해서 캐시에 저장되기 전에 옵션 기본값 설정함
 option(BOX2D_BUILD_UNIT_TESTS "Build the Box2D unit tests" OFF)
 option(BOX2D_BUILD_TESTBED "Build the Box2D testbed" OFF)
 option(BOX2D_BUILD_DOCS "Build the Box2D documentation" OFF)
@@ -61,16 +68,14 @@ option(BOX2D_USER_SETTINGS "Override Box2D settings with b2UserSettings.h" OFF)
 set(BOX2D_DIR "extern/box2d")
 add_subdirectory("${BOX2D_DIR}")
 include_directories("${BOX2D_DIR}/include")
-message("--> BOX2D_BUILD_TESTBED : ${BOX2D_BUILD_TESTBED}")
 
 # ------------------------------------ 링크 -------------------------------------
-# 엔진은 외부 라이브러리와 완전히 분리
-#target_link_libraries(${PROJECT_NAME}
-#        ${SDL2_LIBRARIES}
-#        ${SDL2_IMAGE_LIBRARIES}
-#        glog
-#        box2d
-#        )
+target_link_libraries(${PROJECT_NAME}
+        ${SDL2_LIBRARIES}
+        ${SDL2_IMAGE_LIBRARIES}
+        glog
+        box2d
+        )
 
 target_link_libraries(${PROJECT_NAME}_test #PUBLIC
         ${SDL2_LIBRARIES}

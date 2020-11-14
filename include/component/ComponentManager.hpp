@@ -1,12 +1,12 @@
 #pragma once
 #include <array>
-#include <map>
 #include <cstdlib>
+#include "Component.hpp"
 #include "entity/Entity.hpp"
 #include "entity/EntityMap.hpp"
 
 namespace se4 {
-    template <typename ComponentType>
+    template <is_component ComponentType>
     struct ComponentData {
         unsigned int size = 1;
         std::array<ComponentType, MAX_NUMBER_OF_COMPONENTS>* data;
@@ -22,13 +22,13 @@ namespace se4 {
         BaseComponentManager& operator=(BaseComponentManager&&) = default;
     };
 
-    template <typename ComponentType>
+    template <is_component ComponentType>
     class ComponentManager : public BaseComponentManager {
     public:
         using LookupType = ComponentType;
 
         ComponentManager() {
-            componentData.data = static_cast<std::array<ComponentType, 1024>*>(malloc(sizeof(ComponentType) * 1024));
+            componentData.data = static_cast<std::array<ComponentType, MAX_NUMBER_OF_COMPONENTS>*>(malloc(sizeof(ComponentType) * MAX_NUMBER_OF_COMPONENTS));
         }
         ComponentInstance addComponent(Entity entity, ComponentType& component) {
             ComponentInstance newInstance = componentData.size;

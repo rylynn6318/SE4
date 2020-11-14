@@ -3,3 +3,17 @@
 //
 
 #include "core/Game.h"
+
+
+
+auto se4::Game::addWorlds(std::shared_ptr<World> world_ptr) -> void {
+    worlds.push_back(std::move(world_ptr));
+}
+
+auto se4::Game::run() -> void {
+
+}
+
+auto se4::Game::stop() -> void {
+
+}
