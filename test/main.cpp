@@ -41,6 +41,7 @@ using Position3fHandle = se4::ComponentHandle<se4::Position2d>;
 using YejiHandle = se4::ComponentHandle<Yeji>;
 
 se4::Input input;
+
 auto inputCallback(int dt, InputHandle inputHandler, XAxisAccelerationHandle accelerationHandler) {
     if (inputHandler->is_selected) {
         if (input.checkKey(se4::KeyState::PRESSED, se4::Key::A) ||
@@ -106,7 +107,7 @@ int main(int argc, char *argv[]) {
         auto start = sc::system_clock::now();
 
         // se4window.pollKeyEvent(input);
-
+\
         world->update(0);
         // renderUpdater->render();
 
