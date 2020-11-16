@@ -77,6 +77,7 @@ struct PhysicsBody : public se4::Component<PhysicsBody> {
     float forceX;
     float forceY;
     int jumpSteps;
+    bool die = false;
 };
 
 
@@ -101,9 +102,13 @@ public:
             //동적, 정적 설정
             if (physicsHandler->isMovable) {
                 physicsHandler->bodyDef.type = b2_dynamicBody;
+                physicsHandler->fixtureDef.filter.categoryBits = 0x0002;
+                physicsHandler->fixtureDef.filter.maskBits = 0x0004;
             }
             else {
                 physicsHandler->bodyDef.type = b2_staticBody;
+                physicsHandler->fixtureDef.filter.categoryBits = 0x0004;
+                physicsHandler->fixtureDef.filter.maskBits = 0x0002;
             }
 
             physicsHandler->bodyDef.position.Set(pos2dHandler->x / SCALE, pos2dHandler->y / SCALE);
@@ -154,6 +159,12 @@ public:
             //포지션 갱신
             pos2dHandler->x = pos.x * SCALE;
             pos2dHandler->y = pos.y * SCALE;
+
+            if (physicsHandler->body->GetUserData().pointer)
+            {
+                std::cout << "죽음" << std::endl;
+                b2world.DestroyBody(physicsHandler->body);
+            }
         }
     }
 };
@@ -176,7 +187,7 @@ public:
             se4::ComponentHandle<PhysicsBody> physicsHandler;
             parentWorld->unpack(entity, pos2dHandler, vol2dHandler, physicsHandler);
             for (b2Contact* contact = b2world.GetContactList(); contact != nullptr; contact = contact->GetNext()) {
-                //std::cout << contact->GetFixtureA()->GetBody()->IsBullet() << std::endl;
+     
             }
         }
     }
