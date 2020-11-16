@@ -15,6 +15,7 @@
 #include "input/InputComponent.h"
 #include "component/Position2d.h"
 #include "component/Volume2d.h"
+#include "component/Cam.h"
 #include "graphics/RenderComponent.h"
 
 #include "input/Input.h"
@@ -211,14 +212,14 @@ int main(int argc, char *argv[]) {
     world->addUpdater(std::move(yejiUpdater));
 
     // 엔티티에 필요한 컴포넌트 선언
-    background.addComponent(se4::Position2d(600, 400));
-    background.addComponent(se4::Volume2d(1200.0f, 800.0f));
+    background.addComponent(se4::Position2d(1920/2, 1080/2));
+    background.addComponent(se4::Volume2d(1920.0f, 1080.0f));
     background.addComponent(se4::RenderComponent("resource/background.png"));
 
     yeji.addComponent(se4::Position2d(500, 200));
     yeji.addComponent(se4::Volume2d(100.0f, 100.0f));
     yeji.addComponent(se4::InputComponent(true));
-    yeji.addComponent(se4::RenderComponent("resource/yeji.png"));
+    yeji.addComponent(se4::RenderComponent("resource/yeji.png", true));
     yeji.addComponent(PhysicsBody(true, 0.0f, 0.1f));
     yeji.addComponent(Yeji());
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
@@ -226,24 +227,24 @@ int main(int argc, char *argv[]) {
     entity2.addComponent(se4::Position2d(200, 200));
     entity2.addComponent(se4::Volume2d(100.0f, 200.0f));
     entity2.addComponent(se4::RenderComponent("resource/walk.png"));
-
+    
     //지형 관련 엔티티, 이건 추후 지형관련 옵션으로 따로 빼서
     //ShapePolygon 말고 Edge로 처리해서 더 깔끔하게 코드짤 수 있을듯
     //https://www.iforce2d.net/b2dtut/fixtures
-    floor.addComponent(se4::Position2d(0, SCREEN_HEIGHT - 200.0f));
-    floor.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 1.0f));
+    floor.addComponent(se4::Position2d(0.0f, 1080.0f));
+    floor.addComponent(se4::Volume2d(8000.0f, 0.0f));
     floor.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
     ceil.addComponent(se4::Position2d(0.0, 0.0f));
-    ceil.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 200.0f));
+    ceil.addComponent(se4::Volume2d(8000.0f, 200.0f));
     ceil.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
     leftWall.addComponent(se4::Position2d(0.0f, 0.0f));
-    leftWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 200));
+    leftWall.addComponent(se4::Volume2d(0.0f, 10000.0f));
     leftWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
-    rightWall.addComponent(se4::Position2d(SCREEN_WIDTH, 0.0f));
-    rightWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 2));
+    rightWall.addComponent(se4::Position2d(1920, 0.0f));
+    rightWall.addComponent(se4::Volume2d(0.0f, 10000.0f));
     rightWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
 
@@ -260,6 +261,7 @@ int main(int argc, char *argv[]) {
         // renderUpdater->render();
 
         world->render(0);
+        
 
         // 일단은 남는 시간동안 sleep 때림
         std::this_thread::sleep_for(start + MS_PER_UPDATE - sc::system_clock::now());

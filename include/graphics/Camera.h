@@ -26,16 +26,17 @@ namespace se4 {
 		int y;
 		int levelWidth;
 		int levelHeight;
-		
+
 	public:
 		Camera(float ratio, int levelWidth, int levelHeight, int width, int height) : aspectRatio(ratio), levelWidth(levelWidth), levelHeight(levelHeight), width(width), height(height)
 		{
-			se4::Updater::signature.addComponent<se4::Position2d>();
+			//se4::Updater::signature.addComponent<se4::Position2d>();
 			x = levelWidth / 2 - width;
 			y = levelHeight / 2 - height;
 		}
 
 		SDL_Rect cam();
+		void findRect();
 	};
 }  // namespace se4
 

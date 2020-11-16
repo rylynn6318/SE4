@@ -14,11 +14,16 @@
 
 namespace se4 {
     struct RenderComponent : public Component<RenderComponent> {
-        explicit RenderComponent(char const * path) : texture_path(path) {}
+        explicit RenderComponent(char const * path) : texture_path(path) 
+        {
+            shouldBeSeen = false;
+        }
+        explicit RenderComponent(char const* path, bool shouldBeSeen) : texture_path(path), shouldBeSeen(shouldBeSeen) {}
 
         char const * texture_path;
         // 나중에 빼야함
         SDL_Texture * texture;
+        bool shouldBeSeen;
     };
 }
 

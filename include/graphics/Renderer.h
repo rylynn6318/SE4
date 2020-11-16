@@ -19,9 +19,13 @@ namespace se4 {
 
         auto render(int time) -> void;
 
+        auto getCamViewprot() -> SDL_Rect;
+
     public:
         // 일단 pulbic으로 둠
         std::unique_ptr<Window> window;
+        int winMinWidth = 800;
+        //SDL_Rect viewport{ 1, 0, 600, 400 };
     };
 }
 
