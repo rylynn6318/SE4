@@ -139,15 +139,13 @@ public:
 
             //이전 속도값 더해줌
             physicsHandler->body->SetLinearVelocity(physicsHandler->lastVec2);
-         
-            while (physicsHandler->jumpSteps > 0) {
-                // fps/10
-                physicsHandler->forceY /= 6.0;
-
-                physicsHandler->body->ApplyForceToCenter(b2Vec2(0, physicsHandler->forceY), true);
-                physicsHandler->jumpSteps--;
+            if (physicsHandler->forceY != 0) {
+                physicsHandler->body->ApplyForceToCenter(b2Vec2(0, -physicsHandler->forceY), true); 
+                std::cout << physicsHandler->forceY << std::endl;
+                physicsHandler->forceY = 0;
+                std::cout << "jump!" << std::endl;
             }
-          
+            
 
             //TODO: deltatime으로 바꿀 것
             b2world.Step(1.0f / 60.0f, 6, 2);
@@ -182,9 +180,7 @@ public:
             se4::ComponentHandle<PhysicsBody> physicsHandler;
             parentWorld->unpack(entity, pos2dHandler, vol2dHandler, physicsHandler);
             for (b2Contact* contact = b2world.GetContactList(); contact != nullptr; contact = contact->GetNext()) {
-
-
-
+                //std::cout << contact->GetFixtureA()->GetBody()->IsBullet() << std::endl;
             }
         }
     }
@@ -202,8 +198,9 @@ auto inputCallback(int dt, InputHandle inputHandler, se4::ComponentHandle<Physic
             input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::D))
             physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0.1, 0);
         if (input.checkKey(se4::KeyState::PRESSED, se4::Key::W)) {
-            physicsHandler->forceY = physicsHandler->body->GetMass() * 300 / (1 / 60.0); //f = mv/t , dt로 바꿔야함
+            physicsHandler->forceY = physicsHandler->body->GetMass()*5/ (1 / 60.0); //f = mv/t , dt로 바꿔야함
             physicsHandler->jumpSteps = 6;
+           
         }
         if (input.checkKey(se4::KeyState::PRESSED, se4::Key::S))
             physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
@@ -256,7 +253,7 @@ int main(int argc, char* argv[]) {
     yeji.addComponent(se4::Volume2d(100.0f, 100.0f));
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(se4::RenderComponent("resource/yeji.png"));
-    yeji.addComponent(PhysicsBody(true, 0.0f, 0.1f, 1, se4::BodyType::RECTANGLE));
+    yeji.addComponent(PhysicsBody(true, 0.15f, 0.0f, 1, se4::BodyType::RECTANGLE));
     yeji.addComponent(Yeji());
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
@@ -269,7 +266,7 @@ int main(int argc, char* argv[]) {
     //https://www.iforce2d.net/b2dtut/fixtures
     floor.addComponent(se4::Position2d(0, SCREEN_HEIGHT - 200.0f));
     floor.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 1.0f));
-    floor.addComponent(PhysicsBody(false, 0.3f, 0.0f, 1, se4::BodyType::RECTANGLE));
+    floor.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
     //ceil.addComponent(se4::Position2d(0.0, 0.0f));
     //ceil.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 200.0f));
