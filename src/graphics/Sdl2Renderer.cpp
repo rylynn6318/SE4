@@ -27,7 +27,7 @@ auto se4::Renderer::init() -> bool {
 auto se4::Renderer::render(int time) -> void {
     SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
     SDL_RenderClear(mainRenderer);
-
+    
     for (auto &entity : registeredEntities) {
         se4::ComponentHandle<Position2d> pos2dHandler;
         se4::ComponentHandle<Volume2d> vol2dHandler;
@@ -40,8 +40,19 @@ auto se4::Renderer::render(int time) -> void {
         rect.x = pos2dHandler->x - (rect.w / 2);
         rect.y = pos2dHandler->y - (rect.h / 2);
 
+        SDL_Rect topLeftViewport;
+        topLeftViewport.x = 0;
+        topLeftViewport.y = 0;
+        topLeftViewport.w = 1200 / 2;
+        topLeftViewport.h = 800 / 2;
+        //SDL_RenderSetClipRect(mainRenderer, &topLeftViewport);
+        //SDL_RenderSetScale(mainRenderer, 2, 2);
+        
+        
+
         SDL_RenderCopy(mainRenderer, renderHandler->texture, nullptr, &rect);
     }
+    
     SDL_RenderPresent(mainRenderer);
 }
 

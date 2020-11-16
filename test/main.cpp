@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
     world->setRenderWindow(std::move(se4window));
 
     // 엔티티 선언
-    auto entity = world->createEntity();
+    auto background = world->createEntity();
     auto yeji = world->createEntity();
     auto entity2 = world->createEntity();
     auto floor = world->createEntity();
@@ -211,9 +211,9 @@ int main(int argc, char *argv[]) {
     world->addUpdater(std::move(yejiUpdater));
 
     // 엔티티에 필요한 컴포넌트 선언
-    entity.addComponent(se4::Position2d(100, 100));
-    entity.addComponent(se4::Volume2d(100.0f, 200.0f));
-    entity.addComponent(se4::RenderComponent("resource/walk.png"));
+    background.addComponent(se4::Position2d(600, 400));
+    background.addComponent(se4::Volume2d(1200.0f, 800.0f));
+    background.addComponent(se4::RenderComponent("resource/background.png"));
 
     yeji.addComponent(se4::Position2d(500, 200));
     yeji.addComponent(se4::Volume2d(100.0f, 100.0f));
