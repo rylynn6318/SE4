@@ -139,13 +139,15 @@ public:
 
             //이전 속도값 더해줌
             physicsHandler->body->SetLinearVelocity(physicsHandler->lastVec2);
-
+         
             while (physicsHandler->jumpSteps > 0) {
                 // fps/10
                 physicsHandler->forceY /= 6.0;
+
                 physicsHandler->body->ApplyForceToCenter(b2Vec2(0, physicsHandler->forceY), true);
                 physicsHandler->jumpSteps--;
             }
+          
 
             //TODO: deltatime으로 바꿀 것
             b2world.Step(1.0f / 60.0f, 6, 2);
@@ -182,6 +184,7 @@ public:
             for (b2Contact* contact = b2world.GetContactList(); contact != nullptr; contact = contact->GetNext()) {
 
 
+
             }
         }
     }
@@ -199,7 +202,7 @@ auto inputCallback(int dt, InputHandle inputHandler, se4::ComponentHandle<Physic
             input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::D))
             physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0.1, 0);
         if (input.checkKey(se4::KeyState::PRESSED, se4::Key::W)) {
-            physicsHandler->forceY = physicsHandler->body->GetMass() * 100 / (1 / 60.0); //f = mv/t , dt로 바꿔야함
+            physicsHandler->forceY = physicsHandler->body->GetMass() * 300 / (1 / 60.0); //f = mv/t , dt로 바꿔야함
             physicsHandler->jumpSteps = 6;
         }
         if (input.checkKey(se4::KeyState::PRESSED, se4::Key::S))
