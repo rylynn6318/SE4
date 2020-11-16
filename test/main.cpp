@@ -133,19 +133,15 @@ public:
                 physicsHandler->fixtureDef.shape = &edge;
             }
 
-
-            //TODO: make destory
             physicsHandler->body->CreateFixture(&physicsHandler->fixtureDef);
 
             //이전 속도값 더해줌
             physicsHandler->body->SetLinearVelocity(physicsHandler->lastVec2);
-            if (physicsHandler->forceY != 0) {
-                physicsHandler->body->ApplyForceToCenter(b2Vec2(0, -physicsHandler->forceY), true); 
-                std::cout << physicsHandler->forceY << std::endl;
-                physicsHandler->forceY = 0;
-                std::cout << "jump!" << std::endl;
-            }
-            
+                
+            //TODO : 필드가 만들어지면 나중에 force벡터로 통합해야함 ㅇㅇ
+            physicsHandler->body->ApplyForceToCenter(b2Vec2(physicsHandler->forceX, -physicsHandler->forceY), true); 
+            physicsHandler->forceY = 0;
+            physicsHandler->forceX = 0;            
 
             //TODO: deltatime으로 바꿀 것
             b2world.Step(1.0f / 60.0f, 6, 2);
@@ -198,9 +194,7 @@ auto inputCallback(int dt, InputHandle inputHandler, se4::ComponentHandle<Physic
             input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::D))
             physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0.1, 0);
         if (input.checkKey(se4::KeyState::PRESSED, se4::Key::W)) {
-            physicsHandler->forceY = physicsHandler->body->GetMass()*5/ (1 / 60.0); //f = mv/t , dt로 바꿔야함
-            physicsHandler->jumpSteps = 6;
-           
+           physicsHandler->forceY = physicsHandler->body->GetMass()*5/ (1 / 60.0); //f = mv/t , dt로 바꿔야함           
         }
         if (input.checkKey(se4::KeyState::PRESSED, se4::Key::S))
             physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
