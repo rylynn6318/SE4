@@ -41,13 +41,12 @@ auto se4::Renderer::render(int time) -> void {
 		destRect.w = vol2dHandler->width;
 		destRect.h = vol2dHandler->height;
 		
-		destRect.x = pos2dHandler->x -camera.x;
-		destRect.y = pos2dHandler->y -camera.y;
+		destRect.x = pos2dHandler->x - camera.x - (destRect.w/2);
+		destRect.y = pos2dHandler->y - camera.y - (destRect.h/2);
 
-		//1920*1080
         SDL_RenderCopyEx(mainRenderer, renderHandler->texture, nullptr, &destRect, renderHandler->angle, 0, renderHandler->flip);
     }
-	SDL_RenderSetScale(mainRenderer, (double)window->winWidth / camera.w, (double)window->winHeight / camera.h);
+	SDL_RenderSetScale(mainRenderer, (double)window->width / camera.w, (double)window->height / camera.h);
 
     SDL_RenderPresent(mainRenderer);
 }
@@ -64,6 +63,8 @@ auto se4::Renderer::getCamViewprot() -> SDL_Rect {
 
 	int maxXVolume = 0;
 	int maxYVolume = 0;
+	int minXVolume = 0;
+	int minYVolume = 0;
 
 	for (auto& entity : registeredEntities)
 	{
@@ -77,34 +78,36 @@ auto se4::Renderer::getCamViewprot() -> SDL_Rect {
 			if (posHandler->x > maxX)
 			{
 				maxX = posHandler->x;
-				maxXVolume = volHandler->width;
+				maxXVolume = volHandler->width / 2;
 			}
 			if (posHandler->x < minX)
 			{
 				minX = posHandler->x;
+				minXVolume = volHandler->width / 2;
 			}
 
 			if (posHandler->y > maxY)
 			{
 				maxY = posHandler->y;
-				maxYVolume = volHandler->height;
+				maxYVolume = volHandler->height / 2;
 			}
 			if (posHandler->y < minY)
 			{
 				minY = posHandler->y;
+				minYVolume = volHandler->height / 2;
 			}
 		}
 		
 	}
 
-	double aspectRatio = window->winHeight / (double)window->winWidth;
+	double aspectRatio = window->height / (double)window->width;
 	if (minX == maxX && minY == maxY)
 	{
 		int winMinHeight = (int)(winMinWidth * aspectRatio);
-		SDL_Rect view{ maxX - (winMinWidth - maxXVolume) / 2 - winMinWidth*padding, 
-			maxY - (winMinHeight - maxYVolume) / 2 - winMinHeight * padding, 
-			winMinWidth + winMinWidth * 2 * padding, 
-			winMinHeight + winMinHeight * 2 * padding };
+		SDL_Rect view{ maxX - (winMinWidth) / 2 + maxXVolume,
+			maxY - (winMinHeight) / 2 + maxYVolume,
+			winMinWidth, 
+			winMinHeight };
 		
 		if (view.x + view.w > fieldWidth)
 			view.x = fieldWidth - view.w;
@@ -116,26 +119,30 @@ auto se4::Renderer::getCamViewprot() -> SDL_Rect {
 	}
 	
 	//xy의 좌표값과 width, height 도출
-	int width = maxX - minX + maxXVolume;
-	int height = maxY - minY + maxYVolume;
+	int width = maxX - minX + maxXVolume + minXVolume;
+	int height = maxY - minY + maxYVolume + minYVolume;
 
 	//최소크기 검사
 	if (width < winMinWidth)
 		width = winMinWidth;
 	
-	width *= (1 + padding * 2);
-	if (width > fieldWidth)
-	{
-		width = fieldWidth;
-		height = (int)(width * aspectRatio);
-	}
-	else if (width * aspectRatio > height)
+
+	int x = (minX + maxX) / 2 - width / 2 - width * padding;
+	if (width * aspectRatio > height)
 		height = (int)(width * aspectRatio);
 	else if (height / aspectRatio > width)
 		width = (int)(height / aspectRatio);
+	int y = (minY + maxY) / 2 - height / 2 - height * padding;
+
+	width *= (1 + padding * 2);
+	if (width > fieldWidth) {
+		width = fieldWidth;
+		x = 0;
+		y = 0;
+	}
+	height = (int)(width * aspectRatio);
 	
-	int x = minX - width * padding;
-	int y = minY - height * padding;
+	
 
 	if (x + width > fieldWidth)
 		x = fieldWidth - width;

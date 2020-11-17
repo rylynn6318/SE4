@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
     world->addUpdater(std::move(yejiUpdater));
 
     // 엔티티에 필요한 컴포넌트 선언
-    background.addComponent(se4::Position2d(0, 0));
+    background.addComponent(se4::Position2d(1920/2, 1080/2));
     background.addComponent(se4::Volume2d(1920.0f, 1080.0f));
     background.addComponent(se4::RenderComponent("resource/background.png"));
 
@@ -223,8 +223,9 @@ int main(int argc, char *argv[]) {
     yeji.addComponent(Yeji());
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
-    entity2.addComponent(se4::Position2d(0.0f, 980.0f));
+    entity2.addComponent(se4::Position2d(50.0f, 950.0f));
     entity2.addComponent(se4::Volume2d(100.0f, 100.0f));
+    entity2.addComponent(PhysicsBody(true, 0.0f, 0.1f));
     entity2.addComponent(se4::RenderComponent("resource/token.png", true));
     
     //지형 관련 엔티티, 이건 추후 지형관련 옵션으로 따로 빼서

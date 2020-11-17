@@ -9,7 +9,7 @@
 namespace se4 {
     // 2020.11.11 non null terminated 문자열 넘겨도 잘 되는거 확임 함
     Window::Window(std::string_view title, int width, int height)
-            : Sdl2Window(title.data(), width, height), winWidth(width), winHeight(height) {
+            : Sdl2Window(title.data(), width, height), width(width), height(height) {
 
     }
 
