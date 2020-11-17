@@ -24,8 +24,9 @@ namespace se4 {
     public:
         // 일단 pulbic으로 둠
         std::unique_ptr<Window> window;
-        int winMinWidth = 800;
-        //SDL_Rect viewport{ 1, 0, 600, 400 };
+        //아래 두 변수는 추후 사용자의 입력을 받아서 초기화되도록 바꿔야됨
+        int winMinWidth = 455;
+        float padding = 0.03;
     };
 }
 

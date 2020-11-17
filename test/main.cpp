@@ -15,7 +15,6 @@
 #include "input/InputComponent.h"
 #include "component/Position2d.h"
 #include "component/Volume2d.h"
-#include "component/Cam.h"
 #include "graphics/RenderComponent.h"
 
 #include "input/Input.h"
@@ -23,8 +22,8 @@
 
 #include "box2d/box2d.h"
 
-const int SCREEN_WIDTH = 1200;
-const int SCREEN_HEIGHT = 800;
+const int SCREEN_WIDTH = 960;
+const int SCREEN_HEIGHT = 540;
 
 using namespace std::chrono_literals;
 namespace sc = std::chrono;
@@ -212,11 +211,11 @@ int main(int argc, char *argv[]) {
     world->addUpdater(std::move(yejiUpdater));
 
     // 엔티티에 필요한 컴포넌트 선언
-    background.addComponent(se4::Position2d(1920/2, 1080/2));
+    background.addComponent(se4::Position2d(0, 0));
     background.addComponent(se4::Volume2d(1920.0f, 1080.0f));
     background.addComponent(se4::RenderComponent("resource/background.png"));
 
-    yeji.addComponent(se4::Position2d(500, 200));
+    yeji.addComponent(se4::Position2d(400, 100));
     yeji.addComponent(se4::Volume2d(100.0f, 100.0f));
     yeji.addComponent(se4::InputComponent(true));
     yeji.addComponent(se4::RenderComponent("resource/yeji.png", true));
@@ -224,26 +223,26 @@ int main(int argc, char *argv[]) {
     yeji.addComponent(Yeji());
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
-    entity2.addComponent(se4::Position2d(200, 200));
-    entity2.addComponent(se4::Volume2d(100.0f, 200.0f));
-    entity2.addComponent(se4::RenderComponent("resource/walk.png"));
+    entity2.addComponent(se4::Position2d(0.0f, 980.0f));
+    entity2.addComponent(se4::Volume2d(100.0f, 100.0f));
+    entity2.addComponent(se4::RenderComponent("resource/token.png", true));
     
     //지형 관련 엔티티, 이건 추후 지형관련 옵션으로 따로 빼서
     //ShapePolygon 말고 Edge로 처리해서 더 깔끔하게 코드짤 수 있을듯
     //https://www.iforce2d.net/b2dtut/fixtures
     floor.addComponent(se4::Position2d(0.0f, 1080.0f));
-    floor.addComponent(se4::Volume2d(8000.0f, 0.0f));
+    floor.addComponent(se4::Volume2d(8000.0f, 2.0f));
     floor.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
-    ceil.addComponent(se4::Position2d(0.0, 0.0f));
+    ceil.addComponent(se4::Position2d(0.0f, 0.0f));
     ceil.addComponent(se4::Volume2d(8000.0f, 200.0f));
     ceil.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
-    leftWall.addComponent(se4::Position2d(0.0f, 0.0f));
+    leftWall.addComponent(se4::Position2d(0.0f, 1.0f));
     leftWall.addComponent(se4::Volume2d(0.0f, 10000.0f));
     leftWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
-    rightWall.addComponent(se4::Position2d(1920, 0.0f));
+    rightWall.addComponent(se4::Position2d(1920.0f, 0.0f));
     rightWall.addComponent(se4::Volume2d(0.0f, 10000.0f));
     rightWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
 
