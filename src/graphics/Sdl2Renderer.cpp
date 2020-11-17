@@ -123,17 +123,19 @@ auto se4::Renderer::getCamViewprot() -> SDL_Rect {
 	if (width < winMinWidth)
 		width = winMinWidth;
 	
-	//종횡비에 따라 width, height 보정
-	if (width * aspectRatio > height)
+	width *= (1 + padding * 2);
+	if (width > fieldWidth)
+	{
+		width = fieldWidth;
+		height = (int)(width * aspectRatio);
+	}
+	else if (width * aspectRatio > height)
 		height = (int)(width * aspectRatio);
 	else if (height / aspectRatio > width)
 		width = (int)(height / aspectRatio);
 	
 	int x = minX - width * padding;
 	int y = minY - height * padding;
-
-	width *= (1 + padding * 2);
-	height *= (1 + padding * 2);
 
 	if (x + width > fieldWidth)
 		x = fieldWidth - width;
