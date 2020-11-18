@@ -47,17 +47,17 @@ b2World b2world(gravity);
 
 struct PhysicsBody : public se4::Component<PhysicsBody> {
     PhysicsBody(bool isMovable, float friction, float restitution) :
-        isMovable(isMovable),
-        body(nullptr),
-        lastVec2(0.0f, 0.0f),
-        jumpSteps(0) {
+            isMovable(isMovable),
+            body(nullptr),
+            lastVec2(0.0f, 0.0f),
+            jumpSteps(0) {
 
         fixtureDef.friction = friction;
         fixtureDef.restitution = restitution;
     }
 
     bool isMovable;
-    b2Body* body;
+    b2Body *body;
     b2BodyDef bodyDef;
     b2FixtureDef fixtureDef;
     b2Vec2 lastVec2;
@@ -76,7 +76,7 @@ public:
     }
 
     void update(int dt) {
-        for (auto& entity : registeredEntities) {
+        for (auto &entity : registeredEntities) {
             se4::ComponentHandle<se4::Position2d> pos2dHandler;
             se4::ComponentHandle<se4::Volume2d> vol2dHandler;
             se4::ComponentHandle<PhysicsBody> physicsHandler;
@@ -86,8 +86,7 @@ public:
             //동적, 정적 설정
             if (physicsHandler->isMovable) {
                 physicsHandler->bodyDef.type = b2_dynamicBody;
-            }
-            else {
+            } else {
                 physicsHandler->bodyDef.type = b2_staticBody;
             }
 
@@ -142,18 +141,18 @@ public:
         signature.addComponent<PhysicsBody>();
     }
 
-    void BeginContact(b2Contact* contact) override {
-        auto entity = (void*)contact->GetFixtureA()->GetBody()->GetUserData().pointer;
-        auto phygics = static_cast<PhysicsBody*>(entity);
+    void BeginContact(b2Contact *contact) override {
+        auto entity = (void *) contact->GetFixtureA()->GetBody()->GetUserData().pointer;
+        auto phygics = static_cast<PhysicsBody *>(entity);
     }
 
     void update(int dt) {
-        for (auto& entity : registeredEntities) {
+        for (auto &entity : registeredEntities) {
             se4::ComponentHandle<se4::Position2d> pos2dHandler;
             se4::ComponentHandle<se4::Volume2d> vol2dHandler;
             se4::ComponentHandle<PhysicsBody> physicsHandler;
             parentWorld->unpack(entity, pos2dHandler, vol2dHandler, physicsHandler);
-            for (b2Contact* contact = b2world.GetContactList(); contact != nullptr; contact->GetNext()) {
+            for (b2Contact *contact = b2world.GetContactList(); contact != nullptr; contact->GetNext()) {
                 // contact->GetFixtureA()->GetBody()->GetUserData();
             }
         }
@@ -178,7 +177,7 @@ auto inputCallback(int dt, InputHandle inputHandler, se4::ComponentHandle<Physic
     }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
 
     auto se4window = std::make_unique<se4::Window>("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -206,10 +205,10 @@ int main(int argc, char* argv[]) {
     world->addUpdater(std::move(input_acc));
 
     auto yejiUpdater = se4::makeUpdater(
-        [](int dt, Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler,
-            YejiHandle yeji) -> void {
+            [](int dt, Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler,
+               YejiHandle yeji) -> void {
                 pos3fHandler->x += accelerationHandler->acceleration;
-        });
+            });
     world->addUpdater(std::move(yejiUpdater));
 
     // 엔티티에 필요한 컴포넌트 선언
