@@ -216,13 +216,13 @@ int main(int argc, char* argv[]) {
     google::InitGoogleLogging(argv[0]);
 
     auto se4window = std::make_unique<se4::Window>("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
+    se4window->show();
 
     //For loading PNG images
     IMG_Init(IMG_INIT_PNG);
 
     auto entityManager = std::make_unique<se4::EntityManager>();
-    auto world = std::make_shared<se4::World>(std::move(entityManager));
-    world->setRenderWindow(std::move(se4window));
+    auto world = std::make_shared<se4::World>(std::move(entityManager), se4window->getHandle());
 
     // 엔티티 선언
     auto entity = world->createEntity();
@@ -231,7 +231,6 @@ int main(int argc, char* argv[]) {
     auto floor = world->createEntity();
     auto leftWall = world->createEntity();
     auto rightWall = world->createEntity();
-    auto ceil = world->createEntity();
 
     auto physicsUpdater = std::make_unique<PhysicsUpdater>();
     world->addUpdater(std::move(physicsUpdater));
@@ -241,13 +240,6 @@ int main(int argc, char* argv[]) {
 
     auto input_acc = se4::makeUpdater(inputCallback);
     world->addUpdater(std::move(input_acc));
-
-    auto yejiUpdater = se4::makeUpdater(
-        [](int dt, Position3fHandle pos3fHandler, XAxisAccelerationHandle accelerationHandler,
-            YejiHandle yeji) -> void {
-                pos3fHandler->x += accelerationHandler->acceleration;
-        });
-    world->addUpdater(std::move(yejiUpdater));
 
     // 엔티티에 필요한 컴포넌트 선언
     entity.addComponent(se4::Position2d(100, 100));
@@ -273,17 +265,13 @@ int main(int argc, char* argv[]) {
     floor.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 1.0f));
     floor.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
-    //ceil.addComponent(se4::Position2d(0.0, 0.0f));
-    //ceil.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 200.0f));
-    //ceil.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+    leftWall.addComponent(se4::Position2d(0.0f, 0.0f));
+    leftWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 200));
+    leftWall.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
-    //leftWall.addComponent(se4::Position2d(0.0f, 0.0f));
-    //leftWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 200));
-    //leftWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
-
-    //rightWall.addComponent(se4::Position2d(SCREEN_WIDTH, 0.0f));
-    //rightWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 2));
-    //rightWall.addComponent(PhysicsBody(false, 0.3f, 0.0f));
+    rightWall.addComponent(se4::Position2d(SCREEN_WIDTH, 0.0f));
+    rightWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 2));
+    rightWall.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
 
     world->init();
@@ -293,10 +281,9 @@ int main(int argc, char* argv[]) {
     while (!input.checkKey(se4::KeyState::PRESSED, se4::Key::ESC)) {
         auto start = sc::system_clock::now();
 
-        se4::Window::pollKeyEvent(input);
+        se4window->pollKeyEvent(input);
 
         world->update(0);
-        // renderUpdater->render();
 
         world->render(0);
 

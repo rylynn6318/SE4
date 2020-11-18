@@ -3,8 +3,8 @@
 #include <entity/EntityHandle.hpp>
 
 namespace se4 {
-    World::World(std::unique_ptr<EntityManager> entityManager) : entityManager(std::move(entityManager)) {
-        auto r = std::make_unique<Renderer>();
+    World::World(std::unique_ptr<EntityManager> entityManager, std::any& windowContext) : entityManager(std::move(entityManager)) {
+        auto r = std::make_unique<RenderUpdater>(windowContext);
         renderer = r.get();
         addUpdater(std::move(r));
     }
@@ -56,13 +56,5 @@ namespace se4 {
                 updater->unRegisterEntity(entity);
             }
         }
-    }
-
-    auto World::setRenderWindow(std::unique_ptr<Window> window) -> void {
-        this->renderer->window = std::move(window);
-    }
-
-    auto World::unsetRenderWindow() -> std::unique_ptr<Window> {
-        return std::move(this->renderer->window);
     }
 }  // namespace se4

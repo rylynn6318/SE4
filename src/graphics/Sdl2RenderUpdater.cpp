@@ -7,13 +7,11 @@
 #include <component/Position2d.h>
 #include <SDL_image.h>
 #include <component/ComponentHandle.hpp>
-#include "graphics/Sdl2Renderer.h"
-#include "graphics/Renderer.h"
+#include "graphics/Sdl2RenderUpdater.h"
+#include "graphics/RenderUpdater.h"
 #include "world/World.hpp"
 
-auto se4::Renderer::init() -> bool {
-    mainRenderer = SDL_CreateRenderer(window->tmp_getWindow(), -1, 0);
-
+auto se4::RenderUpdater::init() -> bool {
     for (auto &entity : registeredEntities) {
         se4::ComponentHandle<RenderComponent> renderHandler;
         parentWorld->unpack(entity, renderHandler);
@@ -24,7 +22,7 @@ auto se4::Renderer::init() -> bool {
     return true;
 }
 
-auto se4::Renderer::render(int time) -> void {
+auto se4::RenderUpdater::render(int time) -> void {
     SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
     SDL_RenderClear(mainRenderer);
 
@@ -45,8 +43,10 @@ auto se4::Renderer::render(int time) -> void {
     SDL_RenderPresent(mainRenderer);
 }
 
-se4::Renderer::Renderer() {
+se4::RenderUpdater::RenderUpdater(std::any &context) {
     signature.addComponent<Position2d>();
     signature.addComponent<Volume2d>();
     signature.addComponent<RenderComponent>();
+    windowContext = context;
+    mainRenderer = std::any_cast<SDL_Renderer*>(context);
 }

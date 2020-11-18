@@ -2,8 +2,8 @@
 // Created by ssm on 20. 11. 12..
 //
 
-#ifndef SE4_RENDERER_H
-#define SE4_RENDERER_H
+#ifndef SE4_RENDERUPDATER_H
+#define SE4_RENDERUPDATER_H
 
 #include "EngineConfig.h"
 #include "updater/Updater.hpp"
@@ -11,9 +11,9 @@
 #include SDK_RENDERER_H
 
 namespace se4 {
-    class Renderer : public se4::Updater, SDK_RENDERER {
+    class RenderUpdater : public se4::Updater, SDK_RENDERER {
     public:
-        Renderer();
+        explicit RenderUpdater(std::any& context);
 
         auto init() -> bool override;
 
@@ -21,8 +21,8 @@ namespace se4 {
 
     public:
         // 일단 pulbic으로 둠
-        std::unique_ptr<Window> window;
+        std::any windowContext;
     };
 }
 
-#endif //SE4_RENDERER_H
+#endif //SE4_RENDERUPDATER_H
