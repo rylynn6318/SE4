@@ -14,6 +14,8 @@
 namespace se4 {
 class Window : public SDK_WINDOW {
     public:
+        int width;
+        int height;
         Window(std::string_view title, int width, int height);
         ~Window();
 
