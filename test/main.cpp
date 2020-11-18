@@ -22,8 +22,8 @@
 
 #include "box2d/box2d.h"
 
-const int SCREEN_WIDTH = 1200;
-const int SCREEN_HEIGHT = 800;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 
 using namespace std::chrono_literals;
 namespace sc = std::chrono;
@@ -190,6 +190,7 @@ std::shared_ptr<se4::World> getWorld(std::unique_ptr<se4::Window> &window) {
     auto floor = world->createEntity();
     auto leftWall = world->createEntity();
     auto rightWall = world->createEntity();
+    auto roof = world->createEntity();
 
     auto physicsUpdater = std::make_unique<PhysicsUpdater>();
     world->addUpdater(std::move(physicsUpdater));
@@ -220,28 +221,33 @@ std::shared_ptr<se4::World> getWorld(std::unique_ptr<se4::Window> &window) {
     world->addUpdater(std::move(input_acc));
 
     // 엔티티에 필요한 컴포넌트 선언
-    entity.addComponent(se4::Position2d(100, 100));
-    entity.addComponent(se4::Volume2d(100.0f, 200.0f));
-    entity.addComponent(se4::RenderComponent("resource/walk.png"));
+    entity.addComponent(se4::Position2d(SCREEN_WIDTH/2.0, SCREEN_HEIGHT/2.0));
+    entity.addComponent(se4::Volume2d(SCREEN_WIDTH, SCREEN_HEIGHT));
+    entity.addComponent(se4::RenderComponent("resource/background.png"));
 
     yeji.addComponent(se4::Position2d(500, 200));
     yeji.addComponent(se4::Volume2d(100.0f, 100.0f));
     yeji.addComponent(se4::InputComponent(true));
-    yeji.addComponent(se4::RenderComponent("resource/yeji.png"));
+    yeji.addComponent(se4::RenderComponent("resource/yeji.png", true));
     yeji.addComponent(PhysicsBody(true, 0.15f, 0.0f, 1, se4::BodyType::RECTANGLE));
     yeji.addComponent(Yeji());
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
 
     entity2.addComponent(se4::Position2d(200, 200));
     entity2.addComponent(se4::Volume2d(100.0f, 200.0f));
-    entity2.addComponent(se4::RenderComponent("resource/walk.png"));
+    entity2.addComponent(PhysicsBody(true, 0.15f, 0.0f, 1, se4::BodyType::RECTANGLE));
+    entity2.addComponent(se4::RenderComponent("resource/walk.png", true));
 
     //지형 관련 엔티티, 이건 추후 지형관련 옵션으로 따로 빼서
 //ShapePolygon 말고 Edge로 처리해서 더 깔끔하게 코드짤 수 있을듯
 //https://www.iforce2d.net/b2dtut/fixtures
-    floor.addComponent(se4::Position2d(0, SCREEN_HEIGHT - 200.0f));
+    floor.addComponent(se4::Position2d(0, SCREEN_HEIGHT));
     floor.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 1.0f));
     floor.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
+
+    roof.addComponent(se4::Position2d(0, 0));
+    roof.addComponent(se4::Volume2d(SCREEN_WIDTH * 2, 1.0f));
+    roof.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
     leftWall.addComponent(se4::Position2d(0.0f, 0.0f));
     leftWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 200));

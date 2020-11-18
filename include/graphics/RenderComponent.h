@@ -14,11 +14,14 @@
 
 namespace se4 {
     struct RenderComponent : public Component<RenderComponent> {
-        explicit RenderComponent(char const * path) : texture_path(path) {}
+        explicit RenderComponent(char const* path, bool isFocused = false) : texture_path(path), isFocused(isFocused) {}
 
         char const * texture_path;
         // 나중에 빼야함
         SDL_Texture * texture;
+        bool isFocused;
+        double angle = 0;
+        SDL_RendererFlip flip = SDL_FLIP_NONE;
     };
 }
 
