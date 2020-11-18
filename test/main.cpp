@@ -225,8 +225,8 @@ int main(int argc, char *argv[]) {
 
     entity2.addComponent(se4::Position2d(50.0f, 950.0f));
     entity2.addComponent(se4::Volume2d(100.0f, 100.0f));
-    entity2.addComponent(PhysicsBody(true, 0.0f, 0.1f));
-    entity2.addComponent(se4::RenderComponent("resource/token.png", true));
+    //entity2.addComponent(PhysicsBody(true, 0.0f, 0.1f));
+    entity2.addComponent(se4::RenderComponent("resource/token.png"));
     
     //지형 관련 엔티티, 이건 추후 지형관련 옵션으로 따로 빼서
     //ShapePolygon 말고 Edge로 처리해서 더 깔끔하게 코드짤 수 있을듯

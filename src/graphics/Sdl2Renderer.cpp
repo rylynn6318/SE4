@@ -104,16 +104,21 @@ auto se4::Renderer::getCamViewprot() -> SDL_Rect {
 	if (minX == maxX && minY == maxY)
 	{
 		int winMinHeight = (int)(winMinWidth * aspectRatio);
-		SDL_Rect view{ maxX - (winMinWidth) / 2 + maxXVolume,
-			maxY - (winMinHeight) / 2 + maxYVolume,
+
+		SDL_Rect view{ maxX - (winMinWidth) / 2 ,
+			maxY - (winMinHeight) / 2 ,
 			winMinWidth, 
 			winMinHeight };
 		
 		if (view.x + view.w > fieldWidth)
 			view.x = fieldWidth - view.w;
+		if (view.x < 0)
+			view.x = 0;
 
 		if (view.y + view.h > fieldHeight)
 			view.y = fieldHeight - view.h;
+		if (view.y < 0)
+			view.y = 0;
 
 		return view;
 	}
