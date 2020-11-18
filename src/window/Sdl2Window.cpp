@@ -17,11 +17,11 @@ namespace se4 {
         SDL_DestroyWindow(window);
     }
 
-    auto Window::pollKeyEvent(se4::Input &input) -> void {
+    auto Window::pollKeyEvent(se4::Input &i) -> void {
         SDL_PumpEvents();
         Uint8 const *keystate = SDL_GetKeyboardState(nullptr);
         for (int keycode = 0; keycode < SDL_NUM_SCANCODES; ++keycode) {
-            input.saveKeymap(keycode, keystate[keycode]);
+            i.saveKeymap(keycode, keystate[keycode]);
         }
     }
 
@@ -48,6 +48,10 @@ namespace se4 {
                 SDL_WINDOW_SHOWN
         );
         context = SDL_CreateRenderer(window, -1, 0);;
+    }
+
+    auto Window::pollKeyEvent() -> void {
+        pollKeyEvent(input);
     }
 
     Sdl2Window::Sdl2Window() {

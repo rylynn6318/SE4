@@ -5,7 +5,6 @@
 #ifndef SE4_SDL2WINDOW_H
 #define SE4_SDL2WINDOW_H
 
-#include <memory>
 #include <mutex>
 #include "SDL.h"
 

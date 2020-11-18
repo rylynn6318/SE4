@@ -13,19 +13,20 @@
 namespace se4 {
     class Game {
     public:
-        template<typename... Worlds>
+        Game() = default;
         explicit Game(GameConfig const && config);
 
         auto run() -> void;
-        auto stop() -> void;
+
+        // TODO : 일단 Pulbic으로 둠
+    public:
+        // TODO : 멤버 변수, 혹은 서비스로 InputManager, FileIO, AudioSystem, GameConfig 등 게임 전체에 하나만 존재하는 객체들 : 싱글톤 아님!
+        std::function<bool()> isRunning;
+        se4::Window* window;
+        World* world;
 
     private:
-        // TODO : 멤버 변수, 혹은 서비스로 InputManager, FileIO, AudioSystem, GameConfig 등 게임 전체에 하나만 존재하는 객체들 : 싱글톤 아님!
-        bool isRunning;
-        Window window;
-        std::shared_ptr<World> world;
-        
-        auto addWorlds(std::shared_ptr<World>&& world) -> void;
+        auto loop() -> void;
     };
 }
 

@@ -12,19 +12,27 @@
 #include SDK_WINDOW_H
 
 namespace se4 {
-class Window : public SDK_WINDOW {
+    class Window : public SDK_WINDOW {
     public:
         Window(std::string_view title, int width, int height);
+
         ~Window();
+
+        Input input;
 
         auto show() -> void;
 
-        auto pollKeyEvent(se4::Input& input) -> void;
-        auto getHandle() -> std::any&;
-        auto returnHandle(std::any& handle) -> void;
+        auto pollKeyEvent(Input &i) -> void;
+        auto pollKeyEvent() -> void;
+
+        auto getHandle() -> std::any &;
+
+        auto returnHandle(std::any &handle) -> void;
+
     private:
         int burrowed_count = 0;
         std::any context;
+
         std::string_view title;
         int width;
         int height;
