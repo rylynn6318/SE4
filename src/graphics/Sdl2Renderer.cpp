@@ -70,7 +70,7 @@ auto se4::Renderer::getCamViewprot() -> SDL_Rect {
 	{
 		ComponentHandle<Position2d> posHandler;
 		ComponentHandle<Volume2d> volHandler;
-		se4::ComponentHandle<RenderComponent> renderHandler;
+		ComponentHandle<RenderComponent> renderHandler;
 		parentWorld->unpack(entity, posHandler, volHandler, renderHandler);
 		
 		if (renderHandler->isFocused)
