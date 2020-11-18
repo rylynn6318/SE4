@@ -5,15 +5,15 @@
 #ifndef SE4_SDL2WINDOW_H
 #define SE4_SDL2WINDOW_H
 
-#include <memory>
+#include <mutex>
 #include "SDL.h"
 
 namespace se4 {
     class Sdl2Window {
     protected:
-        SDL_Window* window;
-
-        Sdl2Window(char const * title, int width, int height) ;
+        Sdl2Window();
+        std::once_flag isInit;
+        SDL_Window* window = nullptr;
     };
 }
 

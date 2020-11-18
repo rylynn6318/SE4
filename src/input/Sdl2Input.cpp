@@ -51,10 +51,50 @@ auto se4::Input::toSE4Key(int keycode) -> se4::Key {
             return se4::Key::C;
         case SDL_SCANCODE_D:
             return se4::Key::D;
-        case SDL_SCANCODE_W:
-            return se4::Key::W;
+        case SDL_SCANCODE_E:
+            return se4::Key::E;
+        case SDL_SCANCODE_F:
+            return se4::Key::F;
+        case SDL_SCANCODE_G:
+            return se4::Key::G;
+        case SDL_SCANCODE_H:
+            return se4::Key::H;
+        case SDL_SCANCODE_I:
+            return se4::Key::I;
+        case SDL_SCANCODE_J:
+            return se4::Key::J;
+        case SDL_SCANCODE_K:
+            return se4::Key::K;
+        case SDL_SCANCODE_L:
+            return se4::Key::L;
+        case SDL_SCANCODE_M:
+            return se4::Key::M;
+        case SDL_SCANCODE_N:
+            return se4::Key::N;
+        case SDL_SCANCODE_O:
+            return se4::Key::O;
+        case SDL_SCANCODE_P:
+            return se4::Key::P;
+        case SDL_SCANCODE_Q:
+            return se4::Key::Q;
+        case SDL_SCANCODE_R:
+            return se4::Key::R;
         case SDL_SCANCODE_S:
             return se4::Key::S;
+        case SDL_SCANCODE_T:
+            return se4::Key::T;
+        case SDL_SCANCODE_U:
+            return se4::Key::U;
+        case SDL_SCANCODE_V:
+            return se4::Key::V;
+        case SDL_SCANCODE_W:
+            return se4::Key::W;
+        case SDL_SCANCODE_X:
+            return se4::Key::X;
+        case SDL_SCANCODE_Y:
+            return se4::Key::Y;
+        case SDL_SCANCODE_Z:
+            return se4::Key::Z;
         case SDL_SCANCODE_ESCAPE:
             return se4::Key::ESC;
         default:

@@ -7,14 +7,14 @@
 #include "entity/Entity.hpp"
 #include "entity/EntityManager.hpp"
 #include "updater/Updater.hpp"
-#include "graphics/Renderer.h"
+#include "graphics/RenderUpdater.h"
 #include "window/Window.h"
 
 namespace se4 {
     struct EntityHandle;
     class World {
     public:
-        explicit World(std::unique_ptr<EntityManager> entityManager);
+        explicit World(std::unique_ptr<EntityManager> entityManager, std::any& windowContext);
 
         /*
          * Should be called before the first update, but after instantiation
@@ -30,8 +30,6 @@ namespace se4 {
          * Render a frame.
          */
         void render(int dt);
-        auto setRenderWindow(std::unique_ptr<Window> window) -> void;
-        auto unsetRenderWindow() -> std::unique_ptr<Window>;
         EntityHandle createEntity();
         void addUpdater(std::unique_ptr<Updater> updater);
         void destroyEntity(Entity entity);
@@ -95,7 +93,7 @@ namespace se4 {
         std::vector<std::unique_ptr<Updater>> updaters;
         std::vector<std::unique_ptr<BaseComponentManager>> componentManagers;
         std::map<Entity, ComponentMask> entityMasks;
-        Renderer* renderer;
+        RenderUpdater* renderer;
 
         void updateEntityMask(Entity const& entity, ComponentMask& oldMask);
 

@@ -6,23 +6,36 @@
 #define SE4_WINDOW_H
 
 #include <string_view>
-#include <input/Key.h>
-#include <input/Input.h>
+#include <any>
+#include "input/Input.h"
 #include "EngineConfig.h"
 #include SDK_WINDOW_H
 
 namespace se4 {
-class Window : public SDK_WINDOW {
+    class Window : public SDK_WINDOW {
     public:
         int width;
         int height;
         Window(std::string_view title, int width, int height);
+
         ~Window();
 
-        // TODO : 일단 static으로
-        static auto pollKeyEvent(se4::Input& input) -> void;
-        auto tmp_getWindow() -> SDL_Window*;
+        Input input;
+
+        auto show() -> void;
+
+        auto pollKeyEvent(Input &i) -> void;
+        auto pollKeyEvent() -> void;
+
+        auto getHandle() -> std::any &;
+
+        auto returnHandle(std::any &handle) -> void;
+
     private:
+        int burrowed_count = 0;
+        std::any context;
+
+        std::string_view title;
     };
 }
 
