@@ -12,9 +12,9 @@
 
 namespace se4 {
     struct EntityHandle;
-    class World {
+    class Level {
     public:
-        explicit World(std::unique_ptr<EntityManager> entityManager, std::any& windowContext);
+        explicit Level(std::unique_ptr<EntityManager> entityManager, std::any& windowContext);
 
         /*
          * Should be called before the first update, but after instantiation

@@ -1,29 +1,29 @@
 #pragma once
 #include "component/ComponentHandle.hpp"
 #include "Entity.hpp"
-#include "world/World.hpp"
+#include "level/Level.hpp"
 
 namespace se4 {
     struct EntityHandle {
         Entity entity;
-        World* world;
+        Level* level;
         
-        void destroy() { world->destroyEntity(entity); }
+        void destroy() { level->destroyEntity(entity); }
 
         template <is_component ComponentType>
         void addComponent(ComponentType&& component) {
-            world->addComponent<ComponentType>(entity, std::forward<ComponentType>(component));
+            level->addComponent<ComponentType>(entity, std::forward<ComponentType>(component));
         }
 
         template <is_component ComponentType>
         void removeComponent() {
-            world->removeComponent<ComponentType>(entity);
+            level->removeComponent<ComponentType>(entity);
         }
 
         template <is_component ComponentType>
         ComponentHandle<ComponentType> getComponent() {
             ComponentHandle<ComponentType> handle;
-            world->unpack(entity, handle);
+            level->unpack(entity, handle);
             return handle;
         }
     };

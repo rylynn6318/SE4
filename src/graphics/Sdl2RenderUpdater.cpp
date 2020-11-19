@@ -9,7 +9,7 @@
 #include <component/ComponentHandle.hpp>
 #include "graphics/Sdl2RenderUpdater.h"
 #include "graphics/RenderUpdater.h"
-#include "world/World.hpp"
+#include "level/Level.hpp"
 
 const int fieldWidth = 1920;
 const int fieldHeight = 1080;

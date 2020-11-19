@@ -8,7 +8,7 @@
 #include <memory>
 #include "window/Window.h"
 #include "GameConfig.h"
-#include "world/World.hpp"
+#include "level/Level.hpp"
 
 namespace se4 {
     class Game {
@@ -23,7 +23,7 @@ namespace se4 {
         // TODO : 멤버 변수, 혹은 서비스로 InputManager, FileIO, AudioSystem, GameConfig 등 게임 전체에 하나만 존재하는 객체들 : 싱글톤 아님!
         std::function<bool()> isRunning;
         se4::Window* window;
-        World* world;
+        Level* level;
 
     private:
         auto loop() -> void;

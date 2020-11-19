@@ -25,9 +25,9 @@ auto se4::Game::loop() -> void {
 
         window->pollKeyEvent();
 
-        world->update(0);
+        level->update(0);
 
-        world->render(0);
+        level->render(0);
 
         // 일단은 남는 시간동안 sleep 때림
         std::this_thread::sleep_for(start + MS_PER_UPDATE - sc::system_clock::now());

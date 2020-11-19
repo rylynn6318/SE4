@@ -179,24 +179,24 @@ public:
 
 };
 
-std::shared_ptr<se4::World> getWorld(std::unique_ptr<se4::Window> &window) {
+std::shared_ptr<se4::Level> getLevel(std::unique_ptr<se4::Window> &window) {
     auto entityManager = std::make_unique<se4::EntityManager>();
-    auto world = std::make_shared<se4::World>(std::move(entityManager), window->getHandle());
+    auto level = std::make_shared<se4::Level>(std::move(entityManager), window->getHandle());
 
     // 엔티티 선언
-    auto entity = world->createEntity();
-    auto yeji = world->createEntity();
-    auto entity2 = world->createEntity();
-    auto floor = world->createEntity();
-    auto leftWall = world->createEntity();
-    auto rightWall = world->createEntity();
-    auto roof = world->createEntity();
+    auto entity = level->createEntity();
+    auto yeji = level->createEntity();
+    auto entity2 = level->createEntity();
+    auto floor = level->createEntity();
+    auto leftWall = level->createEntity();
+    auto rightWall = level->createEntity();
+    auto roof = level->createEntity();
 
     auto physicsUpdater = std::make_unique<PhysicsUpdater>();
-    world->addUpdater(std::move(physicsUpdater));
+    level->addUpdater(std::move(physicsUpdater));
 
     auto playerListener = std::make_unique<PlayerListener>();
-    world->addUpdater(std::move(playerListener));
+    level->addUpdater(std::move(playerListener));
 
     se4::Input &win_input = window->input;
     auto input_acc = se4::makeUpdater(
@@ -218,7 +218,7 @@ std::shared_ptr<se4::World> getWorld(std::unique_ptr<se4::Window> &window) {
                     }
                 }
             });
-    world->addUpdater(std::move(input_acc));
+    level->addUpdater(std::move(input_acc));
 
     // 엔티티에 필요한 컴포넌트 선언
     entity.addComponent(se4::Position2d(SCREEN_WIDTH/2.0, SCREEN_HEIGHT/2.0));
@@ -258,8 +258,8 @@ std::shared_ptr<se4::World> getWorld(std::unique_ptr<se4::Window> &window) {
     rightWall.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
 
-    world->init();
-    return world;
+    level->init();
+    return level;
 }
 
 int main(int argc, char *argv[]) {
@@ -272,9 +272,9 @@ int main(int argc, char *argv[]) {
     auto se4window = std::make_unique<se4::Window>("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
     se4window->show();
 
-    auto world = getWorld(se4window);
+    auto level = getLevel(se4window);
 
-    testGame.world = world.get();
+    testGame.level = level.get();
     testGame.isRunning = [&se4window]() -> bool {
         return !se4window->input.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
     };

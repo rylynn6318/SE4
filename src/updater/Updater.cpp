@@ -2,7 +2,7 @@
 #include <updater/Updater.hpp>
 
 namespace se4 {
-    void Updater::registerWorld(World *world) { parentWorld = world; }
+    void Updater::registerWorld(Level *world) { parentWorld = world; }
 
     void Updater::registerEntity(se4::Entity const &entity) { registeredEntities.push_back(entity); }
 
