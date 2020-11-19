@@ -44,6 +44,9 @@ namespace se4 {
     };
 }
 
+//std::bit 해서 생성자로 받은거 각각 category bit설정
+//body들 뒤지는거 관리해줘야함;
+
 struct PhysicsBody : public se4::Component<PhysicsBody> {
     PhysicsBody(bool isMovable, float friction, float restitution, float density, se4::BodyType bodyType) :
             isMovable(isMovable),
@@ -212,6 +215,9 @@ std::shared_ptr<se4::Level> getLevel(std::unique_ptr<se4::Window> &window) {
                     }
                     if (win_input.checkKey(se4::KeyState::PRESSED, se4::Key::W)) {
                         physicsHandler->forceY = physicsHandler->body->GetMass() * 5 / (1 / 60.0); //f = mv/t , dt로 바꿔야함
+                    }
+                    if (win_input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::W)) {
+                        physicsHandler->forceY = physicsHandler->body->GetMass() / (1 / 60.0);
                     }
                     if (win_input.checkKey(se4::KeyState::PRESSED, se4::Key::S)) {
                         physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
