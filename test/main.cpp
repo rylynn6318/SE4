@@ -20,6 +20,7 @@
 #include "input/Input.h"
 #include "window/Window.h"
 
+
 #include "box2d/box2d.h"
 
 const int SCREEN_WIDTH = 1920;
@@ -182,9 +183,9 @@ public:
 
 };
 
-std::shared_ptr<se4::Level> getLevel(std::unique_ptr<se4::Window> &window) {
+std::unique_ptr<se4::Level> getLevel(std::unique_ptr<se4::Window> &window) {
     auto entityManager = std::make_unique<se4::EntityManager>();
-    auto level = std::make_shared<se4::Level>(std::move(entityManager), window->getHandle());
+    auto level = std::make_unique<se4::Level>(std::move(entityManager), window->getHandle());
 
     // 엔티티 선언
     auto entity = level->createEntity();
@@ -265,7 +266,7 @@ std::shared_ptr<se4::Level> getLevel(std::unique_ptr<se4::Window> &window) {
 
 
     level->init();
-    return level;
+    return std::move(level);
 }
 
 int main(int argc, char *argv[]) {
@@ -279,8 +280,12 @@ int main(int argc, char *argv[]) {
     se4window->show();
 
     auto level = getLevel(se4window);
+    se4::LevelManager lvManager;
+    lvManager.addLevel(1, std::move(level));
+    lvManager.changeLevel(1);
+    testGame.level = lvManager.getCurrentLevel().get();
 
-    testGame.level = level.get();
+    //testGame.level = level.get();
     testGame.isRunning = [&se4window]() -> bool {
         return !se4window->input.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
     };

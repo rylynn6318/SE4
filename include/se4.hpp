@@ -6,3 +6,4 @@
 #include "entity/EntityHandle.hpp"
 #include "updater/Updater.hpp"
 #include "level/Level.hpp"
+#include "level/LevelManager.hpp"
