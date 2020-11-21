@@ -16,11 +16,11 @@ namespace se4 {
 		auto getSharedData(std::string)->std::any;
 		auto setSharedData(std::string key, std::any data)->void;
 		auto getLevelNum()->int { return currentLevel; }
-		auto changeLevel(int key)->void;
+		auto setCurrentLevel(int key)->void;
 
 	private:
 		std::map<int, std::unique_ptr<Level>> levelList;					
 		std::map<std::string, std::any> sharedData;
-		int currentLevel;
+		int currentLevel = 0;
 	};
 }	

@@ -264,7 +264,6 @@ std::unique_ptr<se4::Level> getLevel(std::unique_ptr<se4::Window> &window) {
     rightWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 2));
     rightWall.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
-
     level->init();
     return std::move(level);
 }
@@ -282,9 +281,9 @@ int main(int argc, char *argv[]) {
     auto level = getLevel(se4window);
     se4::LevelManager lvManager;
     lvManager.addLevel(1, std::move(level));
-    lvManager.changeLevel(1);
+    lvManager.setCurrentLevel(1);
     testGame.level = lvManager.getCurrentLevel().get();
-
+   
     //testGame.level = level.get();
     testGame.isRunning = [&se4window]() -> bool {
         return !se4window->input.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
