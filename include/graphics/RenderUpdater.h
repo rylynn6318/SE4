@@ -11,9 +11,10 @@
 #include SDK_RENDERER_H
 
 namespace se4 {
-    class RenderUpdater : public se4::Updater, SDK_RENDERER {
+    class RenderUpdater : public se4::Updater, public SDK_RENDERER {
     public:
         explicit RenderUpdater();
+        ~RenderUpdater() override;
 
         auto init() -> bool override;
 

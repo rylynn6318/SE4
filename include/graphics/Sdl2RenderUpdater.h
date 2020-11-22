@@ -10,9 +10,11 @@
 
 namespace se4 {
     class Sdl2RenderUpdater {
+    public:
+        virtual ~Sdl2RenderUpdater() = default;
+
     protected:
-        //std::vector<SDL_Renderer *> renderers;
-        SDL_Renderer *mainRenderer = nullptr;
+        std::vector<SDL_Renderer *> renderers;
     };
 }
 

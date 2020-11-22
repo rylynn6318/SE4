@@ -89,7 +89,7 @@ namespace se4 {
         }
 
     private:
-        friend auto Window::setRenderLevel(int) -> void;
+        friend auto Window::initLevelRender() -> void;
 
         std::unique_ptr<EntityManager> entityManager;
         std::vector<std::unique_ptr<Updater>> updaters;

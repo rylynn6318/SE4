@@ -6,7 +6,6 @@
 #define SE4_WINDOW_H
 
 #include <string_view>
-#include <any>
 #include "input/Input.h"
 #include "EngineConfig.h"
 #include SDK_WINDOW_H
@@ -24,13 +23,14 @@ namespace se4 {
 
         auto show() -> void;
 
-        auto pollKeyEvent(Input &i) -> void;
-        auto pollKeyEvent() -> void;
-
-        auto setRenderLevel(int) -> void;
+        auto setRenderLevel(LevelID) -> void;
+        [[nodiscard]]
+        auto renderingLevelId() const -> LevelID;
+        auto initLevelRender() -> void;
     private:
-        int level_id;
+        LevelID level_id;
         std::string_view title;
+
     };
 }
 

@@ -34,6 +34,9 @@ namespace se4 {
         auto saveKeymap(Key key, ButtonState state) -> void;
 
         auto saveKeymap(int keycode, int state) -> void;
+
+    public:
+        auto pollKeyEvent() -> void;
     };
 }
 

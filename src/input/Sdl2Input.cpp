@@ -122,3 +122,11 @@ auto se4::Input::checkKey(se4::KeyState state, se4::Key key, Keys... keys) -> bo
 auto se4::Input::saveKeymap(int keycode, int state) -> void {
     saveKeymap(toSE4Key(keycode), toButtonState(state));
 }
+
+auto se4::Input::pollKeyEvent() -> void {
+    SDL_PumpEvents();
+    Uint8 const *keystate = SDL_GetKeyboardState(nullptr);
+    for (int keycode = 0; keycode < SDL_NUM_SCANCODES; ++keycode) {
+        saveKeymap(keycode, keystate[keycode]);
+    }
+}

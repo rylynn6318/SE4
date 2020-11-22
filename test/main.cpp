@@ -263,7 +263,7 @@ std::unique_ptr<se4::Level> getLevel() {
 
     level->addUpdater(std::move(input_acc));
     level->init();
-    return std::move(level);
+    return level;
 }
 
 int main(int argc, char *argv[]) {
@@ -273,17 +273,22 @@ int main(int argc, char *argv[]) {
 
     auto se4window = std::make_unique<se4::Window>("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
     se4window->show();
+    se4window->setRenderLevel(1);
+    se4::Game::Instance().windowList.push_back(se4window.get());
+
+    auto se4window2 = std::make_unique<se4::Window>("Title2", SCREEN_WIDTH, SCREEN_HEIGHT);
+    se4window2->show();
+    se4window2->setRenderLevel(1);
+    se4::Game::Instance().windowList.push_back(se4window2.get());
 
     se4::Game::Instance().levelManager.addLevel(1, getLevel);
     se4::Game::Instance().levelManager.loadLevel(1);
     se4::Game::Instance().levelManager.setCurrentLevelID(1);
 
-    se4window->setRenderLevel(1);
 
     se4::Game::Instance().isRunning = []() -> bool {
         return !se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
     };
-    se4::Game::Instance().window = se4window.get();
 
     se4::Game::Instance().run();
 
