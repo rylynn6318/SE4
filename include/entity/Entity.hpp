@@ -1,7 +1,7 @@
 #pragma once
 
 namespace se4 {
-	class World;
+	class Level;
 	struct Entity {
 		int id;
 

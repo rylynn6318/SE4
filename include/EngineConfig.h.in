@@ -16,4 +16,6 @@
 #define SDK_WINDOW_H "GlfwWindow.h"
 #endif
 
+using LevelID = int;
+
 #endif //SE4_ENGINECONFIG_H

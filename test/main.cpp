@@ -20,6 +20,7 @@
 #include "input/Input.h"
 #include "window/Window.h"
 
+
 #include "box2d/box2d.h"
 
 const int SCREEN_WIDTH = 1920;
@@ -43,6 +44,9 @@ namespace se4 {
         EDGE
     };
 }
+
+//std::bit 해서 생성자로 받은거 각각 category bit설정
+//body들 뒤지는거 관리해줘야함;
 
 struct PhysicsBody : public se4::Component<PhysicsBody> {
     PhysicsBody(bool isMovable, float friction, float restitution, float density, se4::BodyType bodyType) :
@@ -179,49 +183,49 @@ public:
 
 };
 
-std::shared_ptr<se4::World> getWorld(std::unique_ptr<se4::Window> &window) {
-    auto entityManager = std::make_unique<se4::EntityManager>();
-    auto world = std::make_shared<se4::World>(std::move(entityManager), window->getHandle());
+std::unique_ptr<se4::Level> getLevel() {
+    auto level = std::make_unique<se4::Level>();
 
     // 엔티티 선언
-    auto entity = world->createEntity();
-    auto yeji = world->createEntity();
-    auto entity2 = world->createEntity();
-    auto floor = world->createEntity();
-    auto leftWall = world->createEntity();
-    auto rightWall = world->createEntity();
-    auto roof = world->createEntity();
+    auto entity = level->createEntity();
+    auto yeji = level->createEntity();
+    auto entity2 = level->createEntity();
+    auto floor = level->createEntity();
+    auto leftWall = level->createEntity();
+    auto rightWall = level->createEntity();
+    auto roof = level->createEntity();
 
     auto physicsUpdater = std::make_unique<PhysicsUpdater>();
-    world->addUpdater(std::move(physicsUpdater));
+    level->addUpdater(std::move(physicsUpdater));
 
     auto playerListener = std::make_unique<PlayerListener>();
-    world->addUpdater(std::move(playerListener));
+    level->addUpdater(std::move(playerListener));
 
-    se4::Input &win_input = window->input;
     auto input_acc = se4::makeUpdater(
-            [&win_input](int dt, InputHandle inputHandler, se4::ComponentHandle<PhysicsBody> physicsHandler) {
+            [](int dt, InputHandle inputHandler, se4::ComponentHandle<PhysicsBody> physicsHandler) {
                 if (inputHandler->is_selected) {
-                    if (win_input.checkKey(se4::KeyState::PRESSED, se4::Key::A) ||
-                        win_input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::A)) {
+                    if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::A) ||
+                        se4::Game::Instance().inputManager.checkKey(se4::KeyState::HELD_DOWN, se4::Key::A)) {
                         physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(-0.1, 0);
                     }
-                    if (win_input.checkKey(se4::KeyState::PRESSED, se4::Key::D) ||
-                        win_input.checkKey(se4::KeyState::HELD_DOWN, se4::Key::D)) {
+                    if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::D) ||
+                        se4::Game::Instance().inputManager.checkKey(se4::KeyState::HELD_DOWN, se4::Key::D)) {
                         physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0.1, 0);
                     }
-                    if (win_input.checkKey(se4::KeyState::PRESSED, se4::Key::W)) {
+                    if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::W)) {
                         physicsHandler->forceY = physicsHandler->body->GetMass() * 5 / (1 / 60.0); //f = mv/t , dt로 바꿔야함
                     }
-                    if (win_input.checkKey(se4::KeyState::PRESSED, se4::Key::S)) {
+                    if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::HELD_DOWN, se4::Key::W)) {
+                        physicsHandler->forceY = physicsHandler->body->GetMass() / (1 / 60.0);
+                    }
+                    if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::S)) {
                         physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
                     }
                 }
             });
-    world->addUpdater(std::move(input_acc));
 
     // 엔티티에 필요한 컴포넌트 선언
-    entity.addComponent(se4::Position2d(SCREEN_WIDTH/2.0, SCREEN_HEIGHT/2.0));
+    entity.addComponent(se4::Position2d(SCREEN_WIDTH / 2.0, SCREEN_HEIGHT / 2.0));
     entity.addComponent(se4::Volume2d(SCREEN_WIDTH, SCREEN_HEIGHT));
     entity.addComponent(se4::RenderComponent("resource/background.png"));
 
@@ -257,9 +261,9 @@ std::shared_ptr<se4::World> getWorld(std::unique_ptr<se4::Window> &window) {
     rightWall.addComponent(se4::Volume2d(0.0f, SCREEN_HEIGHT * 2));
     rightWall.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
-
-    world->init();
-    return world;
+    level->addUpdater(std::move(input_acc));
+    level->init();
+    return level;
 }
 
 int main(int argc, char *argv[]) {
@@ -267,20 +271,26 @@ int main(int argc, char *argv[]) {
     IMG_Init(IMG_INIT_PNG);
     google::InitGoogleLogging(argv[0]);
 
-    se4::Game testGame;
-
     auto se4window = std::make_unique<se4::Window>("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
     se4window->show();
+    se4window->setRenderLevel(1);
+    se4::Game::Instance().windowList.push_back(se4window.get());
 
-    auto world = getWorld(se4window);
+    auto se4window2 = std::make_unique<se4::Window>("Title2", SCREEN_WIDTH, SCREEN_HEIGHT);
+    se4window2->show();
+    se4window2->setRenderLevel(1);
+    se4::Game::Instance().windowList.push_back(se4window2.get());
 
-    testGame.world = world.get();
-    testGame.isRunning = [&se4window]() -> bool {
-        return !se4window->input.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
+    se4::Game::Instance().levelManager.addLevel(1, getLevel);
+    se4::Game::Instance().levelManager.loadLevel(1);
+    se4::Game::Instance().levelManager.setCurrentLevelID(1);
+
+
+    se4::Game::Instance().isRunning = []() -> bool {
+        return !se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
     };
-    testGame.window = se4window.get();
 
-    testGame.run();
+    se4::Game::Instance().run();
 
     //For quitting IMG systems
     IMG_Quit();

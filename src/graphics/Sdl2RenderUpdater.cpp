@@ -9,56 +9,64 @@
 #include <component/ComponentHandle.hpp>
 #include "graphics/Sdl2RenderUpdater.h"
 #include "graphics/RenderUpdater.h"
-#include "world/World.hpp"
+#include "level/Level.hpp"
 
 const int fieldWidth = 1920;
 const int fieldHeight = 1080;
 float winWidth = 1920;
 float winHeight = 1080;
 
-auto se4::RenderUpdater::init() -> bool {
-    for (auto &entity : registeredEntities) {
-        se4::ComponentHandle<RenderComponent> renderHandler;
-        parentWorld->unpack(entity, renderHandler);
+se4::RenderUpdater::RenderUpdater() {
+    signature.addComponent<Position2d>();
+    signature.addComponent<Volume2d>();
+    signature.addComponent<RenderComponent>();
+}
 
-        renderHandler->texture = IMG_LoadTexture(mainRenderer, renderHandler->texture_path);
+se4::RenderUpdater::~RenderUpdater() {
+    for (auto renderer : renderers) {
+        SDL_DestroyRenderer(renderer);
     }
+}
 
+auto se4::RenderUpdater::init() -> bool {
+    for (auto renderer : renderers) {
+        for (auto &entity : registeredEntities) {
+            se4::ComponentHandle<RenderComponent> renderHandler;
+            parentWorld->unpack(entity, renderHandler);
+
+            renderHandler->textures[renderer] = IMG_LoadTexture(renderer, renderHandler->texture_path);
+        }
+    }
     return true;
 }
 
 auto se4::RenderUpdater::render(int time) -> void {
-    SDL_SetRenderDrawColor(mainRenderer, 0, 0, 0, 255);
-    SDL_RenderClear(mainRenderer);
+    for (auto renderer : renderers) {
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_RenderClear(renderer);
 
-	SDL_Rect camera = getCamViewprot();
+        SDL_Rect camera = getCamViewprot();
 
-    for (auto &entity : registeredEntities) {
-        se4::ComponentHandle<Position2d> pos2dHandler;
-        se4::ComponentHandle<Volume2d> vol2dHandler;
-        se4::ComponentHandle<RenderComponent> renderHandler;
-        parentWorld->unpack(entity, pos2dHandler, vol2dHandler, renderHandler);
+        for (auto &entity : registeredEntities) {
+            se4::ComponentHandle<Position2d> pos2dHandler;
+            se4::ComponentHandle<Volume2d> vol2dHandler;
+            se4::ComponentHandle<RenderComponent> renderHandler;
+            parentWorld->unpack(entity, pos2dHandler, vol2dHandler, renderHandler);
 
-		SDL_Rect destRect;
-		destRect.w = vol2dHandler->width;
-		destRect.h = vol2dHandler->height;
+            SDL_Rect destRect;
+            destRect.w = vol2dHandler->width;
+            destRect.h = vol2dHandler->height;
 
-		destRect.x = pos2dHandler->x - camera.x - (destRect.w/2);
-		destRect.y = pos2dHandler->y - camera.y - (destRect.h/2);
+            destRect.x = pos2dHandler->x - camera.x - (destRect.w / 2);
+            destRect.y = pos2dHandler->y - camera.y - (destRect.h / 2);
 
-        SDL_RenderCopyEx(mainRenderer, renderHandler->texture, nullptr, &destRect, renderHandler->angle, 0, renderHandler->flip);
+            SDL_RenderCopyEx(renderer, renderHandler->textures[renderer], nullptr, &destRect, renderHandler->angle, 0,
+                             renderHandler->flip);
+        }
+        SDL_RenderSetScale(renderer, winWidth / camera.w, winHeight / camera.h);
+
+        SDL_RenderPresent(renderer);
     }
-	SDL_RenderSetScale(mainRenderer, winWidth / camera.w, winHeight / camera.h);
-
-    SDL_RenderPresent(mainRenderer);
-}
-
-se4::RenderUpdater::RenderUpdater(std::any &context) {
-    signature.addComponent<Position2d>();
-    signature.addComponent<Volume2d>();
-    signature.addComponent<RenderComponent>();
-    windowContext = context;
-    mainRenderer = std::any_cast<SDL_Renderer*>(context);
 }
 
 auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
@@ -74,33 +82,27 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
     int minXVolume = 0;
     int minYVolume = 0;
 
-    for (auto& entity : registeredEntities)
-    {
+    for (auto &entity : registeredEntities) {
         ComponentHandle<Position2d> posHandler;
         ComponentHandle<Volume2d> volHandler;
         ComponentHandle<RenderComponent> renderHandler;
         parentWorld->unpack(entity, posHandler, volHandler, renderHandler);
 
-        if (renderHandler->isFocused)
-        {
-            if (posHandler->x > maxX)
-            {
+        if (renderHandler->isFocused) {
+            if (posHandler->x > maxX) {
                 maxX = posHandler->x;
                 maxXVolume = volHandler->width / 2;
             }
-            if (posHandler->x < minX)
-            {
+            if (posHandler->x < minX) {
                 minX = posHandler->x;
                 minXVolume = volHandler->width / 2;
             }
 
-            if (posHandler->y > maxY)
-            {
+            if (posHandler->y > maxY) {
                 maxY = posHandler->y;
                 maxYVolume = volHandler->height / 2;
             }
-            if (posHandler->y < minY)
-            {
+            if (posHandler->y < minY) {
                 minY = posHandler->y;
                 minYVolume = volHandler->height / 2;
             }
@@ -109,14 +111,13 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
     }
 
     double aspectRatio = winHeight / winWidth;
-    if (minX == maxX && minY == maxY)
-    {
-        int winMinHeight = (int)(winMinWidth * aspectRatio);
+    if (minX == maxX && minY == maxY) {
+        int winMinHeight = (int) (winMinWidth * aspectRatio);
 
-        SDL_Rect view{ maxX - (winMinWidth) / 2 ,
-                       maxY - (winMinHeight) / 2 ,
-                       winMinWidth,
-                       winMinHeight };
+        SDL_Rect view{maxX - (winMinWidth) / 2,
+                      maxY - (winMinHeight) / 2,
+                      winMinWidth,
+                      winMinHeight};
 
         if (view.x + view.w > fieldWidth)
             view.x = fieldWidth - view.w;
@@ -142,9 +143,9 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
 
     int x = (minX + maxX) / 2 - width / 2 - width * padding;
     if (width * aspectRatio > height)
-        height = (int)(width * aspectRatio);
+        height = (int) (width * aspectRatio);
     else if (height / aspectRatio > width)
-        width = (int)(height / aspectRatio);
+        width = (int) (height / aspectRatio);
     int y = (minY + maxY) / 2 - height / 2 - height * padding;
 
     width *= (1 + padding * 2);
@@ -153,8 +154,7 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
         x = 0;
         y = 0;
     }
-    height = (int)(width * aspectRatio);
-
+    height = (int) (width * aspectRatio);
 
 
     if (x + width > fieldWidth)

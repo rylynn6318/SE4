@@ -1,26 +1,32 @@
 #pragma once
+
+#include <bitset>
+
 #include "Component.hpp"
 
 namespace se4 {
     struct ComponentMask {
-        unsigned mask[32] = {};
+        std::bitset<MAX_COMPONENT_FAMILY> mask;
 
-        template <is_component ComponentType>
+        template<is_component ComponentType>
         void addComponent() {
             auto family = GetComponentFamily<ComponentType>();
-            mask[family / 32] |= (1 << family % 32);
+            mask.set(family);
         }
 
-        template <is_component ComponentType>
+        template<is_component ComponentType>
         void removeComponent() {
             auto family = GetComponentFamily<ComponentType>();
-            mask[family / 32] &= ~(1 << family % 32);
+            mask.reset(family);
         }
 
-        bool isNewMatch(ComponentMask& oldMask, ComponentMask& systemMask);
+        [[nodiscard]]
+        bool isNewMatch(const ComponentMask &oldMask, const ComponentMask &systemMask) const;
 
-        bool isNoLongerMatched(ComponentMask& oldMask, ComponentMask& systemMask);
+        [[nodiscard]]
+        bool isNoLongerMatched(const ComponentMask &oldMask, const ComponentMask &systemMask) const;
 
-        bool matches(ComponentMask& systemMask);
+        [[nodiscard]]
+        bool matches(ComponentMask const &systemMask) const;
     };
 }  // namespace se4

@@ -12,22 +12,21 @@ auto se4::Game::run() -> void {
     loop();
 }
 
-se4::Game::Game(const se4::GameConfig &&config) {
-
-}
-
-
 auto se4::Game::loop() -> void {
     auto const MS_PER_UPDATE = 16ms;
     auto previous = sc::system_clock::now();
     while (isRunning()) {
         auto start = sc::system_clock::now();
 
-        window->pollKeyEvent();
+        inputManager.pollKeyEvent();
 
-        world->update(0);
+        auto level = levelManager.getLevel(levelManager.getCurrentLevelID());
 
-        world->render(0);
+        //if(level) {
+            level->update(0);
+
+            level->render(0);
+        //}
 
         // 일단은 남는 시간동안 sleep 때림
         std::this_thread::sleep_for(start + MS_PER_UPDATE - sc::system_clock::now());

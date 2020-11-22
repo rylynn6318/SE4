@@ -2,9 +2,9 @@
 // Created by ssm on 20. 11. 10..
 //
 
-#include <cassert>
 #include "window/Window.h"
 #include "window/Sdl2Window.h"
+#include "core/Game.h"
 #include "SDL.h"
 
 namespace se4 {
@@ -17,27 +17,6 @@ namespace se4 {
         SDL_DestroyWindow(window);
     }
 
-    auto Window::pollKeyEvent(se4::Input &i) -> void {
-        SDL_PumpEvents();
-        Uint8 const *keystate = SDL_GetKeyboardState(nullptr);
-        for (int keycode = 0; keycode < SDL_NUM_SCANCODES; ++keycode) {
-            i.saveKeymap(keycode, keystate[keycode]);
-        }
-    }
-
-    auto Window::getHandle() -> std::any& {
-        ++burrowed_count;
-        assert(burrowed_count == 1);
-        return context;
-    }
-
-    auto Window::returnHandle(std::any &handle) -> void {
-//        assert(&handle == &context);
-//        std::move(handle);
-//        --burrowed_count;
-//        assert(burrowed_count == 0);
-    }
-
     auto Window::show() -> void {
         window = SDL_CreateWindow(
                 title.data(),
@@ -47,11 +26,22 @@ namespace se4 {
                 height,
                 SDL_WINDOW_SHOWN
         );
-        context = SDL_CreateRenderer(window, -1, 0);;
     }
 
-    auto Window::pollKeyEvent() -> void {
-        pollKeyEvent(input);
+    auto Window::setRenderLevel(LevelID lvl_id) -> void {
+        level_id = lvl_id;
+    }
+
+    auto Window::initLevelRender() -> void {
+        auto level = Game::Instance().levelManager.getLevel(level_id);
+        if (level){
+            SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
+            level->renderer->renderers.push_back(renderer);
+        }
+    }
+
+    auto Window::renderingLevelId() const -> LevelID {
+        return level_id;
     }
 
     Sdl2Window::Sdl2Window() {
