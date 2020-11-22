@@ -113,5 +113,8 @@ namespace se4 {
 
             return static_cast<ComponentManager<ComponentType>*>(componentManagers[family].get());
         }
+
+    private:
+        auto updateUpdaterMask(Updater& updater) -> void;
     };
 }  // namespace se4

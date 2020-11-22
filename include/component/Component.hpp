@@ -1,8 +1,11 @@
 #pragma once
 
 #include <concepts>
+#include <cassert>
 
 namespace se4 {
+    constexpr int MAX_COMPONENT_FAMILY = 1024;
+
     struct ComponentCounter {
         static int familyCounter;
     };
@@ -10,7 +13,8 @@ namespace se4 {
     template<typename ComponentType>
     struct Component {
         static inline int family() {
-            static int family = ComponentCounter::familyCounter++;
+            static int const family = ComponentCounter::familyCounter++;
+            assert(family <= MAX_COMPONENT_FAMILY);
             return family;
         }
     };

@@ -57,4 +57,14 @@ namespace se4 {
             }
         }
     }
+
+    auto Level::updateUpdaterMask(Updater &updater) -> void {
+        ComponentMask& updaterSignature = updater.getSignature();
+
+        for (auto const & [entity, mask] : entityMasks){
+            if(updaterSignature.mask == mask.mask) {
+                updater.registerEntity(entity);
+            }
+        }
+    }
 }  // namespace se4
