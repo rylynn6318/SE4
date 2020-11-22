@@ -25,9 +25,9 @@ message("--> SOURCE FILES : ${TEST_SOURCE_FILE}")
 message("--> HEADER FILES : ${TEST_HEADER_FILE}")
 
 # STATIC 라이브러리로 뱉어낸다
-add_library(${PROJECT_NAME} STATIC ${HEADER_FILE} ${SOURCE_FILE} "include/Audio/Audio.h" "src/audio/Audio.cpp" "include/component/Sound.h")
+add_library(${PROJECT_NAME} STATIC ${HEADER_FILE} ${SOURCE_FILE})
 # TODO : test/ 경로에 있는 파일들 추가해야함. 여긴 일단 GLOB_RECURSE 안씀.
-add_executable(${PROJECT_NAME}_test test/main.cpp ${TEST_SOURCE_FILE} ${TEST_HEADER_FILE} "include/Audio/Audio.h" "src/audio/Audio.cpp" "include/component/Sound.h")
+add_executable(${PROJECT_NAME}_test test/main.cpp ${TEST_SOURCE_FILE} ${TEST_HEADER_FILE})
 # 테스트 실행용 리소스 파일 복사
 file(COPY "test/resource" DESTINATION ${CMAKE_BINARY_DIR})
 
@@ -69,15 +69,15 @@ set(BOX2D_DIR "extern/box2d")
 add_subdirectory("${BOX2D_DIR}")
 include_directories("${BOX2D_DIR}/include")
 
-# SDL
-set(FMOD_DIR "extern/fmod")
-include_directories(${FMOD_DIR}/inc)
-
+# fmod
+find_package(FMOD REQUIRED)
+include_directories(${FMOD_INCLUDE_DIRS})
 
 # ------------------------------------ 링크 -------------------------------------
 target_link_libraries(${PROJECT_NAME}
         ${SDL2_LIBRARIES}
         ${SDL2_IMAGE_LIBRARIES}
+        ${FMOD_LIBRARIES}
         glog
         box2d
         )
@@ -85,6 +85,7 @@ target_link_libraries(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}_test #PUBLIC
         ${SDL2_LIBRARIES}
         ${SDL2_IMAGE_LIBRARIES}
+        ${FMOD_LIBRARIES}
         glog
         box2d
         ${PROJECT_NAME}
@@ -107,5 +108,10 @@ if (WIN32)
     foreach (LIB ${SDL2_IMAGE_LIBRARIES})
         file(COPY ${LIB} DESTINATION ${CMAKE_BINARY_DIR})
     endforeach ()
+    foreach (DLL ${FMOD_DLLS})
+        file(COPY ${DLL} DESTINATION ${CMAKE_BINARY_DIR})
+    endforeach ()
+    foreach (LIB ${FMOD_LIBRARIES})
+        file(COPY ${LIB} DESTINATION ${CMAKE_BINARY_DIR})
+    endforeach ()
 endif ()
-

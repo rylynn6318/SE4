@@ -213,6 +213,7 @@ std::shared_ptr<se4::World> getWorld(std::unique_ptr<se4::Window> &window) {
                     }
                     if (win_input.checkKey(se4::KeyState::PRESSED, se4::Key::W)) {
                         physicsHandler->forceY = physicsHandler->body->GetMass() * 5 / (1 / 60.0); //f = mv/t , dt로 바꿔야함
+
                     }
                     if (win_input.checkKey(se4::KeyState::PRESSED, se4::Key::S)) {
                         physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
@@ -264,7 +265,14 @@ std::shared_ptr<se4::World> getWorld(std::unique_ptr<se4::Window> &window) {
 }
 
 int main(int argc, char *argv[]) {
-    se4::Audio::init();
+    auto audio = std::make_unique<se4::Audio>();
+    audio->addChannel(1);
+    audio->loadSound("resource/sound/battle.wav", 1);
+
+    std::vector<std::pair<int, int>> playlist;
+    playlist.push_back(std::pair<int, int>(1, 1));
+    audio->play(playlist);
+
     //For loading PNG images
     IMG_Init(IMG_INIT_PNG);
     google::InitGoogleLogging(argv[0]);
