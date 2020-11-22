@@ -3,26 +3,25 @@
 #include <entity/EntityHandle.hpp>
 
 namespace se4 {
-    Level::Level(std::unique_ptr<EntityManager> entityManager, std::any& windowContext) : entityManager(std::move(entityManager)) {
-        auto r = std::make_unique<RenderUpdater>(windowContext);
+    Level::Level() : entityManager(std::make_unique<se4::EntityManager>()) {
+        auto r = std::make_unique<RenderUpdater>();
         renderer = r.get();
         addUpdater(std::move(r));
     }
 
     void Level::init() {
         for (auto &updater : updaters) {
+            updateUpdaterMask(updater.get());
             updater->init();
         }
     }
 
     void Level::update(double dt) {
-        // TODO(taurheim) check to make sure that the world has called init
         for (auto &updater : updaters) {
             updater->update(dt);
         }
     }
 
-    // TODO : render, updater 분리
     void Level::render(int dt) {
         renderer->render(dt);
     }
@@ -58,12 +57,12 @@ namespace se4 {
         }
     }
 
-    auto Level::updateUpdaterMask(Updater &updater) -> void {
-        ComponentMask& updaterSignature = updater.getSignature();
+    auto Level::updateUpdaterMask(Updater *updater) -> void {
+        ComponentMask& updaterSignature = updater->getSignature();
 
         for (auto const & [entity, mask] : entityMasks){
-            if(updaterSignature.mask == mask.mask) {
-                updater.registerEntity(entity);
+            if(mask.matches(updaterSignature)) {
+                updater->registerEntity(entity);
             }
         }
     }

@@ -14,7 +14,7 @@ namespace se4 {
     struct EntityHandle;
     class Level {
     public:
-        explicit Level(std::unique_ptr<EntityManager> entityManager, std::any& windowContext);
+        Level();
 
         /*
          * Should be called before the first update, but after instantiation
@@ -115,6 +115,6 @@ namespace se4 {
         }
 
     private:
-        auto updateUpdaterMask(Updater& updater) -> void;
+        auto updateUpdaterMask(Updater* updater) -> void;
     };
 }  // namespace se4

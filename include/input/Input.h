@@ -23,14 +23,15 @@ namespace se4 {
 
         static auto toButtonState(int state) -> ButtonState;
 
-        auto saveToKeymap(Key key, ButtonState state) -> void;
-
     public:
         Input();
 
         auto checkKey(KeyState state, Key key) -> bool;
+
         template<typename... Keys>
         auto checkKey(KeyState state, Key key, Keys ...keys) -> bool;
+
+        auto saveKeymap(Key key, ButtonState state) -> void;
 
         auto saveKeymap(int keycode, int state) -> void;
     };

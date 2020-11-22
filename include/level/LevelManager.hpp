@@ -5,7 +5,9 @@
 #include <any>
 #include <vector>
 
-namespace se4 {	
+namespace se4 {
+    using LevelID = int;
+
 	class LevelManager {
 	public:
 		LevelManager() = default;
@@ -22,9 +24,9 @@ namespace se4 {
 		auto setLevelNum(int key)->void;
 
 	
-		std::map<int, std::unique_ptr<se4::Level>>levelList;
+		std::map<LevelID, std::unique_ptr<se4::Level>>levelList;
 		std::map<std::string, std::any> sharedData;
-		std::map<int, std::function<std::unique_ptr<se4::Level>(std::unique_ptr<se4::Window>&)>> funcList;
+		std::map<LevelID, std::function<std::unique_ptr<se4::Level>(std::unique_ptr<se4::Window>&)>> funcList;
 		int currentLevel = 0;
 	};
 }	

@@ -2,9 +2,9 @@
 // Created by ssm on 20. 11. 10..
 //
 
-#include <cassert>
 #include "window/Window.h"
 #include "window/Sdl2Window.h"
+#include "core/Game.h"
 #include "SDL.h"
 
 namespace se4 {
@@ -25,19 +25,6 @@ namespace se4 {
         }
     }
 
-    auto Window::getHandle() -> std::any& {
-        ++burrowed_count;
-        assert(burrowed_count == 1);
-        return context;
-    }
-
-    auto Window::returnHandle(std::any &handle) -> void {
-//        assert(&handle == &context);
-//        std::move(handle);
-//        --burrowed_count;
-//        assert(burrowed_count == 0);
-    }
-
     auto Window::show() -> void {
         window = SDL_CreateWindow(
                 title.data(),
@@ -52,6 +39,11 @@ namespace se4 {
 
     auto Window::pollKeyEvent() -> void {
         pollKeyEvent(input);
+    }
+
+    auto Window::setRenderLevel(int lvl_id) -> void {
+        this->level_id = lvl_id;
+        Game::levelManager
     }
 
     Sdl2Window::Sdl2Window() {

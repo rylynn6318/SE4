@@ -16,6 +16,14 @@ const int fieldHeight = 1080;
 float winWidth = 1920;
 float winHeight = 1080;
 
+se4::RenderUpdater::RenderUpdater(std::any &context) {
+    signature.addComponent<Position2d>();
+    signature.addComponent<Volume2d>();
+    signature.addComponent<RenderComponent>();
+    windowContext = context;
+    mainRenderer = std::any_cast<SDL_Renderer*>(context);
+}
+
 auto se4::RenderUpdater::init() -> bool {
     for (auto &entity : registeredEntities) {
         se4::ComponentHandle<RenderComponent> renderHandler;
@@ -51,14 +59,6 @@ auto se4::RenderUpdater::render(int time) -> void {
 	SDL_RenderSetScale(mainRenderer, winWidth / camera.w, winHeight / camera.h);
 
     SDL_RenderPresent(mainRenderer);
-}
-
-se4::RenderUpdater::RenderUpdater(std::any &context) {
-    signature.addComponent<Position2d>();
-    signature.addComponent<Volume2d>();
-    signature.addComponent<RenderComponent>();
-    windowContext = context;
-    mainRenderer = std::any_cast<SDL_Renderer*>(context);
 }
 
 auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {

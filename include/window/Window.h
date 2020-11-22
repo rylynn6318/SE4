@@ -27,12 +27,9 @@ namespace se4 {
         auto pollKeyEvent(Input &i) -> void;
         auto pollKeyEvent() -> void;
 
-        auto getHandle() -> std::any &;
-
-        auto returnHandle(std::any &handle) -> void;
-
+        auto setRenderLevel(int) -> void;
     private:
-        int burrowed_count = 0;
+        int level_id;
         std::any context;
 
         std::string_view title;

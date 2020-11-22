@@ -9,15 +9,11 @@ using namespace std::chrono_literals;
 namespace sc = std::chrono;
 
 auto se4::Game::run() -> void {
+    level->init();
     loop();
 }
 
-se4::Game::Game(const se4::GameConfig &&config) {
-
-}
-
-
-auto se4::Game::loop() -> void {
+auto se4::Game::loop() const -> void {
     auto const MS_PER_UPDATE = 16ms;
     auto previous = sc::system_clock::now();
     while (isRunning()) {

@@ -13,7 +13,7 @@
 namespace se4 {
     class RenderUpdater : public se4::Updater, SDK_RENDERER {
     public:
-        explicit RenderUpdater(std::any& context);
+        explicit RenderUpdater();
 
         auto init() -> bool override;
 
