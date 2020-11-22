@@ -277,10 +277,13 @@ int main(int argc, char *argv[]) {
 
     auto level = getLevel();
     se4::LevelManager lvManager;
-    lvManager.loadLevel(1, std::move(level));
-    lvManager.setLevelNum(1);
-    se4::Game::Instance().level = lvManager.getCurrentLevel();
+    std::function<std::unique_ptr<se4::Level>()> level_1 = getLevel();
+    lvManager.addLevel(1, level_1);
+    lvManager.loadLevel(1);
+    lvManager.setCUrrentLevelID(1);
 
+    testGame.level = lvManager.getLevel(lvManager.getCurrentLevelID());
+   
     //testGame.level = level.get();
     se4::Game::Instance().isRunning = []() -> bool {
         return se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
