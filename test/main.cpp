@@ -283,9 +283,9 @@ int main(int argc, char *argv[]) {
     std::function<std::unique_ptr<se4::Level>()> level_1 = getLevel();
     lvManager.addLevel(1, level_1);
     lvManager.loadLevel(1);
-    lvManager.setLevelNum(1);
+    lvManager.setCUrrentLevelID(1);
     
-    testGame.level = lvManager.getCurrentLevel();
+    testGame.level = lvManager.getLevel(lvManager.getCurrentLevelID());
    
     //testGame.level = level.get();
     testGame.isRunning = [&se4window]() -> bool {
