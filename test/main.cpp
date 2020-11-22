@@ -280,9 +280,9 @@ int main(int argc, char *argv[]) {
 
     auto level = getLevel(se4window);
     se4::LevelManager lvManager;
-    lvManager.addLevel(1, std::move(level));
-    lvManager.setCurrentLevel(1);
-    testGame.level = lvManager.getCurrentLevel().get();
+    lvManager.loadLevel(1, std::move(level));
+    lvManager.setLevelNum(1);
+    testGame.level = lvManager.getCurrentLevel();
    
     //testGame.level = level.get();
     testGame.isRunning = [&se4window]() -> bool {
