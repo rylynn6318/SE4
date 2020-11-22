@@ -30,8 +30,6 @@ namespace se4 {
         auto setRenderLevel(int) -> void;
     private:
         int level_id;
-        std::any context;
-
         std::string_view title;
     };
 }

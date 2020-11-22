@@ -272,21 +272,16 @@ int main(int argc, char *argv[]) {
     google::InitGoogleLogging(argv[0]);
 
     auto se4window = std::make_unique<se4::Window>("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
-    se4window->setRenderLevel(1);
     se4window->show();
 
-    auto level = getLevel();
-    se4::LevelManager lvManager;
-    std::function<std::unique_ptr<se4::Level>()> level_1 = getLevel();
-    lvManager.addLevel(1, level_1);
-    lvManager.loadLevel(1);
-    lvManager.setCUrrentLevelID(1);
+    se4::Game::Instance().levelManager.addLevel(1, getLevel);
+    se4::Game::Instance().levelManager.loadLevel(1);
+    se4::Game::Instance().levelManager.setCurrentLevelID(1);
 
-    testGame.level = lvManager.getLevel(lvManager.getCurrentLevelID());
-   
-    //testGame.level = level.get();
+    se4window->setRenderLevel(1);
+
     se4::Game::Instance().isRunning = []() -> bool {
-        return se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
+        return !se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::ESC);
     };
     se4::Game::Instance().window = se4window.get();
 

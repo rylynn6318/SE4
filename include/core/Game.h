@@ -34,7 +34,7 @@ namespace se4 {
         Game() = default;
         ~Game() = default;
 
-        auto loop() const -> void;
+        auto loop() -> void;
     };
 }
 

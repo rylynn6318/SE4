@@ -34,7 +34,6 @@ namespace se4 {
                 height,
                 SDL_WINDOW_SHOWN
         );
-        context = SDL_CreateRenderer(window, -1, 0);;
     }
 
     auto Window::pollKeyEvent() -> void {
@@ -42,8 +41,10 @@ namespace se4 {
     }
 
     auto Window::setRenderLevel(int lvl_id) -> void {
-        this->level_id = lvl_id;
-        Game::levelManager
+        level_id = lvl_id;
+        auto level = Game::Instance().levelManager.getLevel(level_id);
+        if (level)
+            level->renderer->mainRenderer = SDL_CreateRenderer(window, -1, 0);
     }
 
     Sdl2Window::Sdl2Window() {

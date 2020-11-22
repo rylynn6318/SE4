@@ -1,12 +1,9 @@
 #include <level/LevelManager.hpp>
+#include <utility>
 
 namespace se4 {
 	auto se4::LevelManager::loadLevel(int key)->void {
-		auto leveIter = levelList.find(key);
-		auto funcIter = funcList.find(key);
-		if (leveIter != levelList.end() && funcIter != funcList.end()) {
-			levelList[key] = funcList.at(key)();
-		}			
+	    levelList[key] = std::move(funcList.at(key)());
 	}
 
 	auto se4::LevelManager::getLevel(int key)->Level* {
@@ -19,11 +16,11 @@ namespace se4 {
 		}
 	}
 
-	auto LevelManager::addLevel(int key, std::function<std::unique_ptr<se4::Level>()> func) -> void
+	auto LevelManager::addLevel(int key, std::function<std::unique_ptr<se4::Level>()>&& func) -> void
 	{
 		//중복 검사 관련 코드 추가해야함
 		if (funcList.find(key) == funcList.end()) {
-			funcList.at(key) = func;
+			funcList[key] = func;
 		}
 	}
 
@@ -38,8 +35,8 @@ namespace se4 {
 	//	sharedData[key] = data;
 	//}
 
-	auto se4::LevelManager::setCUrrentLevelID(int level)->void {
-		currentLevel = level;	
+	auto se4::LevelManager::setCurrentLevelID(int level)->void {
+		currentLevel = level;
 	}
 
 }

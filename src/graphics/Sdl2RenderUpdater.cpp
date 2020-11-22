@@ -16,12 +16,10 @@ const int fieldHeight = 1080;
 float winWidth = 1920;
 float winHeight = 1080;
 
-se4::RenderUpdater::RenderUpdater(std::any &context) {
+se4::RenderUpdater::RenderUpdater() {
     signature.addComponent<Position2d>();
     signature.addComponent<Volume2d>();
     signature.addComponent<RenderComponent>();
-    windowContext = context;
-    mainRenderer = std::any_cast<SDL_Renderer*>(context);
 }
 
 auto se4::RenderUpdater::init() -> bool {

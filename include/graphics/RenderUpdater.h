@@ -21,10 +21,8 @@ namespace se4 {
 
         // todo : SDL_Rect 말고 다른걸로 변경
         auto getCamViewprot() -> SDL_Rect;
-
-    public:
-        // 일단 pulbic으로 둠
-        std::any windowContext;
+    private:
+        friend Window;
         //아래 두 변수는 추후 사용자의 입력을 받아서 초기화되도록 바꿔야됨
         int winMinWidth = 455;
         float padding = 0.03;
