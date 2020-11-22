@@ -19,6 +19,7 @@
 #include "core/Game.h"
 #include "input/Input.h"
 #include "window/Window.h"
+#include "audio/Audio.h"
 
 #include "box2d/box2d.h"
 
@@ -263,6 +264,7 @@ std::shared_ptr<se4::World> getWorld(std::unique_ptr<se4::Window> &window) {
 }
 
 int main(int argc, char *argv[]) {
+    se4::Audio::init();
     //For loading PNG images
     IMG_Init(IMG_INIT_PNG);
     google::InitGoogleLogging(argv[0]);
