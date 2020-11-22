@@ -11,20 +11,19 @@ namespace se4 {
 		LevelManager() = default;
 		virtual ~LevelManager() = default;
 
-		auto loadLevel(int key, std::unique_ptr<se4::Level> level)->void;
-		auto getCurrentLevel()->se4::Level*;
-		auto setCurrnetLevel(int key, std::unique_ptr<se4::Window> &window)->void;
+		auto loadLevel(int key)->void;
+		auto getLevel(int key)->se4::Level*;
 		
-		auto addLevel(int key, std::function<std::unique_ptr<se4::Level>(std::unique_ptr<se4::Window>&)> func)->void;
-		auto getSharedData(std::string)->std::any;
-		auto setSharedData(std::string key, std::any data)->void;
-		auto getLevelNum()->int { return currentLevel; }
-		auto setLevelNum(int key)->void;
+		auto addLevel(int key, std::function<std::unique_ptr<se4::Level>()> func)->void;
+		//auto getSharedData(std::string)->std::any;
+		//auto setSharedData(std::string key, std::any data)->void;
+		auto getCurrentLevelID()->int { return currentLevel; }
+		auto setCUrrentLevelID(int key)->void;
 
 	
 		std::map<int, std::unique_ptr<se4::Level>>levelList;
-		std::map<std::string, std::any> sharedData;
-		std::map<int, std::function<std::unique_ptr<se4::Level>(std::unique_ptr<se4::Window>&)>> funcList;
+		//std::map<std::string, std::any> sharedData;
+		std::map<int, std::function<std::unique_ptr<se4::Level>()>> funcList;
 		int currentLevel = 0;
 	};
 }	

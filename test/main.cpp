@@ -280,8 +280,11 @@ int main(int argc, char *argv[]) {
 
     auto level = getLevel(se4window);
     se4::LevelManager lvManager;
-    lvManager.loadLevel(1, std::move(level));
+    std::function<std::unique_ptr<se4::Level>()> level_1 = getLevel();
+    lvManager.addLevel(1, level_1);
+    lvManager.loadLevel(1);
     lvManager.setLevelNum(1);
+    
     testGame.level = lvManager.getCurrentLevel();
    
     //testGame.level = level.get();
