@@ -26,17 +26,19 @@ namespace se4 {
                 height,
                 SDL_WINDOW_SHOWN
         );
+        renderer = SDL_CreateRenderer(window, -1, 0);
     }
 
     auto Window::setRenderLevel(LevelID lvl_id) -> void {
         level_id = lvl_id;
+        initLevelRender();
     }
 
     auto Window::initLevelRender() -> void {
         auto level = Game::Instance().levelManager.getLevel(level_id);
         if (level){
-            SDL_Renderer * renderer = SDL_CreateRenderer(window, -1, 0);
             level->renderer->renderers.push_back(renderer);
+            level->init();
         }
     }
 

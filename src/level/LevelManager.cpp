@@ -5,11 +5,6 @@
 namespace se4 {
     auto se4::LevelManager::loadLevel(LevelID key) -> void {
         levelList[key] = std::move(funcList.at(key)());
-        for (auto &win : Game::Instance().windowList) {
-            if (key == win->renderingLevelId()) {
-                win->initLevelRender();
-            }
-        }
         levelList[key]->init();
     }
 
@@ -40,8 +35,13 @@ namespace se4 {
     //	sharedData[key] = data;
     //}
 
-    auto se4::LevelManager::setCurrentLevelID(LevelID level) -> void {
-        currentLevel = level;
+    auto se4::LevelManager::setCurrentLevelID(LevelID key) -> void {
+        currentLevel = key;
+        for (auto &win : Game::Instance().windowList) {
+            if (currentLevel == win->renderingLevelId()) {
+                win->initLevelRender();
+            }
+        }
     }
 
 }
