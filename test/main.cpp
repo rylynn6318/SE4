@@ -224,8 +224,8 @@ std::unique_ptr<se4::Level> getLevel() {
                         physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
                     }
                     if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::Q)) {
-                        se4window->setRenderLevel(2);
-                        se4::Game::Instance().levelManager.setCurrentLevelID(2);
+                        //se4window->setRenderLevel(2);
+                        //se4::Game::Instance().levelManager.setCurrentLevelID(2);
                     }
                 }
             });
@@ -362,20 +362,21 @@ int main(int argc, char *argv[]) {
     se4::Game::Instance().windowList.push_back(se4window.get());
 
 
-    auto se4window2 = std::make_unique<se4::Window>("Title2", SCREEN_WIDTH, SCREEN_HEIGHT);
-    se4window2->show();
-    se4window2->setRenderLevel(1);
-    se4::Game::Instance().levelManager.setSharedData("id", std::string("rylynn6318"));
-    if (std::any_cast<std::string>(se4::Game::Instance().levelManager.getSharedData("id")) == "rylynn6318")
-        LOG(ERROR) << "succes getSharedData";
-    se4::Game::Instance().windowList.push_back(se4window2.get());
+    //auto se4window2 = std::make_unique<se4::Window>("Title2", SCREEN_WIDTH, SCREEN_HEIGHT);
+    //se4window2->show();
+    //se4window2->setRenderLevel(1);
+    //se4::Game::Instance().windowList.push_back(se4window2.get());
+    //se4::Game::Instance().levelManager.setSharedData("id", std::string("rylynn6318"));
+    //if (std::any_cast<std::string>(se4::Game::Instance().levelManager.getSharedData("id")) == "rylynn6318")
+    //    LOG(ERROR) << "succes getSharedData";
 
+    se4window->setRenderLevel(1);
     se4::Game::Instance().levelManager.addLevel(1, getLevel);
     se4::Game::Instance().levelManager.addLevel(2, getLevel2);
     se4::Game::Instance().levelManager.loadLevel(1);
-    se4::Game::Instance().levelManager.loadLevel(2);
+    //se4::Game::Instance().levelManager.loadLevel(2);
 
-    se4window->setRenderLevel(1);
+
     se4::Game::Instance().levelManager.setCurrentLevelID(1);
 
 
