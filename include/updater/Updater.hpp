@@ -7,7 +7,7 @@
 #include "entity/Entity.hpp"
 
 namespace se4 {
-    class World;
+    class Level;
 
     class Updater {
     public:
@@ -36,7 +36,7 @@ namespace se4 {
         /*
          * When a Updater is added to the world, the world will register itself
          */
-        void registerWorld(World *world);
+        void registerWorld(Level *world);
 
         /*
          * When a component is added such that this Updater should begin acting on it,
@@ -54,7 +54,7 @@ namespace se4 {
 
     protected:
         std::vector<Entity> registeredEntities;
-        World *parentWorld;
+        Level *parentWorld;
         ComponentMask signature;
     };
 }
