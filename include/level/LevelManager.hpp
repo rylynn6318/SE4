@@ -17,12 +17,7 @@ namespace se4 {
 
         auto loadLevel(LevelID key) -> void;
 
-        auto getLevel(LevelID key) -> se4::Level *;
-
         auto addLevel(LevelID key, std::function<std::unique_ptr<se4::Level>()>&& func) -> void;
-
-        //auto getSharedData(std::string)->std::any;
-        //auto setSharedData(std::string key, std::any data)->void;
 
         auto activateLevel(LevelID key) -> void;
         auto deactivateLevel(LevelID key) -> void;

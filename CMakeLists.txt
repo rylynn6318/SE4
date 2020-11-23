@@ -1,3 +1,4 @@
+
 cmake_minimum_required(VERSION 3.17)
 project(
         SE4             # 프로젝트 이름
@@ -69,10 +70,15 @@ set(BOX2D_DIR "extern/box2d")
 add_subdirectory("${BOX2D_DIR}")
 include_directories("${BOX2D_DIR}/include")
 
+# fmod
+find_package(FMOD REQUIRED)
+include_directories(${FMOD_INCLUDE_DIRS})
+
 # ------------------------------------ 링크 -------------------------------------
 target_link_libraries(${PROJECT_NAME}
         ${SDL2_LIBRARIES}
         ${SDL2_IMAGE_LIBRARIES}
+        ${FMOD_LIBRARIES}
         glog
         box2d
         )
@@ -80,6 +86,7 @@ target_link_libraries(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}_test #PUBLIC
         ${SDL2_LIBRARIES}
         ${SDL2_IMAGE_LIBRARIES}
+        ${FMOD_LIBRARIES}
         glog
         box2d
         ${PROJECT_NAME}
@@ -102,5 +109,10 @@ if (WIN32)
     foreach (LIB ${SDL2_IMAGE_LIBRARIES})
         file(COPY ${LIB} DESTINATION ${CMAKE_BINARY_DIR})
     endforeach ()
+    foreach (DLL ${FMOD_DLLS})
+        file(COPY ${DLL} DESTINATION ${CMAKE_BINARY_DIR})
+    endforeach ()
+    foreach (LIB ${FMOD_LIBRARIES})
+        file(COPY ${LIB} DESTINATION ${CMAKE_BINARY_DIR})
+    endforeach ()
 endif ()
-

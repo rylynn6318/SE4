@@ -95,21 +95,27 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
         ComponentHandle<RenderComponent> renderHandler;
         parentWorld->unpack(entity, posHandler, volHandler, renderHandler);
 
-        if (renderHandler->isFocused) {
-            if (posHandler->x > maxX) {
+
+        if (renderHandler->isFocused)
+        {
+            if (posHandler->x > maxX)
+            {
                 maxX = posHandler->x;
                 maxXVolume = volHandler->width / 2;
             }
-            if (posHandler->x < minX) {
+            if (posHandler->x < minX)
+            {
                 minX = posHandler->x;
                 minXVolume = volHandler->width / 2;
             }
 
-            if (posHandler->y > maxY) {
+            if (posHandler->y > maxY)
+            {
                 maxY = posHandler->y;
                 maxYVolume = volHandler->height / 2;
             }
-            if (posHandler->y < minY) {
+            if (posHandler->y < minY)
+            {
                 minY = posHandler->y;
                 minYVolume = volHandler->height / 2;
             }
@@ -117,13 +123,14 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
     }
 
     double aspectRatio = winHeight / winWidth;
-    if (minX == maxX && minY == maxY) {
-        int winMinHeight = (int) (winMinWidth * aspectRatio);
+    if (minX == maxX && minY == maxY)
+    {
+        int winMinHeight = (int)(winMinWidth * aspectRatio);
 
-        SDL_Rect view{maxX - (winMinWidth) / 2,
-                      maxY - (winMinHeight) / 2,
-                      winMinWidth,
-                      winMinHeight};
+        SDL_Rect view{ maxX - (winMinWidth) / 2 ,
+                       maxY - (winMinHeight) / 2 ,
+                       winMinWidth,
+                       winMinHeight };
 
         if (view.x + view.w > fieldWidth)
             view.x = fieldWidth - view.w;
@@ -149,9 +156,9 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
 
     int x = (minX + maxX) / 2 - width / 2 - width * padding;
     if (width * aspectRatio > height)
-        height = (int) (width * aspectRatio);
+        height = (int)(width * aspectRatio);
     else if (height / aspectRatio > width)
-        width = (int) (height / aspectRatio);
+        width = (int)(height / aspectRatio);
     int y = (minY + maxY) / 2 - height / 2 - height * padding;
 
     width *= (1 + padding * 2);
@@ -160,8 +167,7 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
         x = 0;
         y = 0;
     }
-    height = (int) (width * aspectRatio);
-
+    height = (int)(width * aspectRatio);
 
     if (x + width > fieldWidth)
         x = fieldWidth - width;
