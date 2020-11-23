@@ -17,5 +17,7 @@
 #endif
 #define SharedDataID std::string
 using LevelID = int;
+using WindowID = int;
+using TextureID = int;
 
 #endif //SE4_ENGINECONFIG_H

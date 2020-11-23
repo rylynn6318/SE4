@@ -30,8 +30,6 @@ const int SCREEN_HEIGHT = 1080;
 using namespace std::chrono_literals;
 namespace sc = std::chrono;
 
-auto se4window = std::make_unique<se4::Window>("Title", SCREEN_WIDTH, SCREEN_HEIGHT);
-
 struct Yeji : public se4::Component<Yeji> {
 };
 
@@ -226,8 +224,9 @@ std::unique_ptr<se4::Level> getLevel() {
                         physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
                     }
                     if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::Q)) {
-                        //se4window->setRenderLevel(2);
-                        //se4::Game::Instance().levelManager.setCurrentLevelID(2);
+                        se4::Game::Instance().levelManager.activateLevel(2);
+                        se4::Game::Instance().levelManager.deactivateLevel(1);
+                        se4::Game::Instance().windows.at(1)->setRenderLevel(2);
                     }
                 }
             });
@@ -270,7 +269,6 @@ std::unique_ptr<se4::Level> getLevel() {
     rightWall.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
     level->addUpdater(std::move(input_acc));
-    level->init();
     return level;
 }
 
@@ -280,6 +278,7 @@ std::unique_ptr<se4::Level> getLevel2() {
     // 엔티티 선언
     auto entity = level->createEntity();
     auto yeji = level->createEntity();
+    auto entity2 = level->createEntity();
     auto floor = level->createEntity();
     auto leftWall = level->createEntity();
     auto rightWall = level->createEntity();
@@ -312,8 +311,9 @@ std::unique_ptr<se4::Level> getLevel2() {
                         physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
                     }
                     if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::Q)) {
-                        se4window->setRenderLevel(1);
-                        se4::Game::Instance().levelManager.setCurrentLevelID(1);
+                        se4::Game::Instance().levelManager.activateLevel(1);
+                        se4::Game::Instance().levelManager.deactivateLevel(2);
+                        se4::Game::Instance().windows.at(1)->setRenderLevel(1);
                     }
                 }
             });
@@ -330,6 +330,10 @@ std::unique_ptr<se4::Level> getLevel2() {
     yeji.addComponent(PhysicsBody(true, 0.15f, 0.0f, 1, se4::BodyType::RECTANGLE));
     yeji.addComponent(Yeji());
     // yeji.addComponent(InputComponent(액션배열(키조합+액션, ...) or 가변인자 액션))
+    entity2.addComponent(se4::Position2d(200, 200));
+    entity2.addComponent(se4::Volume2d(100.0f, 200.0f));
+    entity2.addComponent(PhysicsBody(true, 0.15f, 0.0f, 1, se4::BodyType::RECTANGLE));
+    entity2.addComponent(se4::RenderComponent("resource/walk.png", true));
 
     //지형 관련 엔티티, 이건 추후 지형관련 옵션으로 따로 빼서
 //ShapePolygon 말고 Edge로 처리해서 더 깔끔하게 코드짤 수 있을듯
@@ -351,7 +355,6 @@ std::unique_ptr<se4::Level> getLevel2() {
     rightWall.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
     level->addUpdater(std::move(input_acc));
-    level->init();
     return level;
 }
 
@@ -360,24 +363,20 @@ int main(int argc, char *argv[]) {
     IMG_Init(IMG_INIT_PNG);
     google::InitGoogleLogging(argv[0]);
 
-    se4window->show();
-    se4::Game::Instance().windowList.push_back(se4window.get());
+    auto se4window = std::make_unique<se4::Window>(1, "Title", SCREEN_WIDTH, SCREEN_HEIGHT);
+    se4::Game::Instance().addWindow(se4window.get());
+    se4window->setRenderLevel(2);
 
-    //auto se4window2 = std::make_unique<se4::Window>("Title2", SCREEN_WIDTH, SCREEN_HEIGHT);
-    //se4window2->show();
-    //se4window2->setRenderLevel(1);
-    //se4::Game::Instance().windowList.push_back(se4window2.get());
-    //se4::Game::Instance().levelManager.setSharedData("id", std::string("rylynn6318"));
-    //if (std::any_cast<std::string>(se4::Game::Instance().levelManager.getSharedData("id")) == "rylynn6318")
-    //    LOG(ERROR) << "succes getSharedData";
+    // auto se4window2 = std::make_unique<se4::Window>(2, "Title2", SCREEN_WIDTH, SCREEN_HEIGHT);
+    // se4::Game::Instance().addWindow(se4window2.get());
+    // se4window2->setRenderLevel(2);
 
-    se4window->setRenderLevel(1);
     se4::Game::Instance().levelManager.addLevel(1, getLevel);
+    se4::Game::Instance().levelManager.addLevel(2, getLevel2);
     se4::Game::Instance().levelManager.loadLevel(1);
-    //se4::Game::Instance().levelManager.loadLevel(2);
+    se4::Game::Instance().levelManager.loadLevel(2);
 
-
-    se4::Game::Instance().levelManager.setCurrentLevelID(1);
+    se4::Game::Instance().levelManager.activateLevel(1);
 
 
     se4::Game::Instance().isRunning = []() -> bool {
@@ -385,6 +384,7 @@ int main(int argc, char *argv[]) {
     };
 
     se4::Game::Instance().run();
+
     //For quitting IMG systems
     IMG_Quit();
 

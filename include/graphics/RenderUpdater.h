@@ -7,10 +7,11 @@
 
 #include "EngineConfig.h"
 #include "updater/Updater.hpp"
-#include "window/Window.h"
 #include SDK_RENDERER_H
 
 namespace se4 {
+    class Window;
+
     class RenderUpdater : public se4::Updater, public SDK_RENDERER {
     public:
         explicit RenderUpdater();
@@ -18,12 +19,13 @@ namespace se4 {
 
         auto init() -> bool override;
 
-        auto render(int time) -> void;
+        auto render(WindowID, int time) -> void;
 
         // todo : SDL_Rect 말고 다른걸로 변경
         auto getCamViewprot() -> SDL_Rect;
+
+        static auto createRenderContext(Window*) -> void;
     private:
-        friend Window;
         //아래 두 변수는 추후 사용자의 입력을 받아서 초기화되도록 바꿔야됨
         int winMinWidth = 455;
         float padding = 0.03;

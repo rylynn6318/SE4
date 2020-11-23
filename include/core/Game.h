@@ -5,6 +5,10 @@
 #ifndef SE4_GAME_H
 #define SE4_GAME_H
 
+#include <map>
+
+#include "EngineConfig.h"
+
 #include "window/Window.h"
 #include "level/LevelManager.hpp"
 #include "FileManager.hpp"
@@ -13,16 +17,22 @@
 namespace se4 {
     class Game {
     public:
-        static Game& Instance(){
+        static Game &Instance() {
             static Game instance;
             return instance;
         }
-        Game(const Game&) = delete;
-        Game(Game&&) = delete;
-        Game& operator=(const Game&) = delete;
-        Game& operator=(Game&&) = delete;
+
+        Game(const Game &) = delete;
+
+        Game(Game &&) = delete;
+
+        Game &operator=(const Game &) = delete;
+
+        Game &operator=(Game &&) = delete;
 
         auto run() -> void;
+
+        auto addWindow(Window*) -> void;
 
         // TODO : 일단 Pulbic으로 둠
     public:
@@ -30,16 +40,17 @@ namespace se4 {
         std::function<bool()> isRunning;
         LevelManager levelManager;
         Input inputManager;
+        std::map<WindowID, Window *> windows;
         std::vector<Window*> windowList;
         FileManager fileManager;
         SharedData sharedData;
 
     private:
         Game() = default;
+
         ~Game() = default;
 
         auto loop() -> void;
-
     };
 }
 

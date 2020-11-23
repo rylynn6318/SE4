@@ -22,8 +22,8 @@ namespace se4 {
         }
     }
 
-    void Level::render(int dt) {
-        renderer->render(dt);
+    void Level::render(WindowID id, int dt) {
+        renderer->render(id, dt);
     }
 
     EntityHandle Level::createEntity() {
@@ -65,5 +65,9 @@ namespace se4 {
                 updater->registerEntity(entity);
             }
         }
+    }
+
+    auto Level::createRenderContext(Window * win) -> void {
+        renderer->createRenderContext(win);
     }
 }  // namespace se4

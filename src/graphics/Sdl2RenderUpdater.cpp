@@ -5,16 +5,19 @@
 #include <component/Volume2d.h>
 #include <graphics/RenderComponent.h>
 #include <component/Position2d.h>
+#include <SDL.h>
 #include <SDL_image.h>
 #include <component/ComponentHandle.hpp>
-#include "graphics/Sdl2RenderUpdater.h"
 #include "graphics/RenderUpdater.h"
 #include "level/Level.hpp"
+#include "core/Game.h"
 
 const int fieldWidth = 1920;
 const int fieldHeight = 1080;
 float winWidth = 1920;
 float winHeight = 1080;
+
+std::map<WindowID, SDL_Renderer *> se4::Sdl2RenderUpdater::renderers = {};
 
 se4::RenderUpdater::RenderUpdater() {
     signature.addComponent<Position2d>();
@@ -23,50 +26,54 @@ se4::RenderUpdater::RenderUpdater() {
 }
 
 se4::RenderUpdater::~RenderUpdater() {
-    for (auto renderer : renderers) {
-        SDL_DestroyRenderer(renderer);
+    for (auto[id, texture] : textures) {
+        if (texture) SDL_DestroyTexture(texture);
+    }
+    for (auto[id, renderer] : renderers) {
+        if (renderer) SDL_DestroyRenderer(renderer);
     }
 }
 
 auto se4::RenderUpdater::init() -> bool {
-    for (auto renderer : renderers) {
-        for (auto &entity : registeredEntities) {
-            se4::ComponentHandle<RenderComponent> renderHandler;
-            parentWorld->unpack(entity, renderHandler);
+    for (auto &entity : registeredEntities) {
+        se4::ComponentHandle<RenderComponent> renderHandler;
+        parentWorld->unpack(entity, renderHandler);
 
-            renderHandler->textures[renderer] = IMG_LoadTexture(renderer, renderHandler->texture_path);
+        for (auto[id, renderer] : renderers) {
+            auto key = std::make_pair(id, renderHandler->id);
+            if (textures.find(key) == textures.end())
+                // textures[id] = SDL_CreateTextureFromSurface(renderer, renderHandler->surface);
+                textures[key] = IMG_LoadTexture(renderer, renderHandler->texture_path);
         }
     }
     return true;
 }
 
-auto se4::RenderUpdater::render(int time) -> void {
-    for (auto renderer : renderers) {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
+auto se4::RenderUpdater::render(WindowID window_id, int time) -> void {
+    SDL_SetRenderDrawColor(renderers.at(window_id), 0, 0, 0, 255);
+    SDL_RenderClear(renderers.at(window_id));
 
-        SDL_Rect camera = getCamViewprot();
+    SDL_Rect camera = getCamViewprot();
 
-        for (auto &entity : registeredEntities) {
-            se4::ComponentHandle<Position2d> pos2dHandler;
-            se4::ComponentHandle<Volume2d> vol2dHandler;
-            se4::ComponentHandle<RenderComponent> renderHandler;
-            parentWorld->unpack(entity, pos2dHandler, vol2dHandler, renderHandler);
+    for (auto &entity : registeredEntities) {
+        se4::ComponentHandle<Position2d> pos2dHandler;
+        se4::ComponentHandle<Volume2d> vol2dHandler;
+        se4::ComponentHandle<RenderComponent> renderHandler;
+        parentWorld->unpack(entity, pos2dHandler, vol2dHandler, renderHandler);
 
-            SDL_Rect destRect;
-            destRect.w = vol2dHandler->width;
-            destRect.h = vol2dHandler->height;
+        SDL_Rect destRect;
+        destRect.w = vol2dHandler->width;
+        destRect.h = vol2dHandler->height;
 
-            destRect.x = pos2dHandler->x - camera.x - (destRect.w / 2);
-            destRect.y = pos2dHandler->y - camera.y - (destRect.h / 2);
+        destRect.x = pos2dHandler->x - camera.x - (destRect.w / 2);
+        destRect.y = pos2dHandler->y - camera.y - (destRect.h / 2);
 
-            SDL_RenderCopyEx(renderer, renderHandler->textures[renderer], nullptr, &destRect, renderHandler->angle, 0,
-                             renderHandler->flip);
-        }
-        SDL_RenderSetScale(renderer, winWidth / camera.w, winHeight / camera.h);
-
-        SDL_RenderPresent(renderer);
+        SDL_RenderCopyEx(renderers.at(window_id), textures[{window_id, renderHandler->id}], nullptr, &destRect,
+                         renderHandler->angle, 0, renderHandler->flip);
     }
+    SDL_RenderSetScale(renderers.at(window_id), winWidth / camera.w, winHeight / camera.h);
+
+    SDL_RenderPresent(renderers.at(window_id));
 }
 
 auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
@@ -113,7 +120,6 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
                 minYVolume = volHandler->height / 2;
             }
         }
-
     }
 
     double aspectRatio = winHeight / winWidth;
@@ -174,4 +180,11 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
         y = 0;
 
     return SDL_Rect{x, y, width, height};
+}
+
+auto se4::RenderUpdater::createRenderContext(se4::Window *window) -> void {
+    if (renderers.find(window->id) == renderers.end()){
+        auto renderer = SDL_CreateRenderer(window->window, -1, 0);
+        renderers[window->id] = renderer;
+    }
 }

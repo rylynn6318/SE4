@@ -8,29 +8,27 @@
 #include <vector>
 #include "EngineConfig.h"
 
-
 namespace se4 {
-	class LevelManager {
-	public:
-		LevelManager() = default;
+    class LevelManager {
+    public:
+        LevelManager() = default;
 
-		virtual ~LevelManager() = default;
+        virtual ~LevelManager() = default;
 
-		auto loadLevel(LevelID key)->bool;
+        auto loadLevel(LevelID key) -> void;
 
-		auto getLevel(LevelID key) const->se4::Level*;
+        auto addLevel(LevelID key, std::function<std::unique_ptr<se4::Level>()>&& func) -> void;
 
-		auto addLevel(LevelID key, std::function<std::unique_ptr<se4::Level>()>&& func) -> bool;
+        auto activateLevel(LevelID key) -> void;
+        auto deactivateLevel(LevelID key) -> void;
+        [[nodiscard]]
+        auto activatedLevelId() const -> std::vector<LevelID> const &;
 
-		[[nodiscard]]
-		auto getCurrentLevelID() const -> int { return currentLevel; }
+        std::map<LevelID, std::unique_ptr<se4::Level>> levelList;
+        std::map<std::string, std::any> sharedData;
+        std::map<LevelID, std::function<std::unique_ptr<se4::Level>()>> funcList;
 
-		auto setCurrentLevelID(LevelID key) -> void;
-
-
-		std::map<LevelID, std::unique_ptr<se4::Level>> levelList;
-		
-		std::map<LevelID, std::function<std::unique_ptr<se4::Level>()>> funcList;
-		LevelID currentLevel = 0;
-	};
-}
+    private:
+        std::vector<LevelID> activatedId;
+    };
+}	

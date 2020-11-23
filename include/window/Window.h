@@ -13,24 +13,22 @@
 namespace se4 {
     class Window : public SDK_WINDOW {
     public:
+        WindowID const id;
         int width;
         int height;
-        Window(std::string_view title, int width, int height);
+        Window(WindowID id, std::string_view title, int width, int height);
 
         ~Window();
 
         Input input;
 
-        auto show() -> void;
-
         auto setRenderLevel(LevelID) -> void;
         [[nodiscard]]
         auto renderingLevelId() const -> LevelID;
-        auto initLevelRender() -> void;
-    private:
-        LevelID level_id;
-        std::string_view title;
 
+    private:
+        LevelID level_id = 0;
+        std::string_view title;
     };
 }
 

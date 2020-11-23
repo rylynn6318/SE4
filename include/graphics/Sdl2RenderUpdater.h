@@ -5,16 +5,16 @@
 #ifndef SE4_SDL2RENDERUPDATER_H
 #define SE4_SDL2RENDERUPDATER_H
 
-#include <SDL_render.h>
-#include <vector>
+#include "EngineConfig.h"
+
+#include <map>
+#include "SDL_render.h"
 
 namespace se4 {
     class Sdl2RenderUpdater {
-    public:
-        virtual ~Sdl2RenderUpdater() = default;
-
     protected:
-        std::vector<SDL_Renderer *> renderers;
+        static std::map<WindowID, SDL_Renderer *> renderers;
+        std::map<std::pair<WindowID, TextureID>, SDL_Texture *> textures;
     };
 }
 
