@@ -6,7 +6,7 @@
 #include "updater/Updater.hpp"
 #include "component/Sound.h"
 #include "component/ComponentHandle.hpp"
-#include "world/World.hpp"
+#include "level/Level.hpp"
 
 #include "../../extern/FMOD/inc/fmod.h"
 
