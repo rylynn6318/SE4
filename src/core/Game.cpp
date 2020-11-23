@@ -32,3 +32,11 @@ auto se4::Game::loop() -> void {
         std::this_thread::sleep_for(start + MS_PER_UPDATE - sc::system_clock::now());
     }
 }
+
+auto se4::Game::addWindow(Window* window) -> void {
+    windows.push_back(window);
+
+    for(auto& [id, level] : levelManager.levelList){
+
+    }
+}

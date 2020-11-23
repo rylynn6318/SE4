@@ -37,7 +37,7 @@ namespace se4 {
 
     auto se4::LevelManager::setCurrentLevelID(LevelID key) -> void {
         currentLevel = key;
-        for (auto &win : Game::Instance().windowList) {
+        for (auto &win : Game::Instance().windows) {
             if (currentLevel == win->renderingLevelId()) {
                 win->initLevelRender();
             }

@@ -9,8 +9,8 @@
 
 namespace se4 {
     // 2020.11.11 non null terminated 문자열 넘겨도 잘 되는거 확임 함
-    Window::Window(std::string_view title, int width, int height)
-            : Sdl2Window(), title(title), width(width), height(height) {
+    Window::Window(WindowID id, std::string_view title, int width, int height)
+            : id(id), Sdl2Window(), title(title), width(width), height(height) {
     }
 
     Window::~Window() {
@@ -26,7 +26,6 @@ namespace se4 {
                 height,
                 SDL_WINDOW_SHOWN
         );
-        renderer = SDL_CreateRenderer(window, -1, 0);
     }
 
     auto Window::setRenderLevel(LevelID lvl_id) -> void {
@@ -37,7 +36,7 @@ namespace se4 {
     auto Window::initLevelRender() -> void {
         auto level = Game::Instance().levelManager.getLevel(level_id);
         if (level){
-            level->renderer->renderers.push_back(renderer);
+            level->renderer->createRenderContext(this);
             level->init();
         }
     }

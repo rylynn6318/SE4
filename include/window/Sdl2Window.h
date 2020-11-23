@@ -7,15 +7,16 @@
 
 #include <mutex>
 #include "SDL.h"
+#include "graphics/RenderUpdater.h"
 
 namespace se4 {
     class Sdl2Window {
+        friend RenderUpdater;
     protected:
         Sdl2Window();
 
         std::once_flag isInit;
         SDL_Window *window = nullptr;
-        SDL_Renderer *renderer = nullptr;
     };
 }
 
