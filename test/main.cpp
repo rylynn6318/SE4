@@ -365,6 +365,9 @@ int main(int argc, char *argv[]) {
     auto se4window2 = std::make_unique<se4::Window>("Title2", SCREEN_WIDTH, SCREEN_HEIGHT);
     se4window2->show();
     se4window2->setRenderLevel(1);
+    se4::Game::Instance().levelManager.setSharedData("id", std::string("rylynn6318"));
+    if (std::any_cast<std::string>(se4::Game::Instance().levelManager.getSharedData("id")) == "rylynn6318")
+        LOG(ERROR) << "succes getSharedData";
     se4::Game::Instance().windowList.push_back(se4window2.get());
 
     se4::Game::Instance().levelManager.addLevel(1, getLevel);
