@@ -19,6 +19,7 @@
 #include "core/Game.h"
 #include "input/Input.h"
 #include "window/Window.h"
+#include "audio/Audio.h"
 
 
 #include "box2d/box2d.h"
@@ -214,6 +215,7 @@ std::unique_ptr<se4::Level> getLevel() {
                     }
                     if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::W)) {
                         physicsHandler->forceY = physicsHandler->body->GetMass() * 5 / (1 / 60.0); //f = mv/t , dt로 바꿔야함
+
                     }
                     if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::HELD_DOWN, se4::Key::W)) {
                         physicsHandler->forceY = physicsHandler->body->GetMass() / (1 / 60.0);

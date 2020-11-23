@@ -72,15 +72,16 @@ auto se4::RenderUpdater::render(int time) -> void {
 auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
 
     //모든 entity의 좌표는 0 ~ 필드의 크기 사이
-    int minX = fieldWidth + 1;
-    int maxX = -1;
-    int minY = fieldHeight + 1;
-    int maxY = -1;
 
-    int maxXVolume = 0;
-    int maxYVolume = 0;
-    int minXVolume = 0;
-    int minYVolume = 0;
+    if (registeredEntities.empty())
+    {
+        return { 0, 0, fieldWidth, fieldHeight };
+    }
+
+    int left = fieldWidth;
+    int right = 0;
+    int top = fieldHeight;
+    int bottom = 0;
 
     for (auto &entity : registeredEntities) {
         ComponentHandle<Position2d> posHandler;
@@ -88,84 +89,67 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
         ComponentHandle<RenderComponent> renderHandler;
         parentWorld->unpack(entity, posHandler, volHandler, renderHandler);
 
-        if (renderHandler->isFocused) {
-            if (posHandler->x > maxX) {
-                maxX = posHandler->x;
-                maxXVolume = volHandler->width / 2;
+
+        if (renderHandler->isFocused)
+        {
+            if (posHandler->x + volHandler->width / 2 > right)
+            {
+                right = posHandler->x + volHandler->width / 2;
             }
-            if (posHandler->x < minX) {
-                minX = posHandler->x;
-                minXVolume = volHandler->width / 2;
+            if (posHandler->x - volHandler->width / 2 < left)
+            {
+                left = posHandler->x - volHandler->width / 2;
             }
 
-            if (posHandler->y > maxY) {
-                maxY = posHandler->y;
-                maxYVolume = volHandler->height / 2;
+            if (posHandler->y + volHandler->height / 2 > bottom)
+            {
+                bottom = posHandler->y + volHandler->height / 2;
             }
-            if (posHandler->y < minY) {
-                minY = posHandler->y;
-                minYVolume = volHandler->height / 2;
+            if (posHandler->y - volHandler->height / 2 < top)
+            {
+                top = posHandler->y - volHandler->height / 2;
+
             }
         }
 
     }
 
-    double aspectRatio = winHeight / winWidth;
-    if (minX == maxX && minY == maxY) {
-        int winMinHeight = (int) (winMinWidth * aspectRatio);
 
-        SDL_Rect view{maxX - (winMinWidth) / 2,
-                      maxY - (winMinHeight) / 2,
-                      winMinWidth,
-                      winMinHeight};
-
-        if (view.x + view.w > fieldWidth)
-            view.x = fieldWidth - view.w;
-        if (view.x < 0)
-            view.x = 0;
-
-        if (view.y + view.h > fieldHeight)
-            view.y = fieldHeight - view.h;
-        if (view.y < 0)
-            view.y = 0;
-
-        return view;
+    left -= padding;
+    if (left < 0)
+    {
+        left = 0;
+    }
+    right += padding;
+    if (right > fieldWidth)
+    {
+        right = fieldWidth;
+    }
+    top -= padding;
+    if (top < 0)
+    {
+        top = 0;
+    }
+    bottom += padding;
+    if (bottom > fieldHeight)
+    {
+        bottom = fieldHeight;
     }
 
-    //xy의 좌표값과 width, height 도출
-    int width = maxX - minX + maxXVolume + minXVolume;
-    int height = maxY - minY + maxYVolume + minYVolume;
+    //최소크기는 fieldMinWidth와의 비교로 간단하게 가능함.. 지금은 안짬
 
-    //최소크기 검사
-    if (width < winMinWidth)
-        width = winMinWidth;
+    // 둘 중에 큰 놈을 적용
+    float ratio = (float)winWidth / winHeight;
 
 
-    int x = (minX + maxX) / 2 - width / 2 - width * padding;
-    if (width * aspectRatio > height)
-        height = (int) (width * aspectRatio);
-    else if (height / aspectRatio > width)
-        width = (int) (height / aspectRatio);
-    int y = (minY + maxY) / 2 - height / 2 - height * padding;
+    int width1 = right - left;
+    int width2 = (bottom - top) * ratio;
 
-    width *= (1 + padding * 2);
-    if (width > fieldWidth) {
-        width = fieldWidth;
-        x = 0;
-        y = 0;
-    }
-    height = (int) (width * aspectRatio);
+    int width = (width1 > width2 ? width1 : width2);
+    int height = width / ratio;
 
-
-    if (x + width > fieldWidth)
-        x = fieldWidth - width;
-    if (x < 0)
-        x = 0;
-
-    if (y + height > fieldHeight)
-        y = fieldHeight - height;
-    if (y < 0)
-        y = 0;
+    int x = (left + right) / 2.0f - width / 2.0f;
+    int y = (top + bottom) / 2.0f - height / 2.0f;
 
     return SDL_Rect{x, y, width, height};
 }
