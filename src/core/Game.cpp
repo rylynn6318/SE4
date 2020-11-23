@@ -50,3 +50,13 @@ auto se4::Game::addWindow(Window *window) -> void {
         level->init();
     }
 }
+
+auto se4::Game::setRenderLevel(LevelID id) -> void {
+    for(auto [window_id, window] : windows){
+        window->setRenderLevel(id);
+    }
+}
+
+se4::Game::~Game() {
+
+}

@@ -29,9 +29,9 @@ se4::RenderUpdater::~RenderUpdater() {
     for (auto[id, texture] : textures) {
         if (texture) SDL_DestroyTexture(texture);
     }
-    for (auto[id, renderer] : renderers) {
-        if (renderer) SDL_DestroyRenderer(renderer);
-    }
+//    for (auto[id, renderer] : renderers) {
+//        if (renderer) SDL_DestroyRenderer(renderer);
+//    }
 }
 
 auto se4::RenderUpdater::init() -> bool {

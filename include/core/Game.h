@@ -34,6 +34,8 @@ namespace se4 {
 
         auto addWindow(Window*) -> void;
 
+        auto setRenderLevel(LevelID) -> void;
+
         // TODO : 일단 Pulbic으로 둠
     public:
         // TODO : 멤버 변수, 혹은 서비스로 InputManager, FileIO, AudioSystem, GameConfig 등 게임 전체에 하나만 존재하는 객체들 : 싱글톤 아님!
@@ -48,7 +50,7 @@ namespace se4 {
     private:
         Game() = default;
 
-        ~Game() = default;
+        ~Game();
 
         auto loop() -> void;
     };

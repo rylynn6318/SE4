@@ -2,7 +2,6 @@
 #include <optional>
 
 auto se4::SharedData::getSharedData(SharedDataID key) const ->std::any {
-    std::optional<std::any>;
     if (sharedData.find(key) != sharedData.end())
         return sharedData.at(key);
     else

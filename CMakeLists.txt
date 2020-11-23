@@ -71,8 +71,10 @@ add_subdirectory("${BOX2D_DIR}")
 include_directories("${BOX2D_DIR}/include")
 
 # fmod
-find_package(FMOD REQUIRED)
-include_directories(${FMOD_INCLUDE_DIRS})
+if (WIN32)
+    find_package(FMOD REQUIRED)
+    include_directories(${FMOD_INCLUDE_DIRS})
+endif()
 
 # ------------------------------------ 링크 -------------------------------------
 target_link_libraries(${PROJECT_NAME}
