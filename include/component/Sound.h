@@ -27,4 +27,4 @@ namespace se4 {
     };
 }
 
-#endif //SE4_SOUND_H
+#endif SE4_SOUND_H
