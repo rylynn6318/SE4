@@ -19,7 +19,7 @@ namespace se4 {
 
         auto init() -> bool override;
 
-        auto render(int time) -> void;
+        auto render(WindowID, int time) -> void;
 
         // todo : SDL_Rect 말고 다른걸로 변경
         auto getCamViewprot() -> SDL_Rect;

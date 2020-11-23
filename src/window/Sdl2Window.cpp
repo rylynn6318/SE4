@@ -30,15 +30,6 @@ namespace se4 {
 
     auto Window::setRenderLevel(LevelID lvl_id) -> void {
         level_id = lvl_id;
-        initLevelRender();
-    }
-
-    auto Window::initLevelRender() -> void {
-        auto level = Game::Instance().levelManager.getLevel(level_id);
-        if (level){
-            level->renderer->createRenderContext(this);
-            level->init();
-        }
     }
 
     auto Window::renderingLevelId() const -> LevelID {

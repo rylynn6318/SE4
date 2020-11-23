@@ -29,7 +29,7 @@ namespace se4 {
         /*
          * Render a frame.
          */
-        void render(int dt);
+        void render(WindowID id, int dt);
         EntityHandle createEntity();
         void addUpdater(std::unique_ptr<Updater> updater);
         void destroyEntity(Entity entity);
@@ -88,9 +88,8 @@ namespace se4 {
             handle = ComponentHandle<ComponentType>(e, mgr->lookup(e), mgr);
         }
 
+        auto createRenderContext(Window*) -> void;
     private:
-        friend auto Window::initLevelRender() -> void;
-
         std::unique_ptr<EntityManager> entityManager;
         std::vector<std::unique_ptr<Updater>> updaters;
         std::vector<std::unique_ptr<BaseComponentManager>> componentManagers;

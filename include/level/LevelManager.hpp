@@ -23,15 +23,17 @@ namespace se4 {
 
         //auto getSharedData(std::string)->std::any;
         //auto setSharedData(std::string key, std::any data)->void;
+
+        auto activateLevel(LevelID key) -> void;
+        auto deactivateLevel(LevelID key) -> void;
         [[nodiscard]]
-        auto getCurrentLevelID() const -> int { return currentLevel; }
-
-        auto setCurrentLevelID(LevelID key) -> void;
-
+        auto activatedLevelId() const -> std::vector<LevelID> const &;
 
         std::map<LevelID, std::unique_ptr<se4::Level>> levelList;
         std::map<std::string, std::any> sharedData;
         std::map<LevelID, std::function<std::unique_ptr<se4::Level>()>> funcList;
-        LevelID currentLevel = 0;
+
+    private:
+        std::vector<LevelID> activatedId;
     };
 }	

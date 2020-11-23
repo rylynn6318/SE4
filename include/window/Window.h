@@ -27,7 +27,6 @@ namespace se4 {
         auto setRenderLevel(LevelID) -> void;
         [[nodiscard]]
         auto renderingLevelId() const -> LevelID;
-        auto initLevelRender() -> void;
 
     private:
         LevelID level_id = 0;

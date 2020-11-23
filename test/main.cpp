@@ -226,7 +226,8 @@ std::unique_ptr<se4::Level> getLevel() {
                     }
                     if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::Q)) {
                         se4window->setRenderLevel(2);
-                        se4::Game::Instance().levelManager.setCurrentLevelID(2);
+                        se4::Game::Instance().levelManager.activateLevel(2);
+                        se4::Game::Instance().levelManager.deactivateLevel(1);
                     }
                 }
             });
@@ -313,7 +314,8 @@ std::unique_ptr<se4::Level> getLevel2() {
                     }
                     if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::Q)) {
                         se4window->setRenderLevel(1);
-                        se4::Game::Instance().levelManager.setCurrentLevelID(1);
+                        se4::Game::Instance().levelManager.activateLevel(1);
+                        se4::Game::Instance().levelManager.deactivateLevel(2);
                     }
                 }
             });
@@ -377,7 +379,7 @@ int main(int argc, char *argv[]) {
     se4::Game::Instance().levelManager.loadLevel(1);
     se4::Game::Instance().levelManager.loadLevel(2);
 
-    se4::Game::Instance().levelManager.setCurrentLevelID(1);
+    se4::Game::Instance().levelManager.activateLevel(1);
 
 
     se4::Game::Instance().isRunning = []() -> bool {

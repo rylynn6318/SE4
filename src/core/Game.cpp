@@ -9,6 +9,12 @@ using namespace std::chrono_literals;
 namespace sc = std::chrono;
 
 auto se4::Game::run() -> void {
+    for (auto [id, win] : windows) {
+        for (auto&[id, level] : levelManager.levelList) {
+            level->createRenderContext(win);
+            level->init();
+        }
+    }
     loop();
 }
 
@@ -20,12 +26,16 @@ auto se4::Game::loop() -> void {
 
         inputManager.pollKeyEvent();
 
-        auto level = levelManager.getLevel(levelManager.getCurrentLevelID());
+        for (auto key : levelManager.activatedLevelId()){
+            levelManager.levelList.at(key)->update(0);
+        }
 
-        if(level) {
-            level->update(0);
-
-            level->render(0);
+        for (auto& [level_id, level] : levelManager.levelList) {
+            for (auto [window_id, window] : windows){
+                if(window->renderingLevelId() == level_id){
+                    level->render(window_id, 0);
+                }
+            }
         }
 
         // 일단은 남는 시간동안 sleep 때림
@@ -33,10 +43,6 @@ auto se4::Game::loop() -> void {
     }
 }
 
-auto se4::Game::addWindow(Window* window) -> void {
-    windows.push_back(window);
-
-    for(auto& [id, level] : levelManager.levelList){
-
-    }
+auto se4::Game::addWindow(Window *window) -> void {
+    windows[window->id] = window;
 }

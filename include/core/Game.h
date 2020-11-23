@@ -33,12 +33,12 @@ namespace se4 {
         auto addWindow(Window*) -> void;
 
         // TODO : 일단 Pulbic으로 둠
-        std::vector<Window *> windows;
     public:
         // TODO : 멤버 변수, 혹은 서비스로 InputManager, FileIO, AudioSystem, GameConfig 등 게임 전체에 하나만 존재하는 객체들 : 싱글톤 아님!
         std::function<bool()> isRunning;
         LevelManager levelManager;
         Input inputManager;
+        std::map<WindowID, Window *> windows;
 
     private:
         Game() = default;
