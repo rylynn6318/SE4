@@ -361,7 +361,6 @@ int main(int argc, char *argv[]) {
     se4window->show();
     se4::Game::Instance().windowList.push_back(se4window.get());
 
-
     //auto se4window2 = std::make_unique<se4::Window>("Title2", SCREEN_WIDTH, SCREEN_HEIGHT);
     //se4window2->show();
     //se4window2->setRenderLevel(1);
@@ -372,7 +371,6 @@ int main(int argc, char *argv[]) {
 
     se4window->setRenderLevel(1);
     se4::Game::Instance().levelManager.addLevel(1, getLevel);
-    se4::Game::Instance().levelManager.addLevel(2, getLevel2);
     se4::Game::Instance().levelManager.loadLevel(1);
     //se4::Game::Instance().levelManager.loadLevel(2);
 

@@ -1,5 +1,8 @@
 #pragma once
+#include "EngineConfig.h"
+#include <any>
 #include <map>
+#include <string>
 
 namespace se4 {
 	class SharedData {

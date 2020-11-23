@@ -1,19 +1,25 @@
 #pragma once
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <map>
-#include <string>
 
 namespace se4 {
 
 	class FileManager {
 	public:
-		FileManager() = default;
+		FileManager();
 		virtual ~FileManager() = default;
 		auto setPath(std::filesystem::path p) -> void;
-		auto getPath() -> std::filesystem::path;
+		auto getPath() const -> std::filesystem::path;
+		auto inOpen(const char* fileName) -> bool;
+		auto inClose() -> void;
+		auto outOpen(const char* fileName) -> bool;
+		auto outClose() -> void;
 
 	private:
 		std::filesystem::path path;
+		std::ifstream in;
+		std::ofstream out;
 	};
 }
