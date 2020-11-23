@@ -5,6 +5,7 @@
 
 namespace se4 {
     auto se4::LevelManager::loadLevel(LevelID key) -> void {
+        deleteLevel(key);
         levelList[key] = std::move(funcList.at(key)());
         for ( auto [id, window] : se4::Game::Instance().windows) {
             levelList[key]->createRenderContext(window);
@@ -30,5 +31,9 @@ namespace se4 {
 
     auto LevelManager::activatedLevelId() const -> std::vector<LevelID> const & {
         return activatedId;
+    }
+
+    auto LevelManager::deleteLevel(LevelID key) -> void {
+        levelList.erase(key);
     }
 }

@@ -16,6 +16,7 @@ namespace se4 {
         virtual ~LevelManager() = default;
 
         auto loadLevel(LevelID key) -> void;
+        auto deleteLevel(LevelID key) -> void;
 
         auto addLevel(LevelID key, std::function<std::unique_ptr<se4::Level>()>&& func) -> void;
 
