@@ -12,7 +12,7 @@ find_path(FMOD_INCLUDE_DIR fmod.h
         HINTS
         ENV FMODDIR
         ${FMOD_DIR}
-        PATH_SUFFIXES FMOD
+        PATH_SUFFIXES inc
         # path suffixes to search inside ENV{SDL2DIR}
         PATHS
         ~/inc
