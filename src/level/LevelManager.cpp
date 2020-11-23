@@ -6,6 +6,9 @@
 namespace se4 {
     auto se4::LevelManager::loadLevel(LevelID key) -> void {
         levelList[key] = std::move(funcList.at(key)());
+        for ( auto [id, window] : se4::Game::Instance().windows) {
+            levelList[key]->createRenderContext(window);
+        }
         levelList[key]->init();
     }
 

@@ -13,7 +13,7 @@
 namespace se4 {
     class Sdl2RenderUpdater {
     protected:
-        std::map<WindowID, SDL_Renderer *> renderers;
+        static std::map<WindowID, SDL_Renderer *> renderers;
         std::map<std::pair<WindowID, TextureID>, SDL_Texture *> textures;
     };
 }

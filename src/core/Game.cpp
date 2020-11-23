@@ -9,9 +9,9 @@ using namespace std::chrono_literals;
 namespace sc = std::chrono;
 
 auto se4::Game::run() -> void {
-    for (auto [id, win] : windows) {
+    for ( auto [id, window] : windows) {
         for (auto&[id, level] : levelManager.levelList) {
-            level->createRenderContext(win);
+            level->createRenderContext(window);
             level->init();
         }
     }
@@ -45,4 +45,8 @@ auto se4::Game::loop() -> void {
 
 auto se4::Game::addWindow(Window *window) -> void {
     windows[window->id] = window;
+    for (auto&[id, level] : levelManager.levelList) {
+        level->createRenderContext(window);
+        level->init();
+    }
 }

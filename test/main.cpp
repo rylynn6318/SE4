@@ -29,9 +29,6 @@ const int SCREEN_HEIGHT = 1080;
 using namespace std::chrono_literals;
 namespace sc = std::chrono;
 
-auto se4window = std::make_unique<se4::Window>(1, "Title", SCREEN_WIDTH, SCREEN_HEIGHT);
-auto se4window2 = std::make_unique<se4::Window>(2, "Title2", SCREEN_WIDTH, SCREEN_HEIGHT);
-
 struct Yeji : public se4::Component<Yeji> {
 };
 
@@ -225,9 +222,9 @@ std::unique_ptr<se4::Level> getLevel() {
                         physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
                     }
                     if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::Q)) {
-                        se4window->setRenderLevel(2);
                         se4::Game::Instance().levelManager.activateLevel(2);
                         se4::Game::Instance().levelManager.deactivateLevel(1);
+                        se4::Game::Instance().windows.at(1)->setRenderLevel(2);
                     }
                 }
             });
@@ -270,7 +267,6 @@ std::unique_ptr<se4::Level> getLevel() {
     rightWall.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
     level->addUpdater(std::move(input_acc));
-    level->init();
     return level;
 }
 
@@ -313,9 +309,9 @@ std::unique_ptr<se4::Level> getLevel2() {
                         physicsHandler->lastVec2 = physicsHandler->lastVec2 + b2Vec2(0, 0.1);
                     }
                     if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::Q)) {
-                        se4window->setRenderLevel(1);
                         se4::Game::Instance().levelManager.activateLevel(1);
                         se4::Game::Instance().levelManager.deactivateLevel(2);
+                        se4::Game::Instance().windows.at(1)->setRenderLevel(1);
                     }
                 }
             });
@@ -357,7 +353,6 @@ std::unique_ptr<se4::Level> getLevel2() {
     rightWall.addComponent(PhysicsBody(false, 1.0f, 0.0f, 1, se4::BodyType::RECTANGLE));
 
     level->addUpdater(std::move(input_acc));
-    level->init();
     return level;
 }
 
@@ -366,13 +361,13 @@ int main(int argc, char *argv[]) {
     IMG_Init(IMG_INIT_PNG);
     google::InitGoogleLogging(argv[0]);
 
-    se4window->show();
-    se4window->setRenderLevel(1);
+    auto se4window = std::make_unique<se4::Window>(1, "Title", SCREEN_WIDTH, SCREEN_HEIGHT);
     se4::Game::Instance().addWindow(se4window.get());
+    se4window->setRenderLevel(2);
 
-    se4window2->show();
-    se4window2->setRenderLevel(1);
-    se4::Game::Instance().addWindow(se4window2.get());
+    // auto se4window2 = std::make_unique<se4::Window>(2, "Title2", SCREEN_WIDTH, SCREEN_HEIGHT);
+    // se4::Game::Instance().addWindow(se4window2.get());
+    // se4window2->setRenderLevel(2);
 
     se4::Game::Instance().levelManager.addLevel(1, getLevel);
     se4::Game::Instance().levelManager.addLevel(2, getLevel2);

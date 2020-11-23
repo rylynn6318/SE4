@@ -11,13 +11,6 @@ namespace se4 {
     // 2020.11.11 non null terminated 문자열 넘겨도 잘 되는거 확임 함
     Window::Window(WindowID id, std::string_view title, int width, int height)
             : id(id), Sdl2Window(), title(title), width(width), height(height) {
-    }
-
-    Window::~Window() {
-        SDL_DestroyWindow(window);
-    }
-
-    auto Window::show() -> void {
         window = SDL_CreateWindow(
                 title.data(),
                 SDL_WINDOWPOS_UNDEFINED,
@@ -26,6 +19,10 @@ namespace se4 {
                 height,
                 SDL_WINDOW_SHOWN
         );
+    }
+
+    Window::~Window() {
+        SDL_DestroyWindow(window);
     }
 
     auto Window::setRenderLevel(LevelID lvl_id) -> void {

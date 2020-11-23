@@ -22,8 +22,6 @@ namespace se4 {
 
         Input input;
 
-        auto show() -> void;
-
         auto setRenderLevel(LevelID) -> void;
         [[nodiscard]]
         auto renderingLevelId() const -> LevelID;

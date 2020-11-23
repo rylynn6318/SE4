@@ -17,6 +17,8 @@ const int fieldHeight = 1080;
 float winWidth = 1920;
 float winHeight = 1080;
 
+std::map<WindowID, SDL_Renderer *> se4::Sdl2RenderUpdater::renderers = {};
+
 se4::RenderUpdater::RenderUpdater() {
     signature.addComponent<Position2d>();
     signature.addComponent<Volume2d>();
@@ -175,6 +177,8 @@ auto se4::RenderUpdater::getCamViewprot() -> SDL_Rect {
 }
 
 auto se4::RenderUpdater::createRenderContext(se4::Window *window) -> void {
-    if (renderers.find(window->id) == renderers.end())
-        renderers[window->id] = SDL_CreateRenderer(window->window, -1, 0);
+    if (renderers.find(window->id) == renderers.end()){
+        auto renderer = SDL_CreateRenderer(window->window, -1, 0);
+        renderers[window->id] = renderer;
+    }
 }
