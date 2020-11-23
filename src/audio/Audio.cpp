@@ -4,6 +4,8 @@ namespace se4 {
 	Audio::Audio() {
 		FMOD_System_Create(&system);
 		FMOD_System_Init(system, 32, FMOD_INIT_NORMAL, nullptr);
+		FMOD_System_GetMasterChannelGroup(system, &masterGroup);
+		
 	}
 	
 	Audio::~Audio() {
@@ -11,8 +13,12 @@ namespace se4 {
 		FMOD_System_Release(system);
 	}
 
-	void Audio::addChannel(int channelNumber) {
-		channels[channelNumber] = nullptr;
+	//void Audio::addChannel(const char* channelName) {
+	//	channels[channelName] = nullptr;
+	//}
+
+	void Audio::addChannelGroup(const char* groupName) {
+		FMOD_System_CreateChannelGroup(system, groupName, &customChGroup[groupName]);
 	}
 
 	void Audio::loadSound(const char* path, int soundID) {
@@ -21,7 +27,7 @@ namespace se4 {
 		FMOD_SOUND* newSound;
 		FMOD_System_CreateSound(system, path, FMOD_DEFAULT, 0, &newSound);
 		sounds[soundID] = newSound;
-		
+
 	}
 	//앞은 soundID, 뒤는 channel넘버
 	void Audio::play(std::vector<std::pair<int, int>> soundIDs) {
@@ -52,7 +58,7 @@ namespace se4 {
 	}
 
 	void Audio::update() {
-
+		FMOD_BOOL m_bool;
 		for (std::pair<int, FMOD_CHANNEL*> channel : channels)
 		{
 			FMOD_Channel_IsPlaying(channels[channel.first], &m_bool);

@@ -17,18 +17,21 @@ namespace se4 {
 	public:
 		Audio();
 		~Audio();
-		void addChannel(int channelNumber);
+		/*void addChannel(const char* channelName);*/
+		void addChannelGroup(const char* groupName);
 		void loadSound(const char* path, int soundId);
 		void play(std::vector<std::pair<int, int>> soundIDs);
 		void stop(int channelNum);
 		void volumeUp(int channelNumber);
 		void volumeDown(int channelNumber);
 		void update();
-
+		
 	private:
 		FMOD_SYSTEM* system;
-		FMOD_BOOL m_bool;
-		std::map<int, FMOD_CHANNEL*> channels;
+		/*std::map<int, FMOD_CHANNEL*> channels;*/
+		std::map<const char*, FMOD_CHANNELGROUP*> customChGroup;
+		FMOD_CHANNELGROUP* masterGroup;
+		
 		std::map<int, FMOD_SOUND*> sounds;
 		float volume = 0.0;
 	};

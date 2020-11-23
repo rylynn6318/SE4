@@ -271,7 +271,11 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::pair<int, int>> playlist;
     playlist.push_back(std::pair<int, int>(1, 1));
-    audio->play(playlist);
+
+    for (int i = 0; i < 64; i++) {
+        audio->play(playlist);
+        std::cout << "channel : " << audio->channels[1] << std::endl;
+    }
 
     //For loading PNG images
     IMG_Init(IMG_INIT_PNG);
