@@ -384,7 +384,6 @@ int main(int argc, char *argv[]) {
     };
 
     se4::Game::Instance().run();
-
     //For quitting IMG systems
     IMG_Quit();
 

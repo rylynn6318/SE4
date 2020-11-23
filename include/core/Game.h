@@ -7,6 +7,8 @@
 
 #include "window/Window.h"
 #include "level/LevelManager.hpp"
+#include "FileManager.hpp"
+#include "SharedData.hpp"
 
 namespace se4 {
     class Game {
@@ -29,12 +31,15 @@ namespace se4 {
         LevelManager levelManager;
         Input inputManager;
         std::vector<Window*> windowList;
+        FileManager fileManager;
+        SharedData sharedData;
 
     private:
         Game() = default;
         ~Game() = default;
 
         auto loop() -> void;
+
     };
 }
 

@@ -22,9 +22,6 @@ namespace se4 {
 
 		auto addLevel(LevelID key, std::function<std::unique_ptr<se4::Level>()>&& func) -> bool;
 
-		auto getSharedData(SharedDataID key)const->std::any;
-		auto setSharedData(SharedDataID key, std::any data)->void;
-
 		[[nodiscard]]
 		auto getCurrentLevelID() const -> int { return currentLevel; }
 
@@ -32,7 +29,7 @@ namespace se4 {
 
 
 		std::map<LevelID, std::unique_ptr<se4::Level>> levelList;
-		std::map<SharedDataID, std::any> sharedData;
+		
 		std::map<LevelID, std::function<std::unique_ptr<se4::Level>()>> funcList;
 		LevelID currentLevel = 0;
 	};
