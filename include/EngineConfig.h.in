@@ -15,7 +15,7 @@
 #define SDK_WINDOW GlfwWindow
 #define SDK_WINDOW_H "GlfwWindow.h"
 #endif
-
+#define SharedDataID std::string
 using LevelID = int;
 
 #endif //SE4_ENGINECONFIG_H

@@ -12,8 +12,10 @@ namespace se4 {
     class Sdl2Window {
     protected:
         Sdl2Window();
+
         std::once_flag isInit;
-        SDL_Window* window = nullptr;
+        SDL_Window *window = nullptr;
+        SDL_Renderer *renderer = nullptr;
     };
 }
 

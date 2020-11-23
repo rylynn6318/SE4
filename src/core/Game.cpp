@@ -22,11 +22,11 @@ auto se4::Game::loop() -> void {
 
         auto level = levelManager.getLevel(levelManager.getCurrentLevelID());
 
-        //if(level) {
+        if(level) {
             level->update(0);
 
             level->render(0);
-        //}
+        }
 
         // 일단은 남는 시간동안 sleep 때림
         std::this_thread::sleep_for(start + MS_PER_UPDATE - sc::system_clock::now());
