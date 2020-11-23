@@ -7,10 +7,10 @@
 
 namespace se4 {
     struct Sound : public Component<Sound> {
-        Sound(int soundID) : soundID(soundID) {}
+        Sound(const char* soundID) : soundID(soundID) {}
     };
 
-    int soundID;
+    const char* soundID;
 }
 
 #endif //SE4_SOUND_H

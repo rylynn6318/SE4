@@ -19,11 +19,14 @@ namespace se4 {
 		~Audio();
 		/*void addChannel(const char* channelName);*/
 		void addChannelGroup(const char* groupName);
-		void loadSound(const char* path, int soundId);
-		void play(std::vector<std::pair<int, int>> soundIDs);
-		void stop(int channelNum);
-		void volumeUp(int channelNumber);
-		void volumeDown(int channelNumber);
+		void loadSound(const char* path, const char* soundID);
+		/*void play(std::vector<std::pair<const char*, const char*>> soundIDs);*/
+		void play(const char* soundID, const char* channelGroupName);
+		void stop(const char* channelGroupName);
+		/*void volumeUp(const char* channelGroupName);
+		void volumeDown(const char* channelGroupName);*/
+		void setVolume(const char* channelGroupName, float volume);
+		float getVolume(const char* channelGroupName);
 		void update();
 		
 	private:
@@ -32,7 +35,6 @@ namespace se4 {
 		std::map<const char*, FMOD_CHANNELGROUP*> customChGroup;
 		FMOD_CHANNELGROUP* masterGroup;
 		
-		std::map<int, FMOD_SOUND*> sounds;
-		float volume = 0.0;
+		std::map<const char*, FMOD_SOUND*> sounds;
 	};
 }
