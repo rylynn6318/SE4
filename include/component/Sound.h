@@ -1,16 +1,23 @@
-#ifndef SE4_SOUND_H
+ #ifndef SE4_SOUND_H
 #define SE4_SOUND_H
 
 
 #include "component/Component.hpp"
-#include<Vector>
+#include <queue>
 
 namespace se4 {
     struct Sound : public Component<Sound> {
-        Sound(const char* soundID) : soundID(soundID) {}
-    };
+        Sound()
+        {
+        };
 
-    const char* soundID;
+        void play(const char* soundId)
+        {
+            ids.push(soundId);
+        }
+
+        std::queue<const char*> ids;
+    };
 }
 
 #endif //SE4_SOUND_H

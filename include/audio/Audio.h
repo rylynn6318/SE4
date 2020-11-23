@@ -3,6 +3,10 @@
 #include <map>
 #include <utility>
 
+#include "updater/Updater.hpp"
+#include "component/Sound.h"
+#include "component/ComponentHandle.hpp"
+
 #include "../../extern/FMOD/inc/fmod.h"
 
 
@@ -12,7 +16,7 @@
 #define SOUND_WEIGHT 0.1f
 
 namespace se4 {
-	class Audio
+	class Audio : public se4::Updater
 	{
 	public:
 		Audio();
@@ -21,13 +25,15 @@ namespace se4 {
 		void addChannelGroup(const char* groupName);
 		void loadSound(const char* path, const char* soundID);
 		/*void play(std::vector<std::pair<const char*, const char*>> soundIDs);*/
-		void play(const char* soundID, const char* channelGroupName);
-		void stop(const char* channelGroupName);
+		void play(const char* soundID, const char* groupName, bool isLoop);
+		void stop(const char* groupName);
 		/*void volumeUp(const char* channelGroupName);
 		void volumeDown(const char* channelGroupName);*/
-		void setVolume(const char* channelGroupName, float volume);
-		float getVolume(const char* channelGroupName);
-		void update();
+		void setMasterVolume(float volume);
+		float getMasterVolume();
+		void setVolume(const char* groupName, float volume);
+		float getVolume(const char* groupName);
+		void update(int dt);
 		
 	private:
 		FMOD_SYSTEM* system;
