@@ -12,9 +12,9 @@
 
 namespace se4 {
     struct EntityHandle;
-    class World {
+    class Level {
     public:
-        explicit World(std::unique_ptr<EntityManager> entityManager, std::any& windowContext);
+        Level();
 
         /*
          * Should be called before the first update, but after instantiation
@@ -89,6 +89,8 @@ namespace se4 {
         }
 
     private:
+        friend auto Window::initLevelRender() -> void;
+
         std::unique_ptr<EntityManager> entityManager;
         std::vector<std::unique_ptr<Updater>> updaters;
         std::vector<std::unique_ptr<BaseComponentManager>> componentManagers;
@@ -113,5 +115,8 @@ namespace se4 {
 
             return static_cast<ComponentManager<ComponentType>*>(componentManagers[family].get());
         }
+
+    private:
+        auto updateUpdaterMask(Updater* updater) -> void;
     };
 }  // namespace se4
