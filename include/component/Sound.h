@@ -6,17 +6,24 @@
 #include <queue>
 
 namespace se4 {
+    struct SoundRequest
+    {
+        const char* soundId;
+        const char* groupId;
+        bool isLoop;
+    };
+
     struct Sound : public Component<Sound> {
         Sound()
         {
         };
 
-        void play(const char* soundId)
+        void play(const char* soundId, const char* groupId, bool isLoop = false)
         {
-            ids.push(soundId);
+            ids.push({ soundId, groupId, isLoop });
         }
 
-        std::queue<const char*> ids;
+        std::queue <SoundRequest> ids;
     };
 }
 

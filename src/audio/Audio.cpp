@@ -111,6 +111,11 @@ namespace se4 {
 			ComponentHandle<Sound> sound;
 			parentWorld->unpack(entity, sound);
 			
+			while (!sound->ids.empty())
+			{
+				const auto& front = sound->ids.front(); sound->ids.pop();
+				play(front.soundId, front.groupId, front.isLoop);
+			}
 		}
 	}
 }
