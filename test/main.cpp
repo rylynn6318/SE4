@@ -285,6 +285,9 @@ std::unique_ptr<se4::Level> makeMainMenu() {
 
     auto input_acc = se4::makeUpdater(
             [](int dt, InputHandle inputHandler) {
+                auto mouse = se4::Game::Instance().inputManager.getMousePosition();
+                // LOG(ERROR) << "x : " << mouse.first << ", y : " << mouse.second;
+
                 if (inputHandler->is_selected) {
                     if (se4::Game::Instance().inputManager.checkKey(se4::KeyState::PRESSED, se4::Key::Q)) {
                         se4::Game::Instance().levelManager.loadLevel(LEVEL_1);

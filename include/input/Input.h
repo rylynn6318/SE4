@@ -17,12 +17,19 @@ namespace se4 {
     class Input : SDK_INPUT {
     private:
         std::map<Key, KeyState> keymap;
+        int mouse_x{};
+        int mouse_y{};
 
     protected:
         static auto toSE4Key(int keycode) -> Key;
 
         static auto toButtonState(int state) -> ButtonState;
 
+        auto saveKeymap(Key key, ButtonState state) -> void;
+
+        auto saveKeymap(int keycode, int state) -> void;
+
+        auto saveMouseButtonToKeymap(int state) -> void;
     public:
         Input();
 
@@ -31,10 +38,7 @@ namespace se4 {
         template<typename... Keys>
         auto checkKey(KeyState state, Key key, Keys ...keys) -> bool;
 
-        auto saveKeymap(Key key, ButtonState state) -> void;
-
-        auto saveKeymap(int keycode, int state) -> void;
-
+        auto getMousePosition() -> std::pair<int, int>;
     public:
         auto pollKeyEvent() -> void;
     };
