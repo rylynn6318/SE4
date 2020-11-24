@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <utility>
+#include <string>
 
 #include "updater/Updater.hpp"
 #include "component/Sound.h"
@@ -39,9 +40,9 @@ namespace se4 {
 	private:
 		FMOD_SYSTEM* system;
 		/*std::map<int, FMOD_CHANNEL*> channels;*/
-		std::map<const char*, FMOD_CHANNELGROUP*> customChGroup;
+		std::map<std::string, FMOD_CHANNELGROUP*> customChGroup;
 		FMOD_CHANNELGROUP* masterGroup;
 		
-		std::map<const char*, FMOD_SOUND*> sounds;
+		std::map<std::string, FMOD_SOUND*> sounds;
 	};
 }

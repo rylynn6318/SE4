@@ -24,6 +24,11 @@
 
 #include "box2d/box2d.h"
 
+//임시방편
+
+se4::Audio* audio;
+
+
 const int SCREEN_WIDTH = 1920;
 const int SCREEN_HEIGHT = 1080;
 
@@ -82,6 +87,8 @@ struct PhysicsBody : public se4::Component<PhysicsBody> {
 };
 
 const float SCALE = 100.0f;
+
+
 
 class PhysicsUpdater : public se4::Updater {
 public:
@@ -187,6 +194,7 @@ public:
                     se4::Game::Instance().levelManager.activateLevel(MAIN_MENU);
                     se4::Game::Instance().levelManager.deactivateLevel(LEVEL_1);
                     se4::Game::Instance().setRenderLevel(MAIN_MENU);
+                    audio->stop("bgmChannel");
                 }
             }
         }
@@ -213,6 +221,14 @@ std::unique_ptr<se4::Level> makeLevel() {
 
     auto physicsUpdater = std::make_unique<PhysicsUpdater>();
     level->addUpdater(std::move(physicsUpdater));
+
+    auto audio = std::make_unique<se4::Audio>();
+    audio.get()->loadSound("resource/sound/battle.wav", "bgm");
+    audio.get()->addChannelGroup("bgmChannel");
+    audio.get()->play("bgm","bgmChannel",true);
+    ::audio = audio.get();
+    level->addUpdater(std::move(audio));
+    
 
     auto conflictListener = std::make_unique<ConflictListener>();
     level->addUpdater(std::move(conflictListener));

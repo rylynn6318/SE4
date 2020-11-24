@@ -28,15 +28,19 @@ namespace se4 {
 	//}
 
 	void Audio::addChannelGroup(const char* groupName) {
-		FMOD_System_CreateChannelGroup(system, groupName, &customChGroup[groupName]);
-		FMOD_ChannelGroup_SetVolume(customChGroup[groupName], SOUND_DEFAULT);
+		auto res = FMOD_System_CreateChannelGroup(system, groupName, &customChGroup[groupName]);
+		
+		res = FMOD_ChannelGroup_SetVolume(customChGroup[groupName], SOUND_DEFAULT);
+		std::cout << "addChannelGroup: " << res << std::endl;
 	}
 
 	void Audio::loadSound(const char* path, const char* soundID) {
 		if (sounds.find(soundID) != sounds.end())
 			return;
-		FMOD_System_CreateSound(system, path, FMOD_DEFAULT, 0, &sounds[soundID]);
-
+		FMOD_SOUND* sound;
+		auto res = FMOD_System_CreateSound(system, path, FMOD_DEFAULT, 0, &sound);
+		sounds[soundID] = sound;
+		std::cout << "load sound: " << res << std::endl;
 	}
 	//앞은 soundID, 뒤는 channel넘버
 	//void Audio::play(std::vector<std::pair<const char*, const char*>> soundIDs) {
@@ -45,13 +49,16 @@ namespace se4 {
 	//}
 
 	void Audio::play(const char* soundID, const char* groupName, bool isLoop) {
-		FMOD_CHANNEL* ignore;
-
+		FMOD_CHANNEL* ignore = nullptr;
 		if (isLoop)
 		{
-			FMOD_Sound_SetMode(sounds[soundID], FMOD_LOOP_NORMAL);
+			auto res = FMOD_Sound_SetMode(sounds[soundID], FMOD_LOOP_NORMAL);
+			FMOD_RESULT;
+			std::cout << "setMode : "<< res << std::endl;
 		}
-		FMOD_System_PlaySound(system, sounds[soundID], customChGroup[groupName], false, &ignore);
+		auto res = FMOD_System_PlaySound(system, sounds[soundID], customChGroup[groupName], false, &ignore);
+		//FMOD_RESULT;
+		std::cout << "playSound2 : " << res << std::endl;
 		FMOD_Sound_SetMode(sounds[soundID], FMOD_LOOP_OFF);
 	}
 
