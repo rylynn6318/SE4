@@ -27,7 +27,7 @@ namespace se4 {
         static auto createRenderContext(Window*) -> void;
     private:
         //아래 두 변수는 추후 사용자의 입력을 받아서 초기화되도록 바꿔야됨
-        int winMinWidth = 455;
+        int winMinWidth = 1920;
         float padding = 0.03;
     };
 }

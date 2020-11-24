@@ -27,7 +27,10 @@ auto se4::Game::loop() -> void {
         inputManager.pollKeyEvent();
 
         for (auto key : levelManager.activatedLevelId()){
-            levelManager.levelList.at(key)->update(0);
+            if (levelManager.levelList.find(key) != levelManager.levelList.end()) {
+                levelManager.levelList.at(key)->update(0);
+            }
+        
         }
 
         for (auto& [level_id, level] : levelManager.levelList) {

@@ -25,8 +25,11 @@ namespace se4 {
             activatedId.push_back(key);
     }
 
-    auto LevelManager::deactivateLevel(LevelID key) -> void {
-        activatedId.erase(std::ranges::find(activatedId, key));
+    auto LevelManager::deactivateLevel(LevelID key) -> void {        
+        auto iter = std::ranges::find(activatedId, key);
+        if (iter != activatedId.end()) {
+            activatedId.erase(iter);
+        }
     }
 
     auto LevelManager::activatedLevelId() const -> std::vector<LevelID> const & {
@@ -34,6 +37,8 @@ namespace se4 {
     }
 
     auto LevelManager::deleteLevel(LevelID key) -> void {
-        levelList.erase(key);
+        if (levelList.find(key) != levelList.end()) {
+            levelList.erase(key);
+        }        
     }
 }
