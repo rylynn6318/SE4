@@ -129,4 +129,23 @@ auto se4::Input::pollKeyEvent() -> void {
     for (int keycode = 0; keycode < SDL_NUM_SCANCODES; ++keycode) {
         saveKeymap(keycode, keystate[keycode]);
     }
+
+    saveMouseButtonToKeymap(SDL_GetMouseState(&mouse_x, &mouse_y));
+}
+
+auto se4::Input::getMousePosition() -> std::pair<int, int> {
+    return {mouse_x, mouse_y};
+}
+
+auto se4::Input::saveMouseButtonToKeymap(int state) -> void {
+    if (state & SDL_BUTTON(SDL_BUTTON_LEFT))
+        saveKeymap(Key::MOUSE_1, toButtonState(state));
+    else if (state & SDL_BUTTON(SDL_BUTTON_MIDDLE))
+        saveKeymap(Key::MOUSE_2, toButtonState(state));
+    else if (state & SDL_BUTTON(SDL_BUTTON_RIGHT))
+        saveKeymap(Key::MOUSE_3, toButtonState(state));
+    else if (state & SDL_BUTTON(SDL_BUTTON_X1))
+        saveKeymap(Key::MOUSE_4, toButtonState(state));
+    else if (state & SDL_BUTTON(SDL_BUTTON_X2))
+        saveKeymap(Key::MOUSE_5, toButtonState(state));
 }

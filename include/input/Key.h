@@ -31,6 +31,11 @@ namespace se4 {
         X,
         Y,
         Z,
+        MOUSE_1,
+        MOUSE_2,
+        MOUSE_3,
+        MOUSE_4,
+        MOUSE_5,
 
         // for iter
         FIRST = static_cast<int>(NONE),
